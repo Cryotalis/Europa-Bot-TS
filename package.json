@@ -1,0 +1,52 @@
+{
+  "name": "europa-bot-ts",
+  "version": "1.0.0",
+  "description": "General Purpose Granblue Fantasy Discord Bot, written in TypeScript using Discord.js",
+  "main": "./prod/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node -r ./prod/index.js",
+    "postinstall": "npm run build",
+    "startup": "tsc && node -r dotenv/config ./prod/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cryotalis/Europa-Bot-TS.git"
+  },
+  "engines": {
+    "npm": "8.15.0",
+    "node": "16.17.1"
+  },
+  "keywords": [],
+  "author": "Cryo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Cryotalis/Europa-Bot-TS/issues"
+  },
+  "homepage": "https://github.com/Cryotalis/Europa-Bot-TS#readme",
+  "dependencies": {
+    "@discordjs/builders": "^0.12.0",
+    "@discordjs/rest": "^0.3.0",
+    "@google-cloud/translate": "^7.0.1",
+    "axios": "^0.27.2",
+    "canvas": "^2.9.1",
+    "discord-api-types": "^0.37.1",
+    "discord.js": "^13.8.1",
+    "dotenv": "^16.0.0",
+    "google-spreadsheet": "^3.2.0",
+    "html-entities": "^2.3.2",
+    "node-cron": "^3.0.0",
+    "puppeteer": "^16.1.0",
+    "string-similarity": "^4.0.4",
+    "urlencode": "^1.1.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/google-spreadsheet": "^3.1.5",
+    "@types/node": "^17.0.22",
+    "@types/node-cron": "^3.0.1",
+    "@types/string-similarity": "^4.0.0",
+    "@types/urlencode": "^1.1.2",
+    "typescript": "^4.6.2"
+  }
+}
