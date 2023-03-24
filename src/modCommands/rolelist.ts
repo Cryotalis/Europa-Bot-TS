@@ -47,7 +47,7 @@ module.exports = {
 			rolesInput!.forEach(roleInput => {
 				const role = /^\d+$/.test(roleInput)
 					? serverRoles?.find(role => role.id === roleInput)
-					: serverRoles?.find(role => role.name === findBestMatch(roleInput, serverRoles.map(role => role.name.toLowerCase())).bestMatch.target)
+					: serverRoles?.find(role => role.name === findBestMatch(roleInput, serverRoles.map(role => role.name)).bestMatch.target)
 				const serverRole = serverRolesConfig.find(serverRole => serverRole.id === role?.id)
 				
 				if (!role || clientUser.roles.highest.position <= role.position) {
