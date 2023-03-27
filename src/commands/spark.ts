@@ -110,7 +110,7 @@ module.exports = {
 			function applyText(text: string){
 				let fontSize = 40
 				do {
-					ctx.font = `${fontSize -= 1}px Arial`
+					ctx.font = `${fontSize -= 1}px Times`
 				} while (ctx.measureText(text).width > 200)
 				return ctx.font
 			}
@@ -131,7 +131,7 @@ module.exports = {
 				ctx.drawImage(VIP, 302, 122)
 			}
 			
-			ctx.font = '24px Arial'
+			ctx.font = '24px Times'
 			ctx.textAlign = 'right'
 			ctx.fillText(user.crystals, 160, 175)
 			ctx.fillText(user.tickets, 313, 175)
@@ -233,6 +233,8 @@ module.exports = {
 			}
 
 			operation = operation === 'add' ? 'added' : operation === 'subtract' ? 'subtracted' : operation
+			user.percent = calcDraws(user, false)/300
+			user.rolls = calcDraws(user, false)
 			return interaction.reply(`${formatList(resourceArr)} ${operation}. You now have ${calcDraws(user)} draws (${calcDraws(user) >= initialRolls ? '+' : ''}${calcDraws(user) - initialRolls}).`)
 		}
 		
@@ -249,6 +251,7 @@ module.exports = {
 			})
 			sparkProfiles.push(user)
 		}
+		user.userTag = interaction.user.tag
 
 		const initialRolls = parseInt(user.rolls)
 		const userInput = interaction.options.getUser('user')
@@ -291,10 +294,7 @@ module.exports = {
 			await interaction.reply('Spark profile deleted.')
 		}
 
-		user.userTag = interaction.user.tag
-		user.percent = calcDraws(user, false)/300
-		user.rolls = calcDraws(user, false)
-		user.save()
+		await user.save()
 
 		// Sends a congratulatory message when the user saves up a spark (a set of 300 rolls)
 		if (Math.floor(user.rolls/300) - Math.floor(initialRolls/300) >= 1) {
