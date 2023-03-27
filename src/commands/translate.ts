@@ -2,7 +2,7 @@ import { CommandInteraction, MessageEmbed } from 'discord.js'
 import { SlashCommandBuilder } from '@discordjs/builders'
 import { findBestMatch } from 'string-similarity'
 import { Translate } from '@google-cloud/translate/build/src/v2'
-import { languageCodes } from '../library'
+import { languageCodes, truncateText } from '../library'
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -14,7 +14,7 @@ module.exports = {
 	,
 	async execute(interaction: CommandInteraction) {
 		await interaction.deferReply()
-		const textInput = interaction.options.getString('text')!
+		const textInput = truncateText(interaction.options.getString('text')!, 1024)
 		const sourceLangInput = interaction.options.getString('from')?.toLowerCase()
 		const outputLangInput = interaction.options.getString('to')?.toLowerCase()
 		const userLocale = /-/.test(interaction.locale) ? interaction.locale.match(/.+(?=-)/)![0] : interaction.locale
@@ -32,7 +32,7 @@ module.exports = {
 		const translateEmbed = new MessageEmbed()
 			.setColor('BLUE')
 			.addField(`Input (${sourceLangInput ? sourceLanguage.name : detectedSourceLanguage!.name})`, textInput)
-			.addField(`Output (${outputLanguage.name})`, translation.translatedText)
+			.addField(`Output (${outputLanguage.name})`, truncateText(translation.translatedText, 1024))
 			.setFooter({text: 'Google Translate', iconURL: 'https://cdn.discordapp.com/attachments/647256353844232202/1011429868447211541/Google_Translate_icon.png'})
 		
 		interaction.editReply({embeds: [translateEmbed]})
