@@ -189,8 +189,8 @@ module.exports = {
 			// Take a screenshot of the page and close the page
 			const screenshot = await page.screenshot({clip: { x: 0, y: 52, width: 362, height: 520 }, encoding: 'binary', omitBackground: true})
 			await page.close()
-
-			if (interaction.options.getBoolean('summons-only')) return await loadSummons(playerID, bodyHTML)
+			
+			if (interaction.options.getBoolean('summons')) return await loadSummons(playerID, bodyHTML)
 
 			playerEmbed.setTitle('Loading Support Summons and Star Character <a:loading:763160594974244874>')
 			interaction.editReply({embeds: [playerEmbed]})
@@ -329,7 +329,7 @@ module.exports = {
 				return interaction.editReply({content: 'Player Search by name is currently unavailable. Please try again later.', embeds: []})
 			})
 
-			// // https://gbfdata.com version
+			// https://gbfdata.com version
 			// await axios.get(`https://gbfdata.com/user/search?q=${urlencode(playerName!)}&is_fulltext=1`).then(({data}) => {
 			// 	const playerData = String(data.match(/(?<=\/thead>).+(?=<\/table)/s))
 			// 	const playerMatches = playerData.matchAll(/href=".+?(\d+)">\n(.+?)\n<.+?"num">(\d+)/gs)
