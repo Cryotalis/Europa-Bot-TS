@@ -453,6 +453,16 @@ export function formatList(array: string[]){
 }
 
 /**
+ * Truncates text to stay within certain character limits
+ * @param text - The text to truncate
+ * @param maxLength - The maximum number of characters allowed before truncation
+ * @param endText - The text which replaces the text removed from the original text. Defaults to an ellipsis (...)
+ */
+export function truncateText(text: string, maxLength: number, endText: string = '...'){
+    return text?.length > maxLength ? text.substring(0, maxLength - endText.length) + endText : text
+}
+
+/**
  * Case insensitive version of the findBestMatch function from string-similarity
  * @param searchString the string to match each target string against
  * @param targetStrings an array of strings to be matched against the search string
