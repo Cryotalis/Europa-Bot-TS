@@ -229,7 +229,8 @@ client.on('guildMemberAdd', async member => {
 		})
 		member.roles.add(greetingSettings.autoRoles)
 	}
-	if (!greetingSettings.sendJoinMessage) return
+	
+	if (!greetingSettings.sendJoinMessage || !greetingChannel) return
 
 	if (!greetingSettings.showJoinImage) {
 		greetingChannel.send(greetingSettings.joinMessage.replace('[member]', String(member)))
