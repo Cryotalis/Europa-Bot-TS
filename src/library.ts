@@ -539,6 +539,7 @@ export function timeToUnix(time: string) { //Converts a day/hour/minute/second t
  */
 export function dateStringToUnix(dateString: string) {
     dateString = dateString.toLowerCase().replace(/[^a-zA-Z0-9\s\/:]/g, '') //Remove any characters that aren't words/numbers/spaces/slashes
+    dateString = dateString.replace('noon', 'pm')
     const now = new Date()
     const year = now.getFullYear().toString()
     const months = [ 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec' ]
@@ -644,15 +645,15 @@ export function wrapText(textInfo: CanvasTextInfo, text: string, textX: number, 
     const words = text.split(' ')
     let line = ''
     
-    for (let n = 0; n < words.length; n++) {
-        const testLine = line + words[n] + ' '
+    for (let i = 0; i < words.length; i++) {
+        const testLine = line + words[i] + ' '
         const metrics = ctx.measureText(testLine)
         const testWidth = metrics.width
-        if (testWidth > maxWidth && n > 0) {
+        if (testWidth > maxWidth && i > 0) {
             textY -= (ctx.measureText(text).actualBoundingBoxAscent + ctx.measureText(text).actualBoundingBoxDescent) / 2
             ctx.strokeText(line, textX, textY)
             ctx.fillText(line, textX, textY)
-            line = words[n] + ' '
+            line = words[i] + ' '
             textY += lineHeight
         } else {
             line = testLine
