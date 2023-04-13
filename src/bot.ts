@@ -13,7 +13,8 @@ import { createCanvas, loadImage } from 'canvas'
 export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_BANS]})
 export const cryoServerShardID = ShardClientUtil.shardIdForGuildId('379501550097399810', client.shard?.count!)
 const currentShardID = client.shard?.ids[0]
-let isHost = os.hostname() !== 'PC-Hywell'
+// let isHost = os.hostname() !== 'PC-Hywell'
+let isHost = true
 
 export const languageCookie = { name: 'ln', value: '2', domain: 'game.granbluefantasy.jp' }
 export const accessCookie = {name: 'wing', value: process.env.GBF_WING!, domain: 'game.granbluefantasy.jp'}
@@ -106,7 +107,7 @@ async function renewJSessionID(){
 	await page.waitForNetworkIdle()
 	jsessionID = (await page.cookies())[0].value
 	await page.close()
-	setTimeout(() => renewJSessionID(), 3.6e+6)
+	setTimeout(() => renewJSessionID(), 1.8e+6)
 }
 async function startPuppeteer(){
 	browser = await launch({args: ['--single-process', '--no-zygote', '--no-sandbox']})

@@ -68,14 +68,14 @@ module.exports = {
 
 			// Current Events Information
 			const currentEventsData = String(data.match(/(?<=<td\sstyle="vertical-align:\stop;\stext-align:\scenter;">).+?(?=<\/td>)/s))
-			const currentEventsTitles = [...new Set(currentEventsData.match(/(?<=title=").+?(?=")|(?<=<b>).+?(?=<\/b>)/g))]
-			const currentEventsImgURLs = currentEventsData.match(/<a.+?<\/a>/g) ?? ['']
+			const currentEventsTitles = [...new Set(currentEventsData.match(/(?<=title=").+?(?=")/g))]
+			const currentEventsImgURLs = currentEventsData.match(/<img.+?>/g) ?? ['']
 			const currentEvents = getEventsInformation(currentEventsData, currentEventsTitles, currentEventsImgURLs, true)
 
 			// Upcoming Events Information
 			const upcomingEventsData = String(data.match(/(?<=<td\sstyle="vertical-align:\stop;">).+?(?=<\/td>)/gs)[1])
-			const upcomingEventsTitles = [...new Set(upcomingEventsData.match(/(?<=title=").+?(?=")|(?<=<b>).+?(?=<\/b>)/g))]
-			const upcomingEventsImgURLs = upcomingEventsData.match(/<a.+?<\/a>/g) ?? ['']
+			const upcomingEventsTitles = [...new Set(upcomingEventsData.match(/(?<=title=").+?(?=")/g))]
+			const upcomingEventsImgURLs = upcomingEventsData.match(/<img.+?>/g) ?? ['']
 			const upcomingEvents = getEventsInformation(upcomingEventsData, upcomingEventsTitles, upcomingEventsImgURLs, false)
 
 			while (upcomingEvents.length > 6) upcomingEvents.pop()
