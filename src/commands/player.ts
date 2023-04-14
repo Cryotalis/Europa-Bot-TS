@@ -1,5 +1,4 @@
-import { CommandInteraction, MessageActionRow, MessageAttachment, MessageButton, MessageEmbed, MessageSelectMenu } from 'discord.js'
-import { SlashCommandBuilder } from '@discordjs/builders'
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, ComponentType, EmbedBuilder, SlashCommandBuilder, StringSelectMenuBuilder } from 'discord.js'
 import { data, browser, languageCookie, accessCookie, jsessionID } from '../bot'
 import { compareTwoStrings } from 'string-similarity'
 import { createCanvas, loadImage, Image, CanvasRenderingContext2D } from 'canvas'
@@ -26,17 +25,16 @@ module.exports = {
 				.addBooleanOption(option => option.setName('summons').setDescription('Show summons only?'))
 		)
 	,
-	async execute(interaction: CommandInteraction) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		const playerName = interaction.options.getString('name')
 		const playerID = interaction.options.getNumber('id')?.toString()
 
 		if (!data) return interaction.reply('Unable to connect to database. Please try again in a few seconds.')
 
-		const playerEmbed = new MessageEmbed()
-			.setColor('BLUE')
+		const playerEmbed = new EmbedBuilder()
+			.setColor('Blue')
 			.setAuthor({name: 'Player Finder', iconURL: 'https://upload.wikimedia.org/wikipedia/en/e/e5/Granblue_Fantasy_logo.png'})
 
-		
 		function drawStars(ctx: CanvasRenderingContext2D, stars: Image[], spacing: number, uncaps: number, level: number, maxLevel: number, x: number, y: number) {
 			if (isNaN(uncaps)) { //If number of uncaps are unknown, use summon level to determine uncaps
 				if (level <= 40) {uncaps = 0}
@@ -142,7 +140,7 @@ module.exports = {
 				drawStars(ctx, stars, 19, summon.uncaps, summon.level, summon.maxLevel, xCoordinates[i], yCoordinates[i])
 			})
 
-			const attachment = new MessageAttachment(canvas.toBuffer(), `${String(String(name).replace(/\s/g, '_').match(/\w+/))}SupportSummons.png`)
+			const attachment = new AttachmentBuilder(canvas.toBuffer(), {name: `${String(String(name).replace(/\s/g, '_').match(/\w+/))}SupportSummons.png`})
 			playerEmbed
 				.setTitle(`${name}`)
 				.setURL(`http://game.granbluefantasy.jp/#profile/${playerID}`)
@@ -289,7 +287,7 @@ module.exports = {
 				drawStars(ctx, stars, 13, summon.uncaps, summon.level, summon.maxLevel, xCoordinates[i], yCoordinates[i])
 			})
 
-			const attachment = new MessageAttachment(canvas.toBuffer(), `${String(String(name).replace(/\s/g, '_').match(/\w+/))}Profile.png`)
+			const attachment = new AttachmentBuilder(canvas.toBuffer(), {name: `${String(String(name).replace(/\s/g, '_').match(/\w+/))}Profile.png`})
 	
 			playerEmbed
 				.setTitle(`${name}`)
@@ -304,9 +302,9 @@ module.exports = {
 			await interaction.reply({embeds: [playerEmbed]})
 			loadProfile(playerID)
 		} else {
-			const searchEmbed = new MessageEmbed()
+			const searchEmbed = new EmbedBuilder()
 				.setTitle(`Searching for "${playerName}" <a:loading:763160594974244874>`)
-				.setColor('BLUE')
+				.setColor('Blue')
 				.setAuthor({name: 'Player Finder', iconURL: 'https://upload.wikimedia.org/wikipedia/en/e/e5/Granblue_Fantasy_logo.png'})
 				.setFooter({text: 'http://info.gbfteamraid.fun/web/about', iconURL: 'http://info.gbfteamraid.fun/view/image/icon.png'})
 				// .setFooter({text: 'https://gbfdata.com/', iconURL: 'https://gbfdata.com/favicon.ico'})
@@ -317,15 +315,18 @@ module.exports = {
 			// https://info.gbfteamraid.fun version
 			const options = {
 				method: 'POST',
-				url: `https://info.gbfteamraid.fun/web/userrank?method=getUserrank&params={"username":"${playerName}"}`,
+				url: 'https://info.gbfteamraid.fun/web/userrank',
 				headers: {
-					Cookie: `JSESSIONID=${jsessionID}`,
-				}
-			}
+				  'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+				  Cookie: `JSESSIONID=${jsessionID}`
+				},
+				data: {method: 'getUserrank', params: `{"username":"${playerName}"}`}
+			  }
 
 			await axios.request(options).then(({data: {result}}) => {
 				players = result
 			}).catch(async error => {
+				console.log(error)
 				return interaction.editReply({content: 'Player Search by name is currently unavailable. Please try again later.', embeds: []})
 			})
 
@@ -344,10 +345,10 @@ module.exports = {
 			players = players.sort((a, b) => parseInt(b.level) - parseInt(a.level))
 			players = players.sort((a, b) => compareTwoStrings(b.name, playerName!) - compareTwoStrings(a.name, playerName!))
 
-			const playersEmbed = new MessageEmbed()
+			const playersEmbed = new EmbedBuilder()
 				.setTitle(`Found ${players.length} results for "${playerName}"`)
 				.setDescription('Select a player using the menu below.')
-				.setColor('BLUE')
+				.setColor('Blue')
 
 			let pageNum = 0
 			const numbers = [ '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟' ]
@@ -355,42 +356,42 @@ module.exports = {
 			
 			function setPage(page: number){
 				const index = page*10
-				playersEmbed.fields = []
-				if (players.length > index) playersEmbed.addField('\u200b', formattedPlayers.slice(index, index + 5).join('\n\n'), true)
-				if (players.length > index + 5) playersEmbed.addField('\u200b', formattedPlayers.slice(index + 5, index + 10).join('\n\n'), true)
+				playersEmbed.setFields([])
+				if (players.length > index) playersEmbed.addFields({name: '\u200b', value: formattedPlayers.slice(index, index + 5).join('\n\n'), inline: true})
+				if (players.length > index + 5) playersEmbed.addFields({name: '\u200b', value: formattedPlayers.slice(index + 5, index + 10).join('\n\n'), inline: true})
 
-				const navButtons = new MessageActionRow()
+				const navButtons = new ActionRowBuilder<ButtonBuilder>()
 					.addComponents(
-						new MessageButton()
+						new ButtonBuilder()
 							.setCustomId('leftButton')
 							.setLabel('🡰')
-							.setStyle('PRIMARY')
+							.setStyle(ButtonStyle.Primary)
 							.setDisabled(Boolean(page === 0))
 					)
 					.addComponents(
-						new MessageButton()
+						new ButtonBuilder()
 							.setCustomId('pageButton')
 							.setLabel(`ㅤㅤㅤㅤPage ${pageNum + 1}ㅤㅤㅤㅤ`)
-							.setStyle('SECONDARY')
+							.setStyle(ButtonStyle.Secondary)
 							.setDisabled(true)
 					)
 					.addComponents(
-						new MessageButton()
+						new ButtonBuilder()
 							.setCustomId('rightButton')
 							.setLabel('🡲')
-							.setStyle('PRIMARY')
+							.setStyle(ButtonStyle.Primary)
 							.setDisabled(Boolean(players.length <= index + 10))
 					)
 					.addComponents(
-						new MessageButton()
+						new ButtonBuilder()
 							.setCustomId('cancelButton')
 							.setLabel('✖')
-							.setStyle('DANGER')
+							.setStyle(ButtonStyle.Danger)
 					)
 
-				const playerMenu = new MessageActionRow()
+				const playerMenu = new ActionRowBuilder<StringSelectMenuBuilder>()
 					.addComponents(
-						new MessageSelectMenu()
+						new StringSelectMenuBuilder()
 							.setCustomId('Player Selector')
 							.setPlaceholder('Select a Player')
 							.addOptions(formattedPlayers.slice(index, index + 10).map((player: string) => ({label: player, value: player})))
@@ -399,14 +400,14 @@ module.exports = {
 			}
 			setPage(0)
 
-			const playerCollector = interaction.channel?.createMessageComponentCollector({componentType: 'SELECT_MENU', filter: msg => msg.member?.user.id === interaction.member?.user.id, time: 60000*5, max: 1})
+			const playerCollector = interaction.channel?.createMessageComponentCollector({componentType: ComponentType.StringSelect, filter: msg => msg.member?.user.id === interaction.member?.user.id, time: 60000*5, max: 1})
 			playerCollector?.on('collect', i => {
 				buttonCollector?.stop()
 				playerCollector.stop()
 				loadProfile(String(i.values[0].match(/(?<=\()\d+/)))
 			})
 			
-			const buttonCollector = interaction.channel?.createMessageComponentCollector({componentType: 'BUTTON', filter: msg => msg.member?.user.id === msg.member?.user.id, time: 60000*5})
+			const buttonCollector = interaction.channel?.createMessageComponentCollector({componentType: ComponentType.Button, filter: msg => msg.member?.user.id === msg.member?.user.id, time: 60000*5})
             buttonCollector?.on('collect', i => {
 				i.deferUpdate()
 				if (i.customId === 'leftButton') {pageNum--; setPage(pageNum)}

@@ -1,5 +1,4 @@
-import { CommandInteraction, GuildMember, MessageAttachment, MessageEmbed } from 'discord.js'
-import { SlashCommandBuilder } from '@discordjs/builders'
+import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, GuildMember, SlashCommandBuilder } from 'discord.js'
 import { greetingConfig, servers } from '../bot'
 import { findBestMatch } from 'string-similarity'
 import { capitalize, getDirectImgurLinks } from '../library'
@@ -17,13 +16,13 @@ module.exports = {
 					option
 						.setName('setting')
 						.setDescription('The setting to toggle on or off')
-						.addChoices([
-							['Join Message', 'sendJoinMessage'],
-							['Leave Message', 'sendLeaveMessage'],
-							['Ban Message', 'sendBanMessage'],
-							['Join Image', 'showJoinImage'],
-							['AutoRole', 'useAutoRole']
-						])
+						.addChoices(
+							{name: 'Join Message', value: 'sendJoinMessage'},
+							{name: 'Leave Message', value: 'sendLeaveMessage'},
+							{name: 'Ban Message', value: 'sendBanMessage'},
+							{name: 'Join Image', value: 'showJoinImage'},
+							{name: 'AutoRole', value: 'useAutoRole'}
+						)
 						.setRequired(true)
 				)
 		)
@@ -69,7 +68,7 @@ module.exports = {
 				.setDescription('Show the greeting settings for this server')
 		)
 	,
-	async execute(interaction: CommandInteraction) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		const server = servers.find(server => server.guildID === interaction.guildId)
 		if (!server) return interaction.reply('Unable to access settings for your server.')
 		const channels = interaction.guild?.channels.cache.map(channel => channel)!
@@ -117,7 +116,7 @@ module.exports = {
 			interaction.reply('Join image background set.')
 		} else if (command === 'autorole'){
 			if (!roleIDs) return interaction.reply('The roles you provided were invalid.')
-			const clientUser = interaction.guild?.me! as GuildMember
+			const clientUser = interaction.guild?.members.me! as GuildMember
 			const addedRoles: string[] = [], invalidRoles: string[] = []
 			greetingSettings.autoRoles = []
 
@@ -132,15 +131,15 @@ module.exports = {
 				}
 			})
 
-			const rolesEmbed = new MessageEmbed()
+			const rolesEmbed = new EmbedBuilder()
 				.setAuthor({
 					name: `AutoRoles were${addedRoles.length === 0 ? ' not ' : ' '}set`,
-					iconURL: interaction.guild?.iconURL({format: 'png'}) ?? ''
+					iconURL: interaction.guild?.iconURL({extension: 'png'}) ?? ''
 				})
-				.setColor('BLUE')
+				.setColor('Blue')
 
-			if (addedRoles.length > 0) rolesEmbed.addField(`Auto-Assigned Roles:`, `${addedRoles.join(' ')}`)
-			if (invalidRoles.length > 0) rolesEmbed.addField('Invalid roles:', `${invalidRoles.join(' ')}`)
+			if (addedRoles.length > 0) rolesEmbed.addFields([{name: `Auto-Assigned Roles:`, value: `${addedRoles.join(' ')}`}])
+			if (invalidRoles.length > 0) rolesEmbed.addFields([{name: 'Invalid roles:', value: `${invalidRoles.join(' ')}`}])
 
 			interaction.reply({embeds: [rolesEmbed]})
 		} else if (command === 'settings'){
@@ -162,7 +161,7 @@ module.exports = {
 			const [background, textBox, userAvatar] = await Promise.all([
 				greetingSettings.background ? loadImage(greetingSettings.background) : loadImage('https://cdn.discordapp.com/attachments/659229575821131787/847525054833360896/GBFBackground.jpg'),
 				loadImage('https://i.imgur.com/5pMqWKz.png'),
-				loadImage(interaction.user.displayAvatarURL({format: 'png', size: 4096}))
+				loadImage(interaction.user.displayAvatarURL({extension: 'png', size: 4096, forceStatic: true}))
 			])
 
 			ctx.drawImage(background, 0, 0, canvas.width, canvas.height)
@@ -189,22 +188,24 @@ module.exports = {
 			
 			ctx.drawImage(userAvatar, 25, 25, 200, 200)
 	
-			const greetingAttachment = new MessageAttachment(canvas.toBuffer(), 'welcome.png')
-			const greetingEmbed = new MessageEmbed()
+			const greetingAttachment = new AttachmentBuilder(canvas.toBuffer(), {name: 'welcome.png'})
+			const greetingEmbed = new EmbedBuilder()
 				.setTitle('Server Greeting Settings')
-				.setColor('BLUE')
+				.setColor('Blue')
 				.setDescription(`Greeting messages are currently set to be sent in <#${greetingSettings.channelID}>.`)
-				.addField('Join Message', greetingSettings.sendJoinMessage ? 'Enabled' : 'Disabled', true)
-				.addField('\u200b', '\u200b', true)
-				.addField('Leave Message', greetingSettings.sendLeaveMessage ? 'Enabled' : 'Disabled', true)
-				.addField('Ban Message', greetingSettings.sendBanMessage ? 'Enabled' : 'Disabled', true)
-				.addField('\u200b', '\u200b', true)
-				.addField('Auto Role', greetingSettings.useAutoRole ? 'Enabled' : 'Disabled', true)
-				.addField('Join Message', joinMsg)
-				.addField('Leave Message', leaveMsg)
-				.addField('Ban Message', banMsg)
-				.addField('Auto-Assigned Roles', greetingSettings.autoRoles.length > 0 ? greetingSettings.autoRoles.map(roleID => `<@&${roleID}>`).join(' ') : 'None')
-				.addField('\u200b', `**Join Image \`${greetingSettings.showJoinImage ? 'Enabled' : 'Disabled'}\`**`)
+				.addFields([
+					{name: 'Join Message', value: greetingSettings.sendJoinMessage ? 'Enabled' : 'Disabled', inline: true},
+					{name: '\u200b', value: '\u200b', inline: true},
+					{name: 'Leave Message', value: greetingSettings.sendLeaveMessage ? 'Enabled' : 'Disabled', inline: true},
+					{name: 'Ban Message', value: greetingSettings.sendBanMessage ? 'Enabled' : 'Disabled', inline: true},
+					{name: '\u200b', value: '\u200b', inline: true},
+					{name: 'Auto Role', value: greetingSettings.useAutoRole ? 'Enabled' : 'Disabled', inline: true},
+					{name: 'Join Message', value: joinMsg},
+					{name: 'Leave Message', value: leaveMsg},
+					{name: 'Ban Message', value: banMsg},
+					{name: 'Auto-Assigned Roles', value: greetingSettings.autoRoles.length > 0 ? greetingSettings.autoRoles.map(roleID => `<@&${roleID}>`).join(' ') : 'None'},
+					{name: '\u200b', value: `**Join Image \`${greetingSettings.showJoinImage ? 'Enabled' : 'Disabled'}\`**`},
+				])
 				.setImage('attachment://welcome.png')
 			if (!greetingSettings.channelID) greetingEmbed.setDescription('No channel has been set to display greeting messages.')
 			return interaction.reply({embeds: [greetingEmbed], files: [greetingAttachment]})

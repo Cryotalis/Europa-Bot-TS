@@ -1,5 +1,4 @@
-import { CommandInteraction, MessageEmbed } from 'discord.js'
-import { SlashCommandBuilder } from '@discordjs/builders'
+import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import { data, item, items1, items2, sparkProfiles } from '../bot'
 import { findBestCIMatch, rarityEmotes, weaponEmotes } from '../library'
 
@@ -36,7 +35,7 @@ module.exports = {
 				.addStringOption(option => option.setName('target').setDescription("The character, weapon, or summon you're drawing for").setRequired(true))
 		)
 	,
-	async execute(interaction: CommandInteraction) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		function gacha(crystals: number, singles: number, tenparts: number, target?: item){
 			if (target) tenparts = Infinity
 			const rolls = Math.floor(crystals / 300) + singles + tenparts * 10
@@ -76,17 +75,17 @@ module.exports = {
 			const SSRRate = (items.filter(item => item.rarity === 'SS Rare').length / items.length * 100).toFixed(2)
 			const totalRolls = items.length
 
-			const rollEmbed = new MessageEmbed()
+			const rollEmbed = new EmbedBuilder()
 				.setAuthor({name: 'Gacha Simulator', iconURL: 'https://i.imgur.com/MN6TIHj.png'})
 				.setTitle(target ? `__You got ${target.character ?? target.name} and these ${items.length - 1} items:__` : `__You got these ${items.length} items:__`)
-				.setColor('BLUE')
+				.setColor('Blue')
 			
 			for (let i = 0; i < totalRolls; i++){
 				if (i >= 23){
 					const remainingSSRs = `<:SSR:755671138624864266> ${items.filter(item => item.rarity === 'SS Rare').length}`
 					const remainingSRs = `<:SR:755671130882179113> ${items.filter(item => item.rarity === 'S Rare').length}`
 					const remainingRs = `<:R_:755671123588546623> ${items.filter(item => item.rarity === 'Rare').length}`
-					rollEmbed.addField(`and ${items.length} more...`, `**${remainingSSRs}** | **${remainingSRs}** | **${remainingRs}**`, true)
+					rollEmbed.addFields({name: `and ${items.length} more...`, value: `**${remainingSSRs}** | **${remainingSRs}** | **${remainingRs}**`, inline: true})
 					break
 				} else {
 					const item = items.shift()!
@@ -96,10 +95,10 @@ module.exports = {
 							? `👤 ${item.character}`
 							: weaponEmotes[item.type] + 'Weapon'
 
-					rollEmbed.addField(rarityEmotes[item.rarity] + item.name, description, true)
+					rollEmbed.addFields({name: rarityEmotes[item.rarity] + item.name, value: description, inline: true})
 				}
 			}
-			rollEmbed.addField('\u200b', `**${SSRCharacters.length} SSR Characters | ${SSRSummons.length} SSR Summons | ${SSRRate}% SSR rate**`)
+			rollEmbed.addFields({name: '\u200b', value: `**${SSRCharacters.length} SSR Characters | ${SSRSummons.length} SSR Summons | ${SSRRate}% SSR rate**`})
 			return rollEmbed
 		}
 

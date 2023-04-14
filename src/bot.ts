@@ -1,7 +1,6 @@
-import { Client, Collection, Guild, GuildMember, Intents, MessageAttachment, ShardClientUtil, TextChannel } from 'discord.js'
+import { AttachmentBuilder, ChannelType, Client, Collection, GatewayIntentBits, Guild, GuildMember, REST, ShardClientUtil, TextChannel } from 'discord.js'
 import { GoogleSpreadsheet, GoogleSpreadsheetRow } from 'google-spreadsheet'
 import { Routes } from 'discord-api-types/v9'
-import { REST } from '@discordjs/rest'
 import { schedule } from 'node-cron'
 import { inspect } from 'util'
 import fs from 'node:fs'
@@ -10,7 +9,7 @@ import { Browser, launch } from 'puppeteer'
 import axios from 'axios'
 import { createCanvas, loadImage } from 'canvas'
 
-export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_BANS]})
+export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration]})
 export const cryoServerShardID = ShardClientUtil.shardIdForGuildId('379501550097399810', client.shard?.count!)
 const currentShardID = client.shard?.ids[0]
 // let isHost = os.hostname() !== 'PC-Hywell'
@@ -96,7 +95,6 @@ export async function connectToDB(){
 	console.log(`Database connection successful for Shard #${currentShardID}`)
 }
 connectToDB().then(() => registerCommands())
-// schedule('*/10 * * * *', () => connectToDB()) // Reconnect to the database every 10 minutes
 
 export let browser: Browser
 export let jsessionID: string // Required for player name search
@@ -158,13 +156,14 @@ client.on('ready', () => {
 
 // Slash Command Handler
 client.on('interactionCreate', interaction => {
-	if ((!interaction.isCommand() && !interaction.isMessageContextMenu()) || !interaction.channel || interaction.channel.type === 'DM' || (!isHost && interaction.user.id !== '251458435554607114')) return
+	if ((!interaction.isCommand() && !interaction.isMessageContextMenuCommand()) || !interaction.channel || interaction.channel.type === ChannelType.DM || (!isHost && interaction.user.id !== '251458435554607114')) return
 
 	const isModCommand = modCommands.includes(`${interaction.commandName}.js`)
     const command: any = client.commands?.get(interaction.commandName)
-	if (!command) return interaction.reply('Failed to load command. Please try again in a few seconds.')
-	if (isModCommand && !(interaction.memberPermissions?.has('MANAGE_MESSAGES') || interaction.user.id === '251458435554607114')){
-		return interaction.reply({content: 'You do not have permission to use this command.', ephemeral: true})
+	if (!command) {interaction.reply('Failed to load command. Please try again in a few seconds.'); return}
+	if (isModCommand && !(interaction.memberPermissions?.has('ManageMessages') || interaction.user.id === '251458435554607114')){
+		interaction.reply({content: 'You do not have permission to use this command.', ephemeral: true})
+		return
 	} 
 
 	try {
@@ -217,7 +216,7 @@ export interface greetingConfig {
 client.on('guildMemberAdd', async member => {
 	const server = servers.find(server => server.guildID === member.guild.id)
 	if (!server || !server.greeting) return
-	const clientUser = member.guild?.me! as GuildMember
+	const clientUser = member.guild?.members.me! as GuildMember
 	const greetingSettings: greetingConfig = JSON.parse(server.greeting)
 	const greetingChannel = member.guild.channels.cache.get(greetingSettings.channelID) as TextChannel
 
@@ -243,7 +242,7 @@ client.on('guildMemberAdd', async member => {
 	const [background, textBox, userAvatar] = await Promise.all([
 		greetingSettings.background ? loadImage(greetingSettings.background) : loadImage('https://cdn.discordapp.com/attachments/659229575821131787/847525054833360896/GBFBackground.jpg'),
 		loadImage('https://i.imgur.com/5pMqWKz.png'),
-		loadImage(member.displayAvatarURL({format: 'png', size: 4096}))
+		loadImage(member.displayAvatarURL({extension: 'png', size: 4096, forceStatic: true}))
 	])
 
 	ctx.drawImage(background, 0, 0, canvas.width, canvas.height)
@@ -270,7 +269,7 @@ client.on('guildMemberAdd', async member => {
 	
 	ctx.drawImage(userAvatar, 25, 25, 200, 200)
 
-	const greetingAttachment = new MessageAttachment(canvas.toBuffer(), 'welcome.png')
+	const greetingAttachment = new AttachmentBuilder(canvas.toBuffer(), {name: 'welcome.png'})
 	greetingChannel.send({content: greetingSettings.joinMessage.replace('[member]', String(member)), files: [greetingAttachment]})
 })
 

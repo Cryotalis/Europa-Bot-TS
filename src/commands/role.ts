@@ -1,5 +1,5 @@
-import { CommandInteraction, GuildMember, MessageEmbed, Role } from 'discord.js'
-import { SlashCommandBuilder } from '@discordjs/builders'
+import { ChatInputCommandInteraction, EmbedBuilder, GuildMember, Role, SlashCommandBuilder } from 'discord.js'
+
 import { categoryRole, servers } from '../bot'
 import { findBestMatch } from 'string-similarity'
 
@@ -9,9 +9,9 @@ module.exports = {
 		.setDescription('Manage your roles')
 		.addStringOption(option => option.setName('roles').setDescription('The roles to add or remove (@mention the roles)').setRequired(true))
 	,
-	async execute(interaction: CommandInteraction) {
-		const clientUser = interaction.guild?.me! as GuildMember
-		if (!clientUser.permissions.has('MANAGE_ROLES')) return interaction.reply('I do not have permission to assign roles in this server.')
+	async execute(interaction: ChatInputCommandInteraction) {
+		const clientUser = interaction.guild?.members.me! as GuildMember
+		if (!clientUser.permissions.has('ManageRoles')) return interaction.reply('I do not have permission to assign roles in this server.')
 
 		const server = servers.find(server => server.guildID === interaction.guildId)
 		if (!server || !server.roles) return interaction.reply('No roles are set for your server.')
@@ -42,16 +42,16 @@ module.exports = {
 			}
 		})
 		
-		const rolesEmbed = new MessageEmbed()
+		const rolesEmbed = new EmbedBuilder()
 			.setAuthor({
 				name: `Roles were${addedRoles.concat(removedRoles).length === 0 ? ' not ' : ' '}changed for ${member.nickname ?? member.user.username}`,
-				iconURL: interaction.user.displayAvatarURL({format: 'png'})
+				iconURL: interaction.user.displayAvatarURL({extension: 'png'})
 			})
-			.setColor('BLUE')
+			.setColor('Blue')
 
-		if (addedRoles.length > 0) rolesEmbed.addField('Added Roles:', `${addedRoles.join(' ')}`)
-		if (removedRoles.length > 0) rolesEmbed.addField('Removed Roles:', `${removedRoles.join(' ')}`)
-		if (notAddedRoles.length > 0) rolesEmbed.addField('Unavailable Roles:', `${notAddedRoles.join(' ')}`)
+		if (addedRoles.length > 0) rolesEmbed.addFields([{name: 'Added Roles:', value: `${addedRoles.join(' ')}`}])
+		if (removedRoles.length > 0) rolesEmbed.addFields([{name: 'Removed Roles:', value: `${removedRoles.join(' ')}`}])
+		if (notAddedRoles.length > 0) rolesEmbed.addFields([{name: 'Unavailable Roles:', value: `${notAddedRoles.join(' ')}`}])
 
 		return interaction.reply({embeds: [rolesEmbed]})
 	}

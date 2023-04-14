@@ -1,5 +1,4 @@
-import { CommandInteraction } from 'discord.js'
-import { SlashCommandBuilder } from '@discordjs/builders'
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { client } from '../bot'
 
 module.exports = {
@@ -8,7 +7,7 @@ module.exports = {
 		.setDescription('Force a Europa shard to respawn')
 		.addNumberOption(option => option.setName('number').setDescription('The number for the shard to respawn').setRequired(true))
 	,
-	async execute(interaction: CommandInteraction) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		if (interaction.user.id !== '251458435554607114') {
 			return interaction.reply('This command is reserved for Cryo.')
 		}

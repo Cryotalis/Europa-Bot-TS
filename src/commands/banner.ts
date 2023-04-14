@@ -1,5 +1,4 @@
-import { CommandInteraction, MessageEmbed } from 'discord.js'
-import { SlashCommandBuilder } from '@discordjs/builders'
+import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import { dateStringToUnix, rarityEmotes, weaponEmotes } from '../library'
 import { bannerDuration, featuredItemIDs, items1 } from '../bot'
 
@@ -9,13 +8,13 @@ module.exports = {
 		.setDescription('Show the featured characters and rate ups on the current banner')
 		.addBooleanOption(option => option.setName('detailed').setDescription('Show non-SSR items'))
 	,
-	async execute(interaction: CommandInteraction) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		const includeNonSSRItems = interaction.options.getBoolean('detailed')
 		const includedRarities = includeNonSSRItems ? ['SS Rare', 'S Rare', 'Rare'] : ['SS Rare']
-		const bannerInfoEmbed = new MessageEmbed()
+		const bannerInfoEmbed = new EmbedBuilder()
 			.setTitle('__Banner Information__')
 			.setDescription(`<t:${dateStringToUnix(bannerDuration.start)!/1000}> ~ <t:${dateStringToUnix(bannerDuration.end)!/1000}> (Ends <t:${dateStringToUnix(bannerDuration.end)!/1000}:R>)\n\n**The following items have boosted draw rates:**`)
-			.setColor('BLUE')
+			.setColor('Blue')
 		
 		const rateUpItems = items1
 			.filter(item => item.rate_up && includedRarities.includes(item.rarity))
@@ -28,7 +27,7 @@ module.exports = {
 				: item.character
 					? `👤 ${item.character}`
 					: weaponEmotes[item.type] + 'Weapon'
-			bannerInfoEmbed.addField(`${rarityEmotes[item.rarity]}${item.name} (${featured ? 'Featured | ' : ''}${item.drop_rate}%)`, description)
+			bannerInfoEmbed.addFields([{name: `${rarityEmotes[item.rarity]}${item.name} (${featured ? 'Featured | ' : ''}${item.drop_rate}%)`, value: description}])
 		})
 		
 		interaction.reply({embeds: [bannerInfoEmbed]})

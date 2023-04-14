@@ -1,8 +1,7 @@
-import { CommandInteraction, GuildMember, MessageAttachment, MessageEmbed } from 'discord.js'
-import { SlashCommandBuilder } from '@discordjs/builders'
+import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, GuildMember, SlashCommandBuilder } from 'discord.js'
 import { privateDB, sparkProfiles, info } from '../bot'
 import { GoogleSpreadsheetRow } from 'google-spreadsheet'
-import { createCanvas, loadImage } from 'canvas'
+import { Image, createCanvas, loadImage } from 'canvas'
 import { formatList, getDirectImgurLinks } from '../library'
 
 module.exports = {
@@ -60,7 +59,7 @@ module.exports = {
 				.setDescription('Delete your spark profile')
 		)
 	,
-	async execute(interaction: CommandInteraction) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		async function getProfile(user: GoogleSpreadsheetRow){
 			await interaction.deferReply()
 			let badBackground = false
@@ -81,7 +80,7 @@ module.exports = {
 				const clearBackground = await loadImage('https://cdn.discordapp.com/attachments/659229575821131787/762203777629290526/SparkShadedBG.png')
 				ctx.drawImage(backgroundMask, 0, 0)
 				ctx.globalCompositeOperation = 'source-in'
-				ctx.drawImage(customBackground, 0, 0, canvas.width, canvas.height)
+				ctx.drawImage(customBackground as Image, 0, 0, canvas.width, canvas.height)
 				ctx.globalCompositeOperation = 'source-over'
 				ctx.drawImage(clearBackground, 0, 0)
 			} else {
@@ -151,7 +150,7 @@ module.exports = {
 			ctx.closePath()
 			ctx.clip()
 
-			const avatarURL = interaction.guild?.members.cache.get(user.userID)?.user.displayAvatarURL({format: 'png'})
+			const avatarURL = interaction.guild?.members.cache.get(user.userID)?.user.displayAvatarURL({extension: 'png', forceStatic: true})
 			const defaultAvatarURL = 'https://discordapp.com/assets/6debd47ed13483642cf09e832ed0bc1b.png?size=1024'
 			const avatar = await loadImage(avatarURL ?? defaultAvatarURL)
 			ctx.drawImage(avatar, 55, 40, 100, 100)
@@ -161,7 +160,7 @@ module.exports = {
 			// const cobwebs = await loadImage('https://media.discordapp.net/attachments/647256353844232202/1033487287662690434/SparkProfileCobwebs.png')
 			// ctx.drawImage(cobwebs, 0, 0)
 			
-			const attachment = new MessageAttachment(canvas.toBuffer(), `${username}SparkProfile.png`)
+			const attachment = new AttachmentBuilder(canvas.toBuffer(), {name: `${username}SparkProfile.png`})
 			
 			if (badBackground){ // If the user's custom background caused an error, send a warning.
 				return interaction.editReply({content: 'I could not access your background image. Please make sure your background image is publicly accessible.', files: [attachment]})
@@ -175,9 +174,9 @@ module.exports = {
 			const blank = '⠀'
 			let crystalBlank = '', ticketBlank = '', tenticketBlank = '', sparkBlank = ''
 			const progBar = '▰'.repeat((parseFloat(user.percent) % 100) / 5) + '▱'.repeat(20 - (parseFloat(user.percent) % 100) / 5)
-			const sparkEmbed = new MessageEmbed()
-				.setColor('BLUE')
-				.setAuthor({name: user.userTag, iconURL: interaction.guild?.members.cache.get(user.userID)?.user.displayAvatarURL({format: 'png'})!})
+			const sparkEmbed = new EmbedBuilder()
+				.setColor('Blue')
+				.setAuthor({name: user.userTag, iconURL: interaction.guild?.members.cache.get(user.userID)?.user.displayAvatarURL({extension: 'png', forceStatic: true})!})
 				.setTitle(`${username}'s Spark Progress`)
 	
 			if ((interaction.member as GuildMember).presence?.clientStatus?.mobile){
@@ -187,10 +186,14 @@ module.exports = {
 				for (let i = 0; i < 14 - String(parseInt(user.rolls)).length / 2; i++) {sparkBlank += blank}
 				
 				sparkEmbed
-					.addField('<:Crystal:616792937161949189> Crystals:⠀   ⠀<:Ticket:616792937254092800> Tickets:⠀   ⠀<:10Ticket:616792937220669450> 10 Parts:', 
-					`${crystalBlank + user.crystals + crystalBlank}${ticketBlank + user.tickets + ticketBlank}${tenticketBlank + user.tenParts}`)
-					.addField('⠀⠀⠀⠀⠀⠀⠀⠀⠀<:Spark:622196123695710208> Rolls/Sparks:', sparkBlank + String(parseInt(user.rolls)), false)
-					.addField(`⠀⠀You are ${user.percent} of the way to a spark! <:Stronk:585534348695044199>`, `⠀[${progBar}]`)
+					.addFields([
+						{
+							name: '<:Crystal:616792937161949189> Crystals:⠀   ⠀<:Ticket:616792937254092800> Tickets:⠀   ⠀<:10Ticket:616792937220669450> 10 Parts:', 
+							value: `${crystalBlank + user.crystals + crystalBlank}${ticketBlank + user.tickets + ticketBlank}${tenticketBlank + user.tenParts}`
+						},
+						{name: '⠀⠀⠀⠀⠀⠀⠀⠀⠀<:Spark:622196123695710208> Rolls/Sparks:', value: sparkBlank + String(parseInt(user.rolls)), inline: false},
+						{name: `⠀⠀You are ${user.percent} of the way to a spark! <:Stronk:585534348695044199>`, value: `⠀[${progBar}]`}
+					])
 			} else {
 				for (let i = 0; i < 6 - String(user.crystals).length / 2; i++) {crystalBlank += blank}
 				for (let i = 0; i < 8 - String(user.tickets).length / 2; i++) {ticketBlank += blank}
@@ -198,13 +201,15 @@ module.exports = {
 				for (let i = 0; i < 8 - String(parseInt(user.rolls)).length / 2; i++) {sparkBlank += blank}
 				
 				sparkEmbed
-					.addField('⠀⠀<:Crystal:616792937161949189> Crystals:', crystalBlank + user.crystals, true)
-					.addField('⠀⠀⠀⠀<:Ticket:616792937254092800> Tickets:', ticketBlank + user.tickets, true)
-					.addField('⠀<:10Ticket:616792937220669450> 10 Part Tickets: ⠀', tenticketBlank + user.tenParts, true)
-					.addField('\u200B', '\u200B', true)
-					.addField('⠀⠀<:Spark:622196123695710208> Rolls/Sparks:', sparkBlank + String(parseInt(user.rolls)), true)
-					.addField('\u200B', '\u200B', true)
-					.addField(`⠀⠀⠀⠀⠀⠀You are ${user.percent} of the way to a spark! <:Stronk:585534348695044199>`, `⠀ ⠀ ⠀⠀[${progBar}]`)
+					.addFields([
+						{name: '⠀⠀<:Crystal:616792937161949189> Crystals:', value: crystalBlank + user.crystals, inline: true},
+						{name: '⠀⠀⠀⠀<:Ticket:616792937254092800> Tickets:', value: ticketBlank + user.tickets, inline: true},
+						{name: '⠀<:10Ticket:616792937220669450> 10 Part Tickets: ⠀', value: tenticketBlank + user.tenParts, inline: true},
+						{name: '\u200B', value: '\u200B', inline: true},
+						{name: '⠀⠀<:Spark:622196123695710208> Rolls/Sparks:', value: sparkBlank + String(parseInt(user.rolls)), inline: true},
+						{name: '\u200B', value: '\u200B', inline: true},
+						{name: `⠀⠀⠀⠀⠀⠀You are ${user.percent} of the way to a spark! <:Stronk:585534348695044199>`, value: `⠀ ⠀ ⠀⠀[${progBar}]`}
+					])
 			}
 	
 			return interaction.reply({embeds: [sparkEmbed]})

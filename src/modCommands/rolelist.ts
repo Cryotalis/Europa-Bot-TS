@@ -1,5 +1,4 @@
-import { CommandInteraction, GuildMember, MessageEmbed, Role } from 'discord.js'
-import { SlashCommandBuilder } from '@discordjs/builders'
+import { ChatInputCommandInteraction, EmbedBuilder, GuildMember, Role, SlashCommandBuilder } from 'discord.js'
 import { categoryRole, servers } from '../bot'
 import { findBestMatch } from 'string-similarity'
 
@@ -28,13 +27,13 @@ module.exports = {
 				.addStringOption(option => option.setName('name').setDescription('The new name for the category').setRequired(true))	
 		)
 	,
-	async execute(interaction: CommandInteraction) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		const rolesInput = interaction.options.getString('roles')!.match(/[\w\s]+/g)?.filter(r => /\w/.test(r))
 		const category = interaction.options.getString('category') ?? 'General'
 		const newName = interaction.options.getString('name')!
 		if (!rolesInput?.length && !newName) return interaction.reply('The roles you provided were invalid.')
 
-		const clientUser = interaction.guild?.me! as GuildMember
+		const clientUser = interaction.guild?.members.me! as GuildMember
 		const server = servers.find(server => server.guildID === interaction.guildId)
 		if (!server) return interaction.reply('Unable to access settings for your server.')
 
@@ -87,16 +86,16 @@ module.exports = {
 		server.roles = JSON.stringify(serverRolesConfig)
 		await server.save()
 
-		const rolesEmbed = new MessageEmbed()
+		const rolesEmbed = new EmbedBuilder()
 			.setAuthor({
 				name: `Server role list for ${interaction.guild?.name} was${addedRoles.concat(removedRoles).length === 0 ? ' not ' : ' '}updated`,
-				iconURL: interaction.guild?.iconURL({format: 'png'}) ?? ''
+				iconURL: interaction.guild?.iconURL({extension: 'png'}) ?? ''
 			})
-			.setColor('BLUE')
+			.setColor('Blue')
 
-		if (removedRoles.length > 0) rolesEmbed.addField(`Roles removed from category '${category}':`, `${removedRoles.join(' ')}`)
-		if (addedRoles.length > 0) rolesEmbed.addField(`Roles added to category '${newName ?? category}':`, `${addedRoles.join(' ')}`)
-		if (invalidRoles.length > 0) rolesEmbed.addField('Invalid roles:', `${invalidRoles.join(' ')}`)
+		if (removedRoles.length > 0) rolesEmbed.addFields([{name: `Roles removed from category '${category}':`, value: `${removedRoles.join(' ')}`}])
+		if (addedRoles.length > 0) rolesEmbed.addFields([{name: `Roles added to category '${newName ?? category}':`, value: `${addedRoles.join(' ')}`}])
+		if (invalidRoles.length > 0) rolesEmbed.addFields([{name: 'Invalid roles:', value: `${invalidRoles.join(' ')}`}])
 
 		return interaction.reply({embeds: [rolesEmbed]})
 	}

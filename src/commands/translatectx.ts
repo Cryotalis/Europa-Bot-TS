@@ -1,5 +1,4 @@
-import { MessageContextMenuInteraction, MessageEmbed } from 'discord.js'
-import { ContextMenuCommandBuilder } from '@discordjs/builders'
+import { ContextMenuCommandBuilder, EmbedBuilder, MessageContextMenuCommandInteraction } from 'discord.js'
 import { Translate } from '@google-cloud/translate/build/src/v2'
 import { languageCodes, truncateText } from '../library'
 
@@ -8,7 +7,7 @@ module.exports = {
 		.setName('translate text')
 		.setType(3)
 	,
-	async execute(interaction: MessageContextMenuInteraction) {
+	async execute(interaction: MessageContextMenuCommandInteraction) {
 		const textInput = truncateText(interaction.targetMessage.content, 1024)
 		if (!textInput) return interaction.reply({content: 'I could not find any text to translate.', ephemeral: true})
 		await interaction.deferReply({ephemeral: true})
@@ -18,10 +17,10 @@ module.exports = {
 		const [translation] = (await gTranslate.translate(textInput, outputLanguage.code))[1].data.translations
 		const detectedSourceLanguage = languageCodes.find(lang => lang.code === translation.detectedSourceLanguage) ?? translation.detectedSourceLanguage
 		
-		const translateEmbed = new MessageEmbed()
-			.setColor('BLUE')
-			.addField(`Input (${detectedSourceLanguage!.name})`, textInput)
-			.addField(`Output (${outputLanguage.name})`, truncateText(translation.translatedText, 1024))
+		const translateEmbed = new EmbedBuilder()
+			.setColor('Blue')
+			.addFields([{name: `Input (${detectedSourceLanguage!.name})`, value: textInput}])
+			.addFields([{name: `Output (${outputLanguage.name})`, value: truncateText(translation.translatedText, 1024)}])
 			.setFooter({text: 'Google Translate', iconURL: 'https://cdn.discordapp.com/attachments/647256353844232202/1011429868447211541/Google_Translate_icon.png'})
 		
 		interaction.editReply({embeds: [translateEmbed]})

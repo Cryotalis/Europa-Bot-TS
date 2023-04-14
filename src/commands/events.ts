@@ -1,9 +1,8 @@
-import { CommandInteraction, MessageEmbed, MessageAttachment } from 'discord.js'
-import { SlashCommandBuilder } from '@discordjs/builders'
+import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import { decode } from 'html-entities'
 import { dateDiff, timeToUnix, wrapText } from '../library'
 import axios from 'axios'
-import Canvas, { Image, loadImage } from 'canvas'
+import { Image, createCanvas, loadImage } from 'canvas'
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -11,7 +10,7 @@ module.exports = {
 		.setDescription('Show current and upcoming events')
 		.addBooleanOption(option => option.setName('embed').setDescription('Use the embedded message version of this command instead?'))
 	,
-	async execute(interaction: CommandInteraction) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		await interaction.deferReply()
 		await axios.get('https://gbf.wiki/Main_Page').then(async ({data}) => {
 			function getElementAdvantage(data: string) {
@@ -81,15 +80,15 @@ module.exports = {
 			while (upcomingEvents.length > 6) upcomingEvents.pop()
 
 			if (interaction.options.getBoolean('embed')){
-				const eventEmbed = new MessageEmbed()
+				const eventEmbed = new EmbedBuilder()
 					.setTitle('Events')
 					.setDescription('**__CURRENT AND UPCOMING EVENTS__**')
 					.setURL('https://gbf.wiki/Main_Page')
-					.setColor('BLUE')
+					.setColor('Blue')
 					.setFooter({text: 'https://gbf.wiki/Main_Page', iconURL: 'https://i.imgur.com/MN6TIHj.png'})
 				
-				currentEvents.forEach(event => eventEmbed.addField(decode(event.title), `${event.duration} (<t:${Math.ceil((new Date().getTime() + timeToUnix(event.duration))/1000)}:f>)`))
-				upcomingEvents.forEach(event => eventEmbed.addField(decode(event.title) + (event.elementAdvantage ? ` (${event.elementAdvantage})` : ''), event.duration))
+				currentEvents.forEach(event => eventEmbed.addFields([{name: decode(event.title), value: `${event.duration} (<t:${Math.ceil((new Date().getTime() + timeToUnix(event.duration))/1000)}:f>)`}]))
+				upcomingEvents.forEach(event => eventEmbed.addFields([{name: decode(event.title) + (event.elementAdvantage ? ` (${event.elementAdvantage})` : ''), value: event.duration}]))
 				return interaction.editReply({embeds: [eventEmbed]})
 			}
 
@@ -117,12 +116,12 @@ module.exports = {
 				ctx.fillStyle = 'white'
 				
 				// Draw the event banner, or text if there is no banner image
-				if (event.image) ctx.drawImage(event.image, eventX, eventY, 330, 78)
+				if (event.image) ctx.drawImage(event.image as Image, eventX, eventY, 330, 78)
 				else wrapText({ctx: ctx, font: '25px Arial'}, event.title, textX, eventY + 43, 290, 30)
 
 				if (event.elementAdvantage){
 					textX += 18
-					ctx.drawImage(event.elementAdvantageImage, centerText(event.duration, textX, 20) - 35, eventY + 82)
+					ctx.drawImage(event.elementAdvantageImage as Image, centerText(event.duration, textX, 20) - 35, eventY + 82)
 				}
 				ctx.font = '20px Arial'
 				ctx.strokeText(event.duration, textX, eventY + 100)
@@ -131,7 +130,7 @@ module.exports = {
 
 			// Create the events image
 			const canvasHeight = 200 + Math.ceil(currentEvents.length / 2) * 110 + Math.ceil(upcomingEvents.length / 2) * 110
-			const canvas = Canvas.createCanvas(700, canvasHeight)
+			const canvas = createCanvas(700, canvasHeight)
 			const ctx = canvas.getContext('2d')
 
 			const [background, currentEventsText, upcomingEventsText] = await Promise.all([
@@ -172,7 +171,7 @@ module.exports = {
 				}
 			})
 
-			const attachment = new MessageAttachment(canvas.toBuffer(), `Events.png`)
+			const attachment = new AttachmentBuilder(canvas.toBuffer(), {name: `Events.png`})
 			return interaction.editReply({files: [attachment], allowedMentions: {repliedUser: false}})
 		}).catch(error => {
 			if (error) {

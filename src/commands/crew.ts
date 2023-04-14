@@ -1,5 +1,4 @@
-import { CommandInteraction, MessageActionRow, MessageAttachment, MessageButton, MessageEmbed, MessageSelectMenu } from 'discord.js'
-import { SlashCommandBuilder } from '@discordjs/builders'
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, ComponentType, EmbedBuilder, SlashCommandBuilder, StringSelectMenuBuilder } from 'discord.js'
 import { browser, languageCookie, accessCookie } from '../bot'
 import axios from 'axios'
 import { formatList } from '../library'
@@ -22,7 +21,7 @@ module.exports = {
 				.addNumberOption(option => option.setName('id').setDescription("The ID of the crew you're looking for").setRequired(true))
 		)
 	,
-	async execute(interaction: CommandInteraction) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		const crewName = interaction.options.getString('name')
 		const crewID = interaction.options.getNumber('id')?.toString()
 
@@ -49,21 +48,23 @@ module.exports = {
 			const screenshot = await page.screenshot({ encoding: 'binary', clip: { x: 0, y: 0, width: 363, height: 400 } }) //Take the screenshot
 			await page.close()
 	
-			const attachment = new MessageAttachment(screenshot, `${crew.data[0].name}.png`)
+			const attachment = new AttachmentBuilder(screenshot, {name: `${crew.data[0].name}.png`})
 
 			crewEmbed
 				.setTitle(`${crew.data[0].name}`)
 				.setURL(`http://game.granbluefantasy.jp/#guild/detail/${crew.id}`)
 				.setImage(`attachment://${crew.data[0].name}.png`)
-				.addField('Ranking', `Ranked #${crew.data[0].rank} in GW #${crew.data[0].gw_num} with ${String(crew.data[0].points).match(/\d{3}/g)?.join(',')} points`)
-				.addField('Name History', `${formatList([... new Set(crew.data.map(crew => crew.name))])}`)
+				.addFields([
+					{name: 'Ranking', value: `Ranked #${crew.data[0].rank} in GW #${crew.data[0].gw_num} with ${String(crew.data[0].points).match(/\d{3}/g)?.join(',')} points`},
+					{name: 'Name History', value: `${formatList([... new Set(crew.data.map(crew => crew.name))])}`}
+				])
 			
 			return interaction.editReply({embeds: [crewEmbed], files: [attachment]})
 		}
 
-		const crewEmbed = new MessageEmbed()
+		const crewEmbed = new EmbedBuilder()
 			.setTitle(`Searching for ${crewName ?? crewID} <a:loading:763160594974244874>`)
-			.setColor('BLUE')
+			.setColor('Blue')
 			.setAuthor({name: 'Crew Finder', iconURL: 'https://upload.wikimedia.org/wikipedia/en/e/e5/Granblue_Fantasy_logo.png'})
 			.setFooter({text: 'http://gbf.gw.lt/gw-guild-searcher/', iconURL: 'http://game.granbluefantasy.jp/favicon.ico'})
 		
@@ -97,10 +98,10 @@ module.exports = {
 		crews = crews.sort((a, b) => a.data[0].rank - b.data[0].rank)
 		crews = crews.sort((a, b) => compareTwoStrings(b.data[0].name, crewName!) - compareTwoStrings(a.data[0].name, crewName!))
 
-		const crewsEmbed = new MessageEmbed()
+		const crewsEmbed = new EmbedBuilder()
 			.setTitle(`Found ${crews.length} results for "${crewName}"`)
 			.setDescription('Select a crew using the menu below.\nRank here refers to the rank of the crew for the latest Guild War.')
-			.setColor('BLUE')
+			.setColor('Blue')
 
 		let pageNum = 0
 		const numbers = [ '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟' ]
@@ -108,42 +109,42 @@ module.exports = {
 		
 		function setPage(page: number){
 			const index = page*10
-			crewsEmbed.fields = []
-			if (crews.length > index) crewsEmbed.addField('\u200b', formattedCrews.slice(index, index + 5).join('\n\n'), true)
-			if (crews.length > index + 5) crewsEmbed.addField('\u200b', formattedCrews.slice(index + 5, index + 10).join('\n\n'), true)
+			crewsEmbed.setFields([])
+			if (crews.length > index) crewsEmbed.addFields({name: '\u200b', value: formattedCrews.slice(index, index + 5).join('\n\n'), inline: true})
+			if (crews.length > index + 5) crewsEmbed.addFields({name: '\u200b', value: formattedCrews.slice(index + 5, index + 10).join('\n\n'), inline: true})
 
-			const navButtons = new MessageActionRow()
+			const navButtons = new ActionRowBuilder<ButtonBuilder>()
 				.addComponents(
-					new MessageButton()
+					new ButtonBuilder()
 						.setCustomId('leftButton')
 						.setLabel('🡰')
-						.setStyle('PRIMARY')
+						.setStyle(ButtonStyle.Primary)
 						.setDisabled(Boolean(page === 0))
 				)
 				.addComponents(
-					new MessageButton()
+					new ButtonBuilder()
 						.setCustomId('pageButton')
 						.setLabel(`ㅤㅤㅤㅤPage ${pageNum + 1}ㅤㅤㅤㅤ`)
-						.setStyle('SECONDARY')
+						.setStyle(ButtonStyle.Secondary)
 						.setDisabled(true)
 				)
 				.addComponents(
-					new MessageButton()
+					new ButtonBuilder()
 						.setCustomId('rightButton')
 						.setLabel('🡲')
-						.setStyle('PRIMARY')
+						.setStyle(ButtonStyle.Primary)
 						.setDisabled(Boolean(crews.length <= index + 10))
 				)
 				.addComponents(
-					new MessageButton()
+					new ButtonBuilder()
 						.setCustomId('cancelButton')
 						.setLabel('✖')
-						.setStyle('DANGER')
+						.setStyle(ButtonStyle.Danger)
 				)
 
-			const playerMenu = new MessageActionRow()
+			const playerMenu = new ActionRowBuilder<StringSelectMenuBuilder>()
 				.addComponents(
-					new MessageSelectMenu()
+					new StringSelectMenuBuilder()
 						.setCustomId('Crew Selector')
 						.setPlaceholder('Select a Crew')
 						.addOptions(formattedCrews.slice(index, index + 10).map((crew: string) => ({label: crew, value: crew})))
@@ -152,14 +153,14 @@ module.exports = {
 		}
 		setPage(0)
 
-		const crewCollector = interaction.channel?.createMessageComponentCollector({componentType: 'SELECT_MENU', filter: msg => msg.member?.user.id === interaction.member?.user.id, time: 60000*5, max: 1})
+		const crewCollector = interaction.channel?.createMessageComponentCollector({componentType: ComponentType.StringSelect, filter: msg => msg.member?.user.id === interaction.member?.user.id, time: 60000*5, max: 1})
 			crewCollector?.on('collect', i => {
 				buttonCollector?.stop()
 				crewCollector.stop()
 				loadCrew(crews.find(crew => String(crew.id) === i.values[0].match(/(?<=\()\d+/)![0])!)
 			})
 			
-		const buttonCollector = interaction.channel?.createMessageComponentCollector({componentType: 'BUTTON', filter: msg => msg.member?.user.id === msg.member?.user.id, time: 60000*5})
+		const buttonCollector = interaction.channel?.createMessageComponentCollector({componentType: ComponentType.Button, filter: msg => msg.member?.user.id === msg.member?.user.id, time: 60000*5})
 		buttonCollector?.on('collect', i => {
 			i.deferUpdate()
 			if (i.customId === 'leftButton') {pageNum--; setPage(pageNum)}

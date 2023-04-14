@@ -1,5 +1,4 @@
-import { CommandInteraction } from 'discord.js'
-import { SlashCommandBuilder } from '@discordjs/builders'
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { connectToDB, registerCommands } from '../bot'
 
 module.exports = {
@@ -7,7 +6,7 @@ module.exports = {
 		.setName('connect')
 		.setDescription("Refresh Europa's connection to the database (reserved for Cryo)")
 	,
-	async execute(interaction: CommandInteraction) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		if (interaction.user.id !== '251458435554607114') {
 			return interaction.reply('This command is reserved for Cryo.')
 		}
