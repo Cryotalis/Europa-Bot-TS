@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { dateStringToUnix, rarityEmotes, weaponEmotes } from '../library'
 import { bannerDuration, featuredItemIDs, items1 } from '../bot'
+import { dateStringToUnix } from '../modules/time-functions'
+import { weaponEmotes, rarityEmotes } from '../modules/variables'
 
 module.exports = {
 	data: new SlashCommandBuilder()

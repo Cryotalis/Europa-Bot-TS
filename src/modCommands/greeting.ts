@@ -1,8 +1,9 @@
 import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, GuildMember, SlashCommandBuilder } from 'discord.js'
 import { greetingConfig, servers } from '../bot'
 import { findBestMatch } from 'string-similarity'
-import { capitalize, getDirectImgurLinks } from '../library'
 import { createCanvas, loadImage } from 'canvas'
+import { getDirectImgurLinks } from '../modules/image-functions'
+import { titleize } from '../modules/string-functions'
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -101,11 +102,11 @@ module.exports = {
 			type toggleableGreetingSetting = 'sendJoinMessage' | 'sendLeaveMessage' | 'sendBanMessage' | 'showJoinImage' | 'useAutoRole';
 			greetingSettings[setting as toggleableGreetingSetting] = !greetingSettings[setting as toggleableGreetingSetting]
 			if (/Image|Role/.test(setting)) interaction.reply(`${/Image/.test(setting) ? 'Join Image' : 'Auto Role'} has been ${greetingSettings[setting as toggleableGreetingSetting] ? 'enabled' : 'disabled'}.`)
-			else interaction.reply(`${capitalize(String(setting.match(/(?<=send).+(?=Message)/)))} Message has been ${greetingSettings[setting as toggleableGreetingSetting] ? 'enabled' : 'disabled'}.`)
+			else interaction.reply(`${titleize(String(setting.match(/(?<=send).+(?=Message)/)))} Message has been ${greetingSettings[setting as toggleableGreetingSetting] ? 'enabled' : 'disabled'}.`)
 		} else if (/message/.test(command)){
 			const msgType = String(command.match(/.+(?=-)/)) + 'Message'
 			greetingSettings[msgType as 'joinMessage' | 'leaveMessage' | 'banMessage'] = message
-			interaction.reply(`${capitalize(String(msgType.match(/.+(?=Message)/)))} Message set.`)
+			interaction.reply(`${titleize(String(msgType.match(/.+(?=Message)/)))} Message set.`)
 		} else if (command === 'channel'){
 			greetingSettings.channelID = channel.id
 			interaction.reply(`Greeting channel set to <#${channel.id}>`)

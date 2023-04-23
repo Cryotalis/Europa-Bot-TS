@@ -1,7 +1,8 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import { findBestMatch } from 'string-similarity'
 import { Translate } from '@google-cloud/translate/build/src/v2'
-import { languageCodes, truncateText } from '../library'
+import { truncateText } from '../modules/string-functions'
+import { languageCodes } from '../modules/variables'
 
 module.exports = {
 	data: new SlashCommandBuilder()

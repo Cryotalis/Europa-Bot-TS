@@ -2,7 +2,9 @@ import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, GuildMemb
 import { privateDB, sparkProfiles, info } from '../bot'
 import { GoogleSpreadsheetRow } from 'google-spreadsheet'
 import { Image, createCanvas, loadImage } from 'canvas'
-import { formatList, getDirectImgurLinks } from '../library'
+import { getDirectImgurLinks } from '../modules/image-functions'
+import { formatList } from '../modules/string-functions'
+import { isNumber } from '../modules/number-functions'
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -220,7 +222,6 @@ module.exports = {
 			return Math.floor((parseInt(user.crystals)+parseInt(user.tickets)*300+parseInt(user.tenParts)*3000)/300)
 		}
 
-		const isNumber = (value: number | null) => typeof value === 'number'
 		function manageSpark(user: GoogleSpreadsheetRow, operation: string, crystals: number | null, tickets: number | null, tenparts: number | null){
 			const resourceArr = []
 			if (isNumber(crystals)) resourceArr.push('Crystals')

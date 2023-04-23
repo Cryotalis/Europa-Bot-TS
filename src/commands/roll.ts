@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import { data, item, items1, items2, sparkProfiles } from '../bot'
-import { findBestCIMatch, rarityEmotes, weaponEmotes } from '../library'
+import { findBestCIMatch } from '../modules/string-functions'
+import { weaponEmotes, rarityEmotes } from '../modules/variables'
 
 module.exports = {
 	data: new SlashCommandBuilder()

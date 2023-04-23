@@ -1,8 +1,9 @@
 import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import { decode } from 'html-entities'
-import { dateDiff, timeToUnix, wrapText } from '../library'
-import axios from 'axios'
 import { Image, createCanvas, loadImage } from 'canvas'
+import { wrapText } from '../modules/image-functions'
+import { dateDiff, timeToUnix } from '../modules/time-functions'
+import axios from 'axios'
 
 module.exports = {
 	data: new SlashCommandBuilder()

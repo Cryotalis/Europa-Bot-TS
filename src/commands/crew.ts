@@ -1,8 +1,9 @@
-import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, ComponentType, EmbedBuilder, SlashCommandBuilder, StringSelectMenuBuilder } from 'discord.js'
+import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import { browser, languageCookie, accessCookie } from '../bot'
-import axios from 'axios'
-import { formatList } from '../library'
+import { formatList } from '../modules/string-functions'
 import { compareTwoStrings } from 'string-similarity'
+import { showMenu } from '../modules/menu'
+import axios from 'axios'
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -97,78 +98,11 @@ module.exports = {
 
 		crews = crews.sort((a, b) => a.data[0].rank - b.data[0].rank)
 		crews = crews.sort((a, b) => compareTwoStrings(b.data[0].name, crewName!) - compareTwoStrings(a.data[0].name, crewName!))
+		const formattedCrews = crews.map(crew => `${crew.data[0].name} Rank ${crew.data[0].rank} (${crew.id})`)
 
-		const crewsEmbed = new EmbedBuilder()
-			.setTitle(`Found ${crews.length} results for "${crewName}"`)
-			.setDescription('Select a crew using the menu below.\nRank here refers to the rank of the crew for the latest Guild War.')
-			.setColor('Blue')
+		const userChoice = await showMenu(interaction, crewName!, formattedCrews)
+		if (!userChoice) return
 
-		let pageNum = 0
-		const numbers = [ '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟' ]
-		const formattedCrews = crews.map(crew => `${numbers[crews.indexOf(crew)%10]} ${crew.data[0].name} Rank ${crew.data[0].rank} (${crew.id})`)
-		
-		function setPage(page: number){
-			const index = page*10
-			crewsEmbed.setFields([])
-			if (crews.length > index) crewsEmbed.addFields({name: '\u200b', value: formattedCrews.slice(index, index + 5).join('\n\n'), inline: true})
-			if (crews.length > index + 5) crewsEmbed.addFields({name: '\u200b', value: formattedCrews.slice(index + 5, index + 10).join('\n\n'), inline: true})
-
-			const navButtons = new ActionRowBuilder<ButtonBuilder>()
-				.addComponents(
-					new ButtonBuilder()
-						.setCustomId('leftButton')
-						.setLabel('🡰')
-						.setStyle(ButtonStyle.Primary)
-						.setDisabled(Boolean(page === 0))
-				)
-				.addComponents(
-					new ButtonBuilder()
-						.setCustomId('pageButton')
-						.setLabel(`ㅤㅤㅤㅤPage ${pageNum + 1}ㅤㅤㅤㅤ`)
-						.setStyle(ButtonStyle.Secondary)
-						.setDisabled(true)
-				)
-				.addComponents(
-					new ButtonBuilder()
-						.setCustomId('rightButton')
-						.setLabel('🡲')
-						.setStyle(ButtonStyle.Primary)
-						.setDisabled(Boolean(crews.length <= index + 10))
-				)
-				.addComponents(
-					new ButtonBuilder()
-						.setCustomId('cancelButton')
-						.setLabel('✖')
-						.setStyle(ButtonStyle.Danger)
-				)
-
-			const playerMenu = new ActionRowBuilder<StringSelectMenuBuilder>()
-				.addComponents(
-					new StringSelectMenuBuilder()
-						.setCustomId('Crew Selector')
-						.setPlaceholder('Select a Crew')
-						.addOptions(formattedCrews.slice(index, index + 10).map((crew: string) => ({label: crew, value: crew})))
-				)
-			interaction.editReply({embeds: [crewsEmbed], components: [playerMenu, navButtons]})
-		}
-		setPage(0)
-
-		const crewCollector = interaction.channel?.createMessageComponentCollector({componentType: ComponentType.StringSelect, filter: msg => msg.member?.user.id === interaction.member?.user.id, time: 60000*5, max: 1})
-			crewCollector?.on('collect', i => {
-				buttonCollector?.stop()
-				crewCollector.stop()
-				loadCrew(crews.find(crew => String(crew.id) === i.values[0].match(/(?<=\()\d+/)![0])!)
-			})
-			
-		const buttonCollector = interaction.channel?.createMessageComponentCollector({componentType: ComponentType.Button, filter: msg => msg.member?.user.id === msg.member?.user.id, time: 60000*5})
-		buttonCollector?.on('collect', i => {
-			i.deferUpdate()
-			if (i.customId === 'leftButton') {pageNum--; setPage(pageNum)}
-			else if (i.customId === 'rightButton') {pageNum++; setPage(pageNum)}
-			else if (i.customId === 'cancelButton') {
-				buttonCollector.stop() 
-				interaction.editReply({content: 'Crew Search cancelled.', embeds: [], components: []})
-			}
-		})
+		loadCrew(crews.find(crew => String(crew.id) === userChoice.match(/(?<=\()\d+/)![0])!)
 	}
 }
