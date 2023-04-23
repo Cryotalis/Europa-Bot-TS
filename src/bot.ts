@@ -1,6 +1,5 @@
-import { AttachmentBuilder, ChannelType, Client, Collection, GatewayIntentBits, Guild, GuildMember, REST, ShardClientUtil, TextChannel } from 'discord.js'
+import { AttachmentBuilder, ChannelType, Client, Collection, GatewayIntentBits, Guild, GuildMember, REST, Routes, ShardClientUtil, TextChannel } from 'discord.js'
 import { GoogleSpreadsheet, GoogleSpreadsheetRow } from 'google-spreadsheet'
-import { Routes } from 'discord-api-types/v9'
 import { schedule } from 'node-cron'
 import { inspect } from 'util'
 import fs from 'node:fs'

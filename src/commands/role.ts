@@ -1,5 +1,4 @@
 import { ChatInputCommandInteraction, EmbedBuilder, GuildMember, Role, SlashCommandBuilder } from 'discord.js'
-
 import { categoryRole, servers } from '../bot'
 import { findBestMatch } from 'string-similarity'
 
