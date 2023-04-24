@@ -40,7 +40,6 @@ module.exports = {
 			if (/maintenance/g.test(bodyHTML)) {await interaction.editReply({content: 'The game is currently undergoing maintenance. Please try again when maintenance is over.', embeds: []}); return await page.close()}
 	
 			await page.waitForSelector('#wrapper > div.contents > div.cnt-guild > div.prt-airship-image > img', {visible: true})
-			await page.waitForTimeout(2000) // Wait 2 seconds for page to load
 			await page.evaluate((crewID) => {
 				document.getElementsByClassName('prt-head-current')[0].setAttribute('style', 'font-size: 14pxpadding-top: 4px')
 				document.getElementsByClassName('prt-head-current')[0].textContent += ` ID: ${crewID}`
@@ -49,12 +48,12 @@ module.exports = {
 			const screenshot = await page.screenshot({ encoding: 'binary', clip: { x: 0, y: 0, width: 363, height: 400 } }) //Take the screenshot
 			await page.close()
 	
-			const attachment = new AttachmentBuilder(screenshot, {name: `${crew.data[0].name}.png`})
+			const attachment = new AttachmentBuilder(screenshot, {name: `${crew.data[0].name.replace(/\s/g, '_')}.png`})
 
 			crewEmbed
 				.setTitle(`${crew.data[0].name}`)
 				.setURL(`http://game.granbluefantasy.jp/#guild/detail/${crew.id}`)
-				.setImage(`attachment://${crew.data[0].name}.png`)
+				.setImage(`attachment://${attachment.name}`)
 				.addFields([
 					{name: 'Ranking', value: `Ranked #${crew.data[0].rank} in GW #${crew.data[0].gw_num} with ${String(crew.data[0].points).match(/\d{3}/g)?.join(',')} points`},
 					{name: 'Name History', value: `${formatList([... new Set(crew.data.map(crew => crew.name))])}`}
