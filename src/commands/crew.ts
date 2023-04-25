@@ -1,8 +1,9 @@
 import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { browser, languageCookie, accessCookie } from '../bot'
+import { browser } from '../bot'
 import { formatList } from '../modules/string-functions'
 import { compareTwoStrings } from 'string-similarity'
 import { showMenu } from '../modules/menu'
+import { languageCookie, accessCookie } from '../modules/variables'
 import axios from 'axios'
 
 module.exports = {

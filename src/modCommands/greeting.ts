@@ -1,9 +1,9 @@
-import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, GuildMember, SlashCommandBuilder } from 'discord.js'
-import { greetingConfig, servers } from '../bot'
+import { ChatInputCommandInteraction, EmbedBuilder, GuildMember, SlashCommandBuilder } from 'discord.js'
+import { servers } from '../bot'
 import { findBestMatch } from 'string-similarity'
-import { createCanvas, loadImage } from 'canvas'
 import { getDirectImgurLinks } from '../modules/image-functions'
 import { titleize } from '../modules/string-functions'
+import { greetingConfig, makeGreetingImage, toggleableGreetingSetting } from '../modules/greeting'
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -76,7 +76,7 @@ module.exports = {
 		const generalChannel = channels[findBestMatch('general', channels?.map(channel => channel.name)).bestMatchIndex].id
 
 		const command = interaction.options.getSubcommand()
-		const setting = interaction.options.getString('setting')!
+		const setting = interaction.options.getString('setting')! as toggleableGreetingSetting
 		const message = interaction.options.getString('message')!
 		const channel = interaction.options.getChannel('channel')!
 		const backgroundURL = interaction.options.getString('link')!
@@ -99,10 +99,9 @@ module.exports = {
 			} 
 		
 		if (command === 'toggle'){
-			type toggleableGreetingSetting = 'sendJoinMessage' | 'sendLeaveMessage' | 'sendBanMessage' | 'showJoinImage' | 'useAutoRole';
-			greetingSettings[setting as toggleableGreetingSetting] = !greetingSettings[setting as toggleableGreetingSetting]
-			if (/Image|Role/.test(setting)) interaction.reply(`${/Image/.test(setting) ? 'Join Image' : 'Auto Role'} has been ${greetingSettings[setting as toggleableGreetingSetting] ? 'enabled' : 'disabled'}.`)
-			else interaction.reply(`${titleize(String(setting.match(/(?<=send).+(?=Message)/)))} Message has been ${greetingSettings[setting as toggleableGreetingSetting] ? 'enabled' : 'disabled'}.`)
+			greetingSettings[setting] = !greetingSettings[setting as toggleableGreetingSetting]
+			if (/Image|Role/.test(setting)) interaction.reply(`${/Image/.test(setting) ? 'Join Image' : 'Auto Role'} has been ${greetingSettings[setting] ? 'enabled' : 'disabled'}.`)
+			else interaction.reply(`${titleize(String(setting.match(/(?<=send).+(?=Message)/)))} Message has been ${greetingSettings[setting] ? 'enabled' : 'disabled'}.`)
 		} else if (/message/.test(command)){
 			const msgType = String(command.match(/.+(?=-)/)) + 'Message'
 			greetingSettings[msgType as 'joinMessage' | 'leaveMessage' | 'banMessage'] = message
@@ -143,13 +142,10 @@ module.exports = {
 			if (invalidRoles.length > 0) rolesEmbed.addFields([{name: 'Invalid roles:', value: `${invalidRoles.join(' ')}`}])
 
 			interaction.reply({embeds: [rolesEmbed]})
-		} else if (command === 'settings'){
-			const canvas = createCanvas(700, 250)
-			const ctx = canvas.getContext('2d')
-	
-			let joinMsg = greetingSettings.joinMessage,
-				leaveMsg = greetingSettings.leaveMessage,
-				banMsg = greetingSettings.banMessage
+		} else if (command === 'settings'){	
+			let joinMsg = greetingSettings.joinMessage
+			let	leaveMsg = greetingSettings.leaveMessage
+			let	banMsg = greetingSettings.banMessage
 			
 			joinMsg = joinMsg.replace('[member]', String(interaction.user))
 			leaveMsg = leaveMsg.replace('[member]', interaction.user.username)
@@ -159,37 +155,6 @@ module.exports = {
 			if (leaveMsg.length > 1000) {leaveMsg = leaveMsg.substring(0, 1000) + '...' }
 			if (banMsg.length > 1000) {banMsg = banMsg.substring(0, 1000) + '...' }
 			
-			const [background, textBox, userAvatar] = await Promise.all([
-				greetingSettings.background ? loadImage(greetingSettings.background) : loadImage('https://cdn.discordapp.com/attachments/659229575821131787/847525054833360896/GBFBackground.jpg'),
-				loadImage('https://i.imgur.com/5pMqWKz.png'),
-				loadImage(interaction.user.displayAvatarURL({extension: 'png', size: 4096, forceStatic: true}))
-			])
-
-			ctx.drawImage(background, 0, 0, canvas.width, canvas.height)
-			ctx.drawImage(textBox, 250, 40, 420, 170)
-	
-			let fontSize = 40
-			function applyText(text: string){
-				do {
-					ctx.font = `${fontSize -= 1}px Times`
-				} while (ctx.measureText(text).width > 200)
-				return ctx.font
-			}
-	
-			ctx.font = `28px Times`
-			ctx.fillStyle = '#000000'
-			ctx.fillText('Welcome to the server,', canvas.width / 2.5, canvas.height / 2.8)
-			ctx.font = applyText(interaction.user.username + '!')
-			ctx.fillText(`${interaction.user.username}!`, canvas.width / 2.5, 160 - (40 - fontSize * 0.5))
-	
-			ctx.beginPath()
-			ctx.arc(125, 125, 100, 0, Math.PI * 2, true)
-			ctx.closePath()
-			ctx.clip()
-			
-			ctx.drawImage(userAvatar, 25, 25, 200, 200)
-	
-			const greetingAttachment = new AttachmentBuilder(canvas.toBuffer(), {name: 'welcome.png'})
 			const greetingEmbed = new EmbedBuilder()
 				.setTitle('Server Greeting Settings')
 				.setColor('Blue')
@@ -209,7 +174,7 @@ module.exports = {
 				])
 				.setImage('attachment://welcome.png')
 			if (!greetingSettings.channelID) greetingEmbed.setDescription('No channel has been set to display greeting messages.')
-			return interaction.reply({embeds: [greetingEmbed], files: [greetingAttachment]})
+			return interaction.reply({embeds: [greetingEmbed], files: [await makeGreetingImage(greetingSettings, interaction.user)]})
 		}
 
 		server.greeting = JSON.stringify(greetingSettings)

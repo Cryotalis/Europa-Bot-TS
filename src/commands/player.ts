@@ -1,11 +1,12 @@
 import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { data, browser, languageCookie, accessCookie, jsessionID } from '../bot'
+import { data, browser, jsessionID } from '../bot'
 import { compareTwoStrings } from 'string-similarity'
-import { Image, createCanvas, loadImage } from 'canvas'
+import { createCanvas, loadImage } from 'canvas'
 import { wrapText } from '../modules/image-functions'
 import { showMenu } from '../modules/menu'
 import { drawStars, getAllSummonInfo } from '../modules/granblue-functions'
 import { openSummon, playerTemplate } from '../modules/assets'
+import { accessCookie, languageCookie } from '../modules/variables'
 import axios from 'axios'
 
 module.exports = {
@@ -35,7 +36,7 @@ module.exports = {
 
 		const playerEmbed = new EmbedBuilder()
 			.setColor('Blue')
-			.setAuthor({name: 'Player Finder', iconURL: 'https://upload.wikimedia.org/wikipedia/en/e/e5/Granblue_Fantasy_logo.png'})
+			.setAuthor({name: 'Player Search', iconURL: 'https://upload.wikimedia.org/wikipedia/en/e/e5/Granblue_Fantasy_logo.png'})
 
 		async function loadProfile(playerID: string) {
 			playerEmbed.setTitle('Fetching Player Profile <a:loading:763160594974244874>')
@@ -52,9 +53,17 @@ module.exports = {
 				await page.close()
 			})
 			if (page.isClosed()) return
-			
-			// Reformat the page for the screenshot
+
 			const bodyHTML = await page.evaluate(() => new XMLSerializer().serializeToString(document.doctype!) + document.documentElement.outerHTML)
+			
+			// Check whether the player's profile is private
+			if (/(?<=<div\sclass="txt-secret-profile">).+(?=<\/div>)/.test(bodyHTML)) {interaction.editReply('Player profile is private.'); return await page.close()}
+
+			// Get the player's name
+			const name = bodyHTML.match(/(?<=<span\sclass="txt-other-name">).+(?=<\/span>)/)?.toString()
+			if (!name) {interaction.editReply({content: 'Could not get player profile. Please try again later.', embeds: []}); return await page.close()}
+
+			// Reformat the page for the screenshot
 			await page.evaluate(playerID => {
 				document.getElementById('pop-force')?.remove()
 				document.getElementsByClassName('prt-status')[0].innerHTML += `<div class="prt-user-id" style="left:160px; padding-top:10px">Player ID: ${playerID}</div>`
@@ -63,13 +72,6 @@ module.exports = {
 				document.body.style.background = 'transparent'
 				document.getElementById('wrapper')?.removeAttribute('class')
 			}, playerID)
-			
-			// Check whether player profile is private
-			if (/(?<=<div\sclass="txt-secret-profile">).+(?=<\/div>)/.test(bodyHTML)) {interaction.editReply('Player profile is private.'); return await page.close()}
-	
-			// Extract player name
-			const name = bodyHTML.match(/(?<=<span\sclass="txt-other-name">).+(?=<\/span>)/)
-			if (!name) {interaction.editReply({content: 'Could not get player profile. Please try again later.', embeds: []}); return await page.close()}
 			
 			// Take a screenshot of the page and close the page
 			const screenshot = await page.screenshot({clip: { x: 0, y: 52, width: 362, height: 520 }, encoding: 'binary', omitBackground: true})
@@ -103,13 +105,13 @@ module.exports = {
 				drawStars(ctx, 13, summon.level, summon.uncaps, summon.maxUncaps, starXCoords[i], starYCoords[i])
 			})
 
-			// Fetch Star Character information and draw
+			// Fetch Star Character info and draw
 			const starCharPrivate = /Star\sCharacter<\/div>\n.+Private/.test(bodyHTML)
 			const starCharURL = String(bodyHTML.match(/(?<=img-pushed-npc"\ssrc=").+?(?=")/))
 			let starCharName = String(bodyHTML.match(/(?<=prt-current-npc-name">)\s+?.+?\s+?(?=<)/)).trim()
 			let emLvl = String(bodyHTML.match(/(?<=txt-npc-rank">)\d+(?=<)/))
 			let starCharText = String(bodyHTML.match(/(?<=prt-pushed-info">).+?(?=<)/))
-			let starCharImage: Image | undefined
+			let starCharImage
 			if (starCharURL.includes('empty.jpg')){starCharImage = openSummon; starCharName = 'Not Set'; emLvl = 'N/A'}
 			else if (starCharPrivate){starCharName = 'Private'; emLvl = 'N/A'; starCharText = 'Private' }
 			else starCharImage = await loadImage(starCharURL)
@@ -132,15 +134,15 @@ module.exports = {
 	
 			wrapText({ctx: ctx, font: '18px Times Bold', textAlign: 'left'}, `${starCharText}`, 525, 435, 240, 15)
 
-			const attachment = new AttachmentBuilder(canvas.toBuffer(), {name: `${String(String(name).replace(/\s/g, '_').match(/\w+/))}Profile.png`})
+			const attachment = new AttachmentBuilder(canvas.toBuffer(), {name: `${name.replace(/\s/g, '_')}_Profile.png`})
 	
 			playerEmbed
 				.setTitle(`${name}`)
 				.setURL(`http://game.granbluefantasy.jp/#profile/${playerID}`)
-				.setImage(`attachment://${String(String(name).replace(/\s/g, '_').match(/\w+/))}Profile.png`)
+				.setImage(`attachment://${attachment.name}`)
 				.setFooter({text: `http://game.granbluefantasy.jp/#profile/${playerID}`, iconURL: 'http://game.granbluefantasy.jp/favicon.ico'})
 	
-			return interaction.editReply({embeds: [playerEmbed], files: [attachment]})
+			interaction.editReply({embeds: [playerEmbed], files: [attachment]})
 		}
 
 		async function loadSummons(playerID: string, bodyHTML: string){
@@ -198,7 +200,7 @@ module.exports = {
 			const searchEmbed = new EmbedBuilder()
 				.setTitle(`Searching for "${playerName}" <a:loading:763160594974244874>`)
 				.setColor('Blue')
-				.setAuthor({name: 'Player Finder', iconURL: 'https://upload.wikimedia.org/wikipedia/en/e/e5/Granblue_Fantasy_logo.png'})
+				.setAuthor({name: 'Player Search', iconURL: 'https://upload.wikimedia.org/wikipedia/en/e/e5/Granblue_Fantasy_logo.png'})
 				.setFooter({text: 'http://info.gbfteamraid.fun/web/about', iconURL: 'http://info.gbfteamraid.fun/view/image/icon.png'})
 				// .setFooter({text: 'https://gbfdata.com/', iconURL: 'https://gbfdata.com/favicon.ico'})
 

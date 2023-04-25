@@ -1,4 +1,4 @@
-import { AttachmentBuilder, ChannelType, Client, Collection, GatewayIntentBits, Guild, GuildMember, REST, Routes, ShardClientUtil, TextChannel } from 'discord.js'
+import { ChannelType, Client, Collection, GatewayIntentBits, Guild, GuildMember, REST, Routes, ShardClientUtil, TextChannel } from 'discord.js'
 import { GoogleSpreadsheet, GoogleSpreadsheetRow } from 'google-spreadsheet'
 import { schedule } from 'node-cron'
 import { inspect } from 'util'
@@ -6,16 +6,14 @@ import fs from 'node:fs'
 import os from 'os'
 import { Browser, launch } from 'puppeteer'
 import axios from 'axios'
-import { createCanvas, loadImage } from 'canvas'
+import { accessCookie, languageCookie } from './modules/variables'
+import { greetingConfig, makeGreetingImage } from './modules/greeting'
 
 export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration]})
 export const cryoServerShardID = ShardClientUtil.shardIdForGuildId('379501550097399810', client.shard?.count!)
 const currentShardID = client.shard?.ids[0]
 // let isHost = os.hostname() !== 'PC-Hywell'
 let isHost = true
-
-export const languageCookie = { name: 'ln', value: '2', domain: 'game.granbluefantasy.jp' }
-export const accessCookie = {name: 'wing', value: process.env.GBF_WING!, domain: 'game.granbluefantasy.jp'}
 
 const privateCommandFiles = ['connect.js', 'say.js', 'respawn.js', 'log.js']
 const gameCommandNames = ['spark', 'crew', 'events', 'player', 'roll', 'banner']
@@ -198,20 +196,6 @@ client.on('guildCreate', async guild => {
 })
 
 // Greeting System
-export interface greetingConfig {
-	joinMessage: string,
-	leaveMessage: string,
-	banMessage: string,
-	channelID: string,
-	background: string | null,
-	autoRoles: string[],
-	sendJoinMessage: boolean,
-	sendLeaveMessage: boolean,
-	sendBanMessage: boolean,
-	showJoinImage: boolean,
-	useAutoRole: boolean
-}
-
 client.on('guildMemberAdd', async member => {
 	const server = servers.find(server => server.guildID === member.guild.id)
 	if (!server || !server.greeting) return
@@ -235,41 +219,7 @@ client.on('guildMemberAdd', async member => {
 		return
 	}
 
-	const canvas = createCanvas(700, 250)
-	const ctx = canvas.getContext('2d')
-	
-	const [background, textBox, userAvatar] = await Promise.all([
-		greetingSettings.background ? loadImage(greetingSettings.background) : loadImage('https://cdn.discordapp.com/attachments/659229575821131787/847525054833360896/GBFBackground.jpg'),
-		loadImage('https://i.imgur.com/5pMqWKz.png'),
-		loadImage(member.displayAvatarURL({extension: 'png', size: 4096, forceStatic: true}))
-	])
-
-	ctx.drawImage(background, 0, 0, canvas.width, canvas.height)
-	ctx.drawImage(textBox, 250, 40, 420, 170)
-
-	let fontSize = 40
-	function applyText(text: string){
-		do {
-			ctx.font = `${fontSize -= 1}px Times`
-		} while (ctx.measureText(text).width > 200)
-		return ctx.font
-	}
-
-	ctx.font = `28px Times`
-	ctx.fillStyle = '#000000'
-	ctx.fillText('Welcome to the server,', canvas.width / 2.5, canvas.height / 2.8)
-	ctx.font = applyText(member.user.username + '!')
-	ctx.fillText(`${member.user.username}!`, canvas.width / 2.5, 160 - (40 - fontSize * 0.5))
-
-	ctx.beginPath()
-	ctx.arc(125, 125, 100, 0, Math.PI * 2, true)
-	ctx.closePath()
-	ctx.clip()
-	
-	ctx.drawImage(userAvatar, 25, 25, 200, 200)
-
-	const greetingAttachment = new AttachmentBuilder(canvas.toBuffer(), {name: 'welcome.png'})
-	greetingChannel.send({content: greetingSettings.joinMessage.replace('[member]', String(member)), files: [greetingAttachment]})
+	greetingChannel.send({content: greetingSettings.joinMessage.replace('[member]', String(member)), files: [await makeGreetingImage(greetingSettings, member.user)]})
 })
 
 client.on('guildMemberRemove', async member => {
