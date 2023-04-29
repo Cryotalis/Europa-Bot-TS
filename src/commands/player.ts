@@ -134,7 +134,7 @@ module.exports = {
 	
 			wrapText({ctx: ctx, font: '18px Times Bold', textAlign: 'left'}, `${starCharText}`, 525, 435, 240, 15)
 
-			const attachment = new AttachmentBuilder(canvas.toBuffer(), {name: `${name.replace(/\s/g, '_')}_Profile.png`})
+			const attachment = new AttachmentBuilder(canvas.toBuffer(), {name: `Player_${playerID}.png`})
 	
 			playerEmbed
 				.setTitle(`${name}`)

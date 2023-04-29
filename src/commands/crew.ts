@@ -49,7 +49,7 @@ module.exports = {
 			const screenshot = await page.screenshot({ encoding: 'binary', clip: { x: 0, y: 0, width: 363, height: 400 } }) //Take the screenshot
 			await page.close()
 	
-			const attachment = new AttachmentBuilder(screenshot, {name: `${crew.data[0].name.replace(/\s/g, '_')}.png`})
+			const attachment = new AttachmentBuilder(screenshot, {name: `Crew_${crew.id}.png`})
 
 			crewEmbed
 				.setTitle(`${crew.data[0].name}`)
