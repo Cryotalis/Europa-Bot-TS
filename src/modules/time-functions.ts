@@ -1,6 +1,21 @@
+import { getOrdinal } from './number-functions'
 import { timeZoneOffsets } from './variables'
 
 const TZdefault = timeZoneOffsets.find(TZ => TZ.name === 'EST')! // The default timezone to use for time functions
+const fullDates: {[key: string]: string} = {
+    'Jan': 'January',
+    'Feb': 'February',
+    'Mar': 'March',
+    'Apr': 'April',
+    'May': 'May',
+    'Jun': 'June',
+    'Jul': 'July',
+    'Aug': 'August',
+    'Sep': 'September',
+    'Oct': 'October',
+    'Nov': 'November',
+    'Dec': 'December'
+}
 
 /**
  * Converts UTC offset in format ±hours:minutes to minutes
@@ -140,4 +155,13 @@ export function dateToString(date: Date, timeZone: string = 'UTC', showTZ: boole
     if (hours === 0) {dateString = dateString.replace(`${hours}:`, `${hours + 12}:`)} //Coerce the output to 12 hour format
     if (!showTZ) {timeZone = ''}
     return `${dateString} ${ampm} ${timeZone.toUpperCase()}`.trim()
+}
+
+/**
+ * Takes a Date object and returns the simple date (e.g. January 1st, February 2nd, etc)
+ */
+export function getSimpleDate(date: Date){
+    const simpleShortDate = date.toString().match(/\w+/g)!.slice(1,3)
+    const simpleFullDate = fullDates[simpleShortDate[0]] + ' ' + getOrdinal(simpleShortDate[1])
+    return simpleFullDate
 }
