@@ -228,7 +228,7 @@ client.on('guildMemberRemove', async member => {
 	const greetingSettings: greetingConfig = JSON.parse(server.greeting)
 	const greetingChannel = member.guild.channels.cache.get(greetingSettings.channelID) as TextChannel
 	
-	if (!greetingSettings.sendLeaveMessage) return
+	if (!greetingSettings.sendLeaveMessage || !greetingChannel) return
 	const ban = await member.guild.bans.fetch(member.user).catch(() => {})
 	if (ban?.user === member.user) return // Don't send a leave message if the user was banned rather than leaving on their own
 	greetingChannel.send(greetingSettings.leaveMessage.replace('[member]', member.user.username))
@@ -240,7 +240,7 @@ client.on('guildBanAdd', ban => {
 	const greetingSettings: greetingConfig = JSON.parse(server.greeting)
 	const greetingChannel = ban.guild.channels.cache.get(greetingSettings.channelID) as TextChannel
 	
-	if (!greetingSettings.sendBanMessage) return
+	if (!greetingSettings.sendBanMessage || !greetingChannel) return
 	greetingChannel.send(greetingSettings.banMessage.replace('[member]', ban.user.username))
 })
 
