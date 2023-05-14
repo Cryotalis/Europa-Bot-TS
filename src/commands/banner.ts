@@ -21,7 +21,7 @@ module.exports = {
 			.filter(item => item.rate_up && includedRarities.includes(item.rarity))
 			.sort((a, b) => (featuredItemIDs.includes(a.id) ? -1 : featuredItemIDs.includes(b.id) ? 1 : 0))
 
-		rateUpItems.forEach(item => {
+		rateUpItems.slice(0,25).forEach(item => {
 			const featured = featuredItemIDs.includes(item.id)
 			const description = item.type === 'Summon'
 				? '<:SummonCradle:753364568138317914> Summon'
