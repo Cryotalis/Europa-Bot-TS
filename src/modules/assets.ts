@@ -7,16 +7,25 @@ export let regularStar: Image
 export let blankRegularStar: Image
 export let blueStar: Image
 export let blankBlueStar: Image
+
 export let eventsBackground: Image
 export let eventsBackgroundHalloween: Image
 export let currentEventsText: Image
 export let upcomingEventsText: Image
-export let darkAdvantage: Image
-export let lightAdvantage: Image
-export let waterAdvantage: Image
+
 export let fireAdvantage: Image
-export let windAdvantage: Image
+export let waterAdvantage: Image
 export let earthAdvantage: Image
+export let windAdvantage: Image
+export let lightAdvantage: Image
+export let darkAdvantage: Image
+
+export let sparkBGMask: Image
+export let clearSparkBG: Image
+export let defaultSparkBG: Image
+export let developerTitle: Image
+export let VIPTitle: Image
+export let progressBars: Image[]
 async function loadAssets(){
     [
         playerTemplate,
@@ -36,6 +45,12 @@ async function loadAssets(){
         windAdvantage,
         lightAdvantage,
         darkAdvantage,
+        sparkBGMask,
+        clearSparkBG,
+        defaultSparkBG,
+        developerTitle,
+        VIPTitle,
+        progressBars,
     ] = await Promise.all([
         loadImage('https://cdn.discordapp.com/attachments/647256353844232202/1097295608148144129/PlayerTemplate.png'),
         loadImage('https://i.imgur.com/kruvcZo.png'),
@@ -54,6 +69,18 @@ async function loadAssets(){
         loadImage('https://gbf.wiki/images/thumb/4/4d/Status_WindAtkUp.png/25px-Status_WindAtkUp.png'),
         loadImage('https://gbf.wiki/images/thumb/3/3d/Status_LightAtkUp.png/25px-Status_LightAtkUp.png'),
         loadImage('https://gbf.wiki/images/thumb/a/a0/Status_DarkAtkUp.png/25px-Status_DarkAtkUp.png'),
+        loadImage('https://cdn.discordapp.com/attachments/659229575821131787/762191969321484328/SparkMask.png'),
+        loadImage('https://cdn.discordapp.com/attachments/659229575821131787/762203777629290526/SparkShadedBG.png'),
+        loadImage('https://cdn.discordapp.com/attachments/659229575821131787/762188325330485248/SparkDefaultBG.png'),
+        loadImage('https://i.imgur.com/THKXHC0.png'),
+        loadImage('https://i.imgur.com/uGK0xjS.png'),
+        Promise.all([
+            loadImage('https://cdn.discordapp.com/attachments/659229575821131787/762201628031189002/RegularProgressBar.png'),
+            loadImage('https://cdn.discordapp.com/attachments/659229575821131787/762201828334239764/RedProgressBar.png'),
+            loadImage('https://cdn.discordapp.com/attachments/659229575821131787/762202150599917568/BlueProgressBar.png'),
+            loadImage('https://cdn.discordapp.com/attachments/565650781961846784/790744430805123103/PurpleProgressBar_2.png'),
+        ]),
+
     ]) 
 }
 loadAssets()

@@ -5,6 +5,7 @@ import { Image, createCanvas, loadImage } from 'canvas'
 import { getDirectImgurLinks } from '../modules/image-functions'
 import { formatList } from '../modules/string-functions'
 import { isNumber } from '../modules/number-functions'
+import { VIPTitle, clearSparkBG, defaultSparkBG, developerTitle, progressBars, sparkBGMask } from '../modules/assets'
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -78,34 +79,22 @@ module.exports = {
 			}
 
 			if (user.background && !badBackground){
-				const backgroundMask = await loadImage('https://cdn.discordapp.com/attachments/659229575821131787/762191969321484328/SparkMask.png')
-				const clearBackground = await loadImage('https://cdn.discordapp.com/attachments/659229575821131787/762203777629290526/SparkShadedBG.png')
-				ctx.drawImage(backgroundMask, 0, 0)
+				ctx.drawImage(sparkBGMask, 0, 0)
 				ctx.globalCompositeOperation = 'source-in'
 				ctx.drawImage(customBackground as Image, 0, 0, canvas.width, canvas.height)
 				ctx.globalCompositeOperation = 'source-over'
-				ctx.drawImage(clearBackground, 0, 0)
+				ctx.drawImage(clearSparkBG, 0, 0)
 			} else {
-				const defaultBackground = await loadImage('https://cdn.discordapp.com/attachments/659229575821131787/762188325330485248/SparkDefaultBG.png')
-				ctx.drawImage(defaultBackground, 0, 0)
+				ctx.drawImage(defaultSparkBG, 0, 0)
 			}
 			
-			//Work around inconsistencies between number/string in the database 
+			// Work around inconsistencies between number/string in the database 
 			if (typeof user.percent === 'number'){user.percent = `${(user.percent*100).toFixed(2)}%`}
 			const sparkPercent = parseFloat(user.percent)/100.0
 
-			const progbars = [
-				await loadImage('https://cdn.discordapp.com/attachments/659229575821131787/762201628031189002/RegularProgressBar.png'),
-				await loadImage('https://cdn.discordapp.com/attachments/659229575821131787/762201828334239764/RedProgressBar.png'),
-				await loadImage('https://cdn.discordapp.com/attachments/659229575821131787/762202150599917568/BlueProgressBar.png'),
-				await loadImage('https://cdn.discordapp.com/attachments/565650781961846784/790744430805123103/PurpleProgressBar_2.png'),
-				await loadImage('https://cdn.discordapp.com/attachments/659229575821131787/762202150599917568/BlueProgressBar.png'),
-				await loadImage('https://cdn.discordapp.com/attachments/659229575821131787/762202150599917568/BlueProgressBar.png')
-			]
-
-			if (Math.floor(sparkPercent)-1 >= 0) ctx.drawImage(progbars[Math.floor(sparkPercent)-1] ?? progbars[progbars.length-1], 0, 0) // Draw a full length progress bar if the user has 1 whole spark or more
+			if (Math.floor(sparkPercent)-1 >= 0) ctx.drawImage(progressBars[Math.floor(sparkPercent)-1] ?? progressBars[progressBars.length-1], 0, 0) // Draw a full length progress bar if the user has 1 whole spark or more
 			if (sparkPercent > 0){ // Draw a portion of a progress bar according to the user's spark percentage
-				ctx.drawImage(progbars[Math.ceil(sparkPercent)-1] ?? progbars[progbars.length-1], 0, 0, 35+424*(sparkPercent % 1), canvas.height, 0, 0, 35+424*(sparkPercent % 1), canvas.height)
+				ctx.drawImage(progressBars[Math.ceil(sparkPercent)-1] ?? progressBars[progressBars.length-1], 0, 0, 35+424*(sparkPercent % 1), canvas.height, 0, 0, 35+424*(sparkPercent % 1), canvas.height)
 			}
 
 			function applyText(text: string){
@@ -123,13 +112,11 @@ module.exports = {
 			ctx.fillText(username, 318, 95)
 
 			if (user.userID === '251458435554607114'){
-				const Developer = await loadImage('https://i.imgur.com/THKXHC0.png')
-				ctx.drawImage(Developer, 270, 122)
+				ctx.drawImage(developerTitle, 270, 122)
 			}
 
 			if (info.find(row => row.name === 'VIPs')?.value.includes(user.userID)){
-				const VIP = await loadImage('https://i.imgur.com/uGK0xjS.png')
-				ctx.drawImage(VIP, 302, 122)
+				ctx.drawImage(VIPTitle, 302, 122)
 			}
 			
 			ctx.font = '24px Times'
@@ -152,9 +139,8 @@ module.exports = {
 			ctx.closePath()
 			ctx.clip()
 
-			const avatarURL = interaction.guild?.members.cache.get(user.userID)?.user.displayAvatarURL({extension: 'png', forceStatic: true})
-			const defaultAvatarURL = 'https://discordapp.com/assets/6debd47ed13483642cf09e832ed0bc1b.png?size=1024'
-			const avatar = await loadImage(avatarURL ?? defaultAvatarURL)
+			const avatarURL = interaction.user.displayAvatarURL({extension: 'png', forceStatic: true})
+			const avatar = await loadImage(avatarURL)
 			ctx.drawImage(avatar, 55, 40, 100, 100)
 			ctx.restore()
 
