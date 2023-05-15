@@ -1,4 +1,4 @@
-import { getOrdinal } from './number-functions'
+import { getOrdinal } from './number-helpers'
 import { timeZoneOffsets } from './variables'
 
 const TZdefault = timeZoneOffsets.find(TZ => TZ.name === 'EST')! // The default timezone to use for time functions

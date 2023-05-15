@@ -1,7 +1,7 @@
 import { CanvasRenderingContext2D, Image, loadImage } from 'canvas'
 import { data } from '../bot'
 import { blankBlueStar, blankRegularStar, blueStar, privateSummon, regularStar } from './assets'
-import { isInRange } from './number-functions'
+import { isInRange } from './number-helpers'
 
 /**
  * Parses raw HTML and returns an array containing information for each support summon the player has set.

@@ -1,9 +1,9 @@
 import { ChatInputCommandInteraction, EmbedBuilder, GuildMember, SlashCommandBuilder } from 'discord.js'
 import { servers } from '../bot'
 import { findBestMatch } from 'string-similarity'
-import { getDirectImgurLinks } from '../modules/image-functions'
-import { titleize } from '../modules/string-functions'
-import { greetingConfig, makeGreetingImage, toggleableGreetingSetting } from '../modules/greeting'
+import { getDirectImgurLinks } from '../modules/image-helpers'
+import { titleize } from '../modules/string-helpers'
+import { greetingConfig, makeGreetingImage, toggleableGreetingSetting } from '../modules/greeting-helpers'
 
 module.exports = {
 	data: new SlashCommandBuilder()

@@ -1,8 +1,8 @@
 import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import { decode } from 'html-entities'
 import { Image, createCanvas, loadImage } from 'canvas'
-import { wrapText } from '../modules/image-functions'
-import { dateDiff, getSimpleDate, timeToUnix } from '../modules/time-functions'
+import { wrapText } from '../modules/image-helpers'
+import { dateDiff, getSimpleDate, timeToUnix } from '../modules/time-helpers'
 import { currentEventsText, darkAdvantage, earthAdvantage, eventsBackground, fireAdvantage, lightAdvantage, upcomingEventsText, waterAdvantage, windAdvantage } from '../modules/assets'
 import axios from 'axios'
 

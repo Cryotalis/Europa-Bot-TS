@@ -2,9 +2,9 @@ import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, GuildMemb
 import { privateDB, sparkProfiles, info } from '../bot'
 import { GoogleSpreadsheetRow } from 'google-spreadsheet'
 import { Image, createCanvas, loadImage } from 'canvas'
-import { getDirectImgurLinks } from '../modules/image-functions'
-import { formatList } from '../modules/string-functions'
-import { isNumber } from '../modules/number-functions'
+import { getDirectImgurLinks } from '../modules/image-helpers'
+import { formatList } from '../modules/string-helpers'
+import { isNumber } from '../modules/number-helpers'
 import { VIPTitle, clearSparkBG, defaultSparkBG, developerTitle, progressBars, sparkBGMask } from '../modules/assets'
 
 module.exports = {
