@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { formatList } from '../modules/string-helpers'
+import { formatList } from '../modules/string'
 
 module.exports = {
 	data: new SlashCommandBuilder()

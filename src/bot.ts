@@ -7,7 +7,7 @@ import os from 'os'
 import { Browser, launch } from 'puppeteer'
 import axios from 'axios'
 import { accessCookie, languageCookie } from './modules/variables'
-import { greetingConfig, makeGreetingImage } from './modules/greeting-helpers'
+import { greetingConfig, makeGreetingImage } from './modules/greeting'
 
 export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration]})
 export const cryoServerShardID = ShardClientUtil.shardIdForGuildId('379501550097399810', client.shard?.count!)

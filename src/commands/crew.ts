@@ -1,6 +1,6 @@
 import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import { browser } from '../bot'
-import { formatList } from '../modules/string-helpers'
+import { formatList } from '../modules/string'
 import { compareTwoStrings } from 'string-similarity'
 import { showMenu } from '../modules/menu'
 import { languageCookie, accessCookie } from '../modules/variables'
