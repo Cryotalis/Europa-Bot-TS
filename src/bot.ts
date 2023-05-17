@@ -125,17 +125,7 @@ client.on('ready', () => {
         }
         console.log(`Shard #${currentShardID} is now online`)
 		
-		client.user?.setActivity('/help')
-		while (!sparkProfiles){setTimeout(() => {}, 1000)}
-		setInterval(async () => { 
-			const serverCount = await getServerCount()
-			const status = [`/help`, `${serverCount} servers`, `https://cryotalis.github.io/Europa`, `${sparkProfiles.length} spark profiles`] //Array of status messages for the bot to switch through
-			
-			let index = 0
-			client.user!.setActivity(status[index])
-			index++
-			if (index > status.length - 1) { index = 0 }
-		}, 300000) //Rotates through status messages every 5 minutes
+		client.user?.setActivity('Granblue Fantasy')
 		
 		async function updateCounter() {
 			const serverCount = await getServerCount()
