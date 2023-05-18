@@ -33,7 +33,6 @@ module.exports = {
 		
 		await interaction.reply({embeds: [crewEmbed]})
 
-		let crews: crew[] = []
 		const options = crewName 
 			? {
 				method: 'POST',
@@ -45,20 +44,16 @@ module.exports = {
 				url: `http://gbf.gw.lt/gw-guild-searcher/info/${crewID}`
 			}
 		
-		await axios.request(options).then(({data}) => {
-			crews = crewName ? data.result : [data]
-		}).catch((error) => {
-			if (error){
-				console.error(error)
-				return interaction.reply({content: 'Crew Search is currently unavailable. Please try again later.'})
-			}
+		const crews: crew[] = await axios.request(options).then(({data}) => crewName ? data.result : [data]).catch((error) => {
+			console.error(error)
+			return interaction.reply({content: 'Crew Search is currently unavailable. Please try again later.'})
 		})
 
 		if (!crews[0]?.data[0]) return interaction.editReply({content: `No crews were found for ${crewName ?? crewID}.`, embeds: []})
 		if (crews.length === 1) return loadCrew(crews[0], interaction)
 
-		crews = crews.sort((a, b) => a.data[0].rank - b.data[0].rank)
-		crews = crews.sort((a, b) => compareTwoStrings(b.data[0].name, crewName!) - compareTwoStrings(a.data[0].name, crewName!))
+		crews.sort((a, b) => a.data[0].rank - b.data[0].rank)
+		crews.sort((a, b) => compareTwoStrings(b.data[0].name, crewName!) - compareTwoStrings(a.data[0].name, crewName!))
 		const formattedCrews = crews.map(crew => `${crew.data[0].name} Rank ${crew.data[0].rank} (${crew.id})`)
 
 		const userChoice = await showMenu(interaction, crewName!, formattedCrews)
