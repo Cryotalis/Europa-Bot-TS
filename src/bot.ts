@@ -102,7 +102,7 @@ async function renewJSessionID(){
 	await page.waitForNetworkIdle()
 	jsessionID = (await page.cookies())[0].value
 	await page.close()
-	setTimeout(() => renewJSessionID(), 1.8e+6)
+	setTimeout(() => renewJSessionID(), 9e+5)
 }
 async function startPuppeteer(){
 	browser = await launch({args: ['--single-process', '--no-zygote', '--no-sandbox']})
