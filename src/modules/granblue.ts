@@ -20,7 +20,7 @@ export async function getAllSummonInfo(rawHtml: string){
         '00', '01', // Misc summon IDs
     ]
 
-    const summonPrivate = /Support\sSummons<\/div>.+<div\sclass="txt-private">Private/s.test(rawHtml)
+    const summonPrivate = /Support Summons<\/div>\n\n.+<div class="txt-private">Private/.test(rawHtml)
     if (summonPrivate) return []
 
     const summonImagePromises: Promise<Image>[] = []
