@@ -50,7 +50,7 @@ module.exports = {
 		})
 
 		if (!crews[0]?.data[0]) return interaction.editReply({content: `No crews were found for ${crewName ?? crewID}.`, embeds: []})
-		if (crews.length === 1) return loadCrew(crews[0], interaction)
+		if (crews.length === 1) return loadCrew(interaction, crews[0])
 
 		crews.sort((a, b) => a.data[0].rank - b.data[0].rank)
 		crews.sort((a, b) => compareTwoStrings(b.data[0].name, crewName!) - compareTwoStrings(a.data[0].name, crewName!))
@@ -60,6 +60,6 @@ module.exports = {
 		if (!userChoice) return
 
 		const targetCrew = crews.find(crew => String(crew.id) === userChoice.match(/(?<=\()\d+/)![0])!
-		loadCrew(targetCrew, interaction)
+		loadCrew(interaction, targetCrew)
 	}
 }

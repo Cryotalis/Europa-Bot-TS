@@ -4,7 +4,7 @@ import { formatList } from "./string"
 import { languageCookie, accessCookie } from "./variables"
 
 export interface crew {data: {is_seed: number, points: number, gw_num: number, rank: number, name: string}[], id: number}
-export async function loadCrew(crew: crew, interaction: ChatInputCommandInteraction){
+export async function loadCrew(interaction: ChatInputCommandInteraction, crew: crew){
     if (!browser) return interaction.editReply({content: 'Browser is currently unavailable. Please try again later.', embeds: []})
     
     const crewEmbed = new EmbedBuilder()
