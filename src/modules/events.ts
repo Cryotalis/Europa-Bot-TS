@@ -1,11 +1,61 @@
-import { loadImage } from "canvas"
+import { Canvas, CanvasRenderingContext2D, Image, createCanvas, loadImage } from "canvas"
 import { decode } from "html-entities"
-import { waterAdvantage, earthAdvantage, windAdvantage, fireAdvantage, darkAdvantage, lightAdvantage } from "./assets"
+import { waterAdvantage, earthAdvantage, windAdvantage, fireAdvantage, darkAdvantage, lightAdvantage, currentEventsText, eventsBackground, upcomingEventsText } from "./assets"
 import { wrapText } from "./image"
 import { dateDiff, getSimpleDate } from "./time"
-import { CanvasRenderingContext2D, Image } from "canvas"
+import { schedule } from "node-cron"
+import axios from "axios"
 
 export interface event {title: string, image: Image | undefined, duration: string, elementAdvantage: string | undefined, elementAdvantageImage: Image | undefined}
+export let currentEvents: event[] = []
+export let upcomingEvents: event[] = []
+export let eventsTemplate: Canvas | undefined
+
+/**
+ * Loads event information and event template. The template includes upcoming events and leaves a blank space for current events.
+ */
+async function loadEvents(){
+    let {data}: {data: string} = await axios.get('https://gbf.wiki/Template:MainPageEvents').catch(() => ({data: ''}))
+    if (!data) return
+
+    const eventData = data.match(/vertical-align: top.+<!--/s)!.toString()
+    const currentEventsData = eventData.match(/.+(?=<hr \/>)/s)?.[0] ?? ''
+    const upcomingEventsData = eventData.match(/(?<=<hr \/>).+/s)?.[0] ?? ''
+    ;[currentEvents, upcomingEvents] = await Promise.all([
+        getEventsInformation(currentEventsData, 'Current'),
+        getEventsInformation(upcomingEventsData, 'Upcoming')
+    ])
+
+    // Create the events image
+    const canvasHeight = 200 + Math.ceil(currentEvents.length / 2) * 110 + Math.ceil(upcomingEvents.length / 2) * 110
+    const canvas = createCanvas(700, canvasHeight)
+    const ctx = canvas.getContext('2d')
+
+    ctx.drawImage(eventsBackground, 0, 0, 700, canvasHeight)
+    ctx.drawImage(currentEventsText, 170, 65)
+
+    let X = 25
+    let Y = 120 + Math.ceil(currentEvents.length / 2) * 110
+    ctx.drawImage(upcomingEventsText, 165, Y)
+    Y += 40
+
+    upcomingEvents.forEach((event, i) => {
+        if (i % 2 === 0){ // Draw events in the left column
+            const lastEvent = Boolean(i + 1 === upcomingEvents.length)
+            X = lastEvent ? 185 : 25 // Center the event if it's the last one
+            Y += i ? 110 : 0 // Only add to Y after the first event
+            drawEvent(ctx, event, lastEvent ? 350 : 190, X, Y)
+        } else { // Draw events in the right column
+            X = 345
+            drawEvent(ctx, event, 510, X, Y)
+        }
+    })
+
+    eventsTemplate = canvas
+}
+
+loadEvents()
+schedule('0 * * * *', () => loadEvents())
 
 /** Parses through event data from gbf.wiki and returns a JSON with important information for each event. */
 export async function getEventsInformation(eventData: string, type: 'Current' | 'Upcoming'){
