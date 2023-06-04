@@ -18,21 +18,27 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
     const page = await browser.newPage()
     await page.setCookie(languageCookie, accessCookie)
     await page.goto(`http://game.granbluefantasy.jp/#profile/${playerID}`, { waitUntil: 'networkidle0' })
+
+    const bodyHTML = await page.evaluate(() => new XMLSerializer().serializeToString(document.doctype!) + document.documentElement.outerHTML)
+    if (/\.cnt-maintenance/.test(bodyHTML)){
+        interaction.editReply({content: 'The game is currently undergoing maintenance. Please try again when maintenance is over.', embeds: []})
+        return await page.close()
+    }
+    if (/(?<=<div\sclass="txt-secret-profile">).+(?=<\/div>)/.test(bodyHTML)){
+        interaction.editReply({content: 'Player profile is private.', embeds: []})
+        return await page.close()
+    }
+
     await page.waitForSelector('#wrapper > div.contents > div.cnt-profile > div.prt-status', { timeout: 5000 }).catch(async () => {
-        if (await page.$('.cnt-maintenance') !== null) await interaction.editReply({content: 'The game is currently undergoing maintenance. Please try again when maintenance is over.', embeds: []})
-        else await interaction.editReply({content: 'Could not connect to Granblue Fantasy. Please try again later.', embeds: []})
+        await interaction.editReply({content: 'Could not connect to Granblue Fantasy. Please try again later.', embeds: []})
         await page.close()
     })
     if (page.isClosed()) return
 
-    const bodyHTML = await page.evaluate(() => new XMLSerializer().serializeToString(document.doctype!) + document.documentElement.outerHTML)
-    
-    // Check whether the player's profile is private
-    if (/(?<=<div\sclass="txt-secret-profile">).+(?=<\/div>)/.test(bodyHTML)) {interaction.editReply('Player profile is private.'); return await page.close()}
-
-    // Get the player's name
     const name = bodyHTML.match(/(?<=<span\sclass="txt-other-name">).+(?=<\/span>)/)?.toString()
-    if (!name) {interaction.editReply({content: 'Could not get player profile. Please try again later.', embeds: []}); return await page.close()}
+
+    playerEmbed.setTitle('Drawing Player Profile and Support Summons <a:loading:763160594974244874>')
+    interaction.editReply({embeds: [playerEmbed]})
 
     // Reformat the page for the screenshot
     await page.evaluate(playerID => {
@@ -46,10 +52,7 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
     
     // Take a screenshot of the page and close the page
     const screenshot = await page.screenshot({clip: { x: 0, y: 52, width: 362, height: 520 }, encoding: 'binary', omitBackground: true})
-    await page.close()
-
-    playerEmbed.setTitle('Drawing Player Profile and Support Summons <a:loading:763160594974244874>')
-    interaction.editReply({embeds: [playerEmbed]})
+    page.close()
     
     // Draw Player profile, template, and Star Character
     const canvas = createCanvas(810, 520)
