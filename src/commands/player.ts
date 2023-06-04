@@ -8,6 +8,7 @@ import { drawStars, getAllSummonInfo } from '../modules/granblue'
 import { openSummon, playerTemplate } from '../modules/assets'
 import { accessCookie, languageCookie } from '../modules/variables'
 import axios from 'axios'
+import urlencode from 'urlencode'
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -29,7 +30,7 @@ module.exports = {
 		)
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
-		const playerName = interaction.options.getString('name')
+		const playerName = interaction.options.getString('name')!
 		const playerID = interaction.options.getNumber('id')?.toString()
 
 		if (!data) return interaction.reply('Unable to connect to database. Please try again in a few seconds.')
@@ -202,13 +203,11 @@ module.exports = {
 				.setColor('Blue')
 				.setAuthor({name: 'Player Search', iconURL: 'https://upload.wikimedia.org/wikipedia/en/e/e5/Granblue_Fantasy_logo.png'})
 				.setFooter({text: 'http://info.gbfteamraid.fun/web/about', iconURL: 'http://info.gbfteamraid.fun/view/image/icon.png'})
-				// .setFooter({text: 'https://gbfdata.com/', iconURL: 'https://gbfdata.com/favicon.ico'})
 
 			await interaction.reply({embeds: [searchEmbed]})
 
-			let players: {level: string, name: string, userid: string}[] = []
-			// https://info.gbfteamraid.fun version
-			const options = {
+			interface player {level: string, name: string, userid: string}
+			const options = { // https://info.gbfteamraid.fun version
 				method: 'POST',
 				url: 'https://info.gbfteamraid.fun/web/userrank',
 				headers: {
@@ -216,32 +215,29 @@ module.exports = {
 				  Cookie: `JSESSIONID=${jsessionID}`
 				},
 				data: {method: 'getUserrank', params: `{"username":"${playerName}"}`}
-			  }
+			}
+			
+			let players = await axios.request(options).then(({data: {result}}) => result as player[]).catch(() => undefined) 
+			
+			if (!players){ // Fall back to https://gbfdata.com version if teamraid is not available
+				searchEmbed.setFooter({text: 'https://gbfdata.com/', iconURL: 'https://gbfdata.com/favicon.ico'})
+				interaction.editReply({embeds: [searchEmbed]})
+				players = await axios.get(`https://gbfdata.com/user/search?q=${urlencode(playerName)}&is_fulltext=1`).then(({data}) => {
+					const playerData = String(data.match(/(?<=\/thead>).+(?=<\/table)/s))
+					const playerMatches = playerData.matchAll(/href=".+?(\d+)">\n(.+?)\n<.+?"num">(\d+)/gs)
+					return [...playerMatches].map(player => ({userid: player[1], name: player[2], level: player[3]}))
+				}).catch(() => undefined)
+			}
 
-			await axios.request(options).then(({data: {result}}) => {
-				players = result
-			}).catch(async error => {
-				console.log(error)
-				return interaction.editReply({content: 'Player Search by name is currently unavailable. Please try again later.', embeds: []})
-			})
-
-			// https://gbfdata.com version
-			// await axios.get(`https://gbfdata.com/user/search?q=${urlencode(playerName!)}&is_fulltext=1`).then(({data}) => {
-			// 	const playerData = String(data.match(/(?<=\/thead>).+(?=<\/table)/s))
-			// 	const playerMatches = playerData.matchAll(/href=".+?(\d+)">\n(.+?)\n<.+?"num">(\d+)/gs)
-			// 	players = [...playerMatches].map(player => ({userid: player[1], name: player[2], level: player[3]}))
-			// }).catch(async error => {
-			// 	return interaction.editReply({content: 'Player Search by name is currently unavailable. Please try again later.', embeds: []})
-			// })
-
-			if (!players?.length) return interaction.editReply({content: 'No players were found.', embeds: []})
+			if (!players) return interaction.editReply({content: 'Player search is currently unavailable. Please try again later.', embeds: []})
+			if (!players.length) return interaction.editReply({content: 'No players were found.', embeds: []})
 			if (players.length === 1) return loadProfile(players[0].userid)
 
-			players = players.sort((a, b) => parseInt(b.level) - parseInt(a.level))
-			players = players.sort((a, b) => compareTwoStrings(b.name, playerName!) - compareTwoStrings(a.name, playerName!))
+			players.sort((a, b) => parseInt(b.level) - parseInt(a.level))
+			players.sort((a, b) => compareTwoStrings(b.name, playerName) - compareTwoStrings(a.name, playerName))
 			const formattedPlayers = players.map(player => `${player.name} Rank ${player.level} (${player.userid})`)
 
-			const userChoice = await showMenu(interaction, playerName!, formattedPlayers)
+			const userChoice = await showMenu(interaction, playerName, formattedPlayers)
 			if (!userChoice) return
 			
 			loadProfile(userChoice.match(/(?<=\()\d+/)![0])
