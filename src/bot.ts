@@ -104,7 +104,7 @@ async function renewJSessionID(){
 	await page.close()
 }
 
-async function startPuppeteer(){
+export async function startPuppeteer(){
 	browser = await launch({args: ['--single-process', '--no-zygote', '--no-sandbox']})
 	console.log(`Puppeteer browser launched for Shard #${currentShardID}`)
 	renewJSessionID()

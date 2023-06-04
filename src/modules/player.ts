@@ -1,6 +1,6 @@
 import { createCanvas, loadImage } from "canvas"
 import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder } from "discord.js"
-import { browser } from "../bot"
+import { browser, startPuppeteer } from "../bot"
 import { playerTemplate, openSummon } from "./assets"
 import { getAllSummonInfo, drawStars } from "./granblue"
 import { wrapText } from "./image"
@@ -14,7 +14,7 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
     interaction.editReply({embeds: [playerEmbed], components: []})
 
     // Access the Player profile page
-    if (!browser.isConnected()) return interaction.editReply({content: 'Browser is currently unavailable. Please try again later.', embeds: []})
+    if (!browser.isConnected()) await startPuppeteer()
     const page = await browser.newPage()
     await page.setCookie(languageCookie, accessCookie)
     await page.goto(`http://game.granbluefantasy.jp/#profile/${playerID}`, { waitUntil: 'networkidle0' })
