@@ -30,11 +30,12 @@ export async function getAllSummonInfo(rawHtml: string){
         const levelRegex = new RegExp(`summon${ID}-name".+?\\d+`)
         const summonURLRegex = new RegExp(`${ID.replace(/(\d)(\d)/, '$1/$2')}".+?img-fix-summon.+?src="(.+?)"`, 's')
         const summonInfo = data.find(info => info.summonName === String(rawHtml.match(nameRegex)))
+        const uncapRank = parseInt(String(rawHtml.match(uncapRegex)))
         summonImagePromises.push(loadImage(rawHtml.match(summonURLRegex)![1]))
         summons.push({
             image: privateSummon,
             level: parseInt(String(String(rawHtml.match(levelRegex)).match(/(?<=Lvl\s)\d+/i))),
-            uncaps: parseInt(String(rawHtml.match(uncapRegex))) + 2,
+            uncaps: uncapRank ? uncapRank + 2 : uncapRank,
             maxUncaps: summonInfo?.ulbDate ? 5 : summonInfo?.flbDate ? 4 : 3
         })
     })
