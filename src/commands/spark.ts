@@ -139,7 +139,7 @@ module.exports = {
 			ctx.closePath()
 			ctx.clip()
 
-			const avatarURL = interaction.user.displayAvatarURL({extension: 'png', forceStatic: true})
+			const avatarURL = (userInput ?? interaction.user).displayAvatarURL({extension: 'png', forceStatic: true})
 			const avatar = await loadImage(avatarURL)
 			ctx.drawImage(avatar, 55, 40, 100, 100)
 			ctx.restore()
