@@ -1,7 +1,6 @@
 import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import { createCanvas } from 'canvas'
-import { timeToUnix } from '../modules/time'
-import { drawEvent, currentEvents, eventsTemplate, upcomingEvents } from '../modules/events'
+import { drawEvent, currentEvents, eventsTemplate, upcomingEvents, getEventDuration } from '../modules/events'
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -10,7 +9,7 @@ module.exports = {
 		.addBooleanOption(option => option.setName('embed').setDescription('Use the embedded message version of this command instead?'))
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
-		if (!currentEvents || !upcomingEvents || !eventsTemplate) return interaction.reply('Events information is currently unavailable.')
+		if (!currentEvents || !upcomingEvents || !eventsTemplate) return interaction.reply('Events information is currently unavailable. Please try again in a few seconds.')
 		await interaction.deferReply()
 
 		if (interaction.options.getBoolean('embed')){ // If requested by the user, show the embedded message output instead
@@ -21,7 +20,7 @@ module.exports = {
 				.setColor('Blue')
 				.setFooter({text: 'https://gbf.wiki/Main_Page', iconURL: 'https://i.imgur.com/MN6TIHj.png'})
 			
-			currentEvents.forEach(event => eventEmbed.addFields([{name: event.title, value: `${event.duration} (<t:${Math.ceil((new Date().getTime() + timeToUnix(event.duration))/1000)}:f>)`}]))
+			currentEvents.forEach(event => eventEmbed.addFields([{name: event.title + (event.elementAdvantage ? ` (${event.elementAdvantage})` : ''), value: `${getEventDuration(event)} (<t:${event.end.valueOf()/1000}:f>)`}]))
 			upcomingEvents.forEach(event => eventEmbed.addFields([{name: event.title + (event.elementAdvantage ? ` (${event.elementAdvantage})` : ''), value: event.duration}]))
 			interaction.editReply({embeds: [eventEmbed]})
 		} else {

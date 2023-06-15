@@ -6,7 +6,7 @@ import { dateDiff, getSimpleDate } from "./time"
 import { schedule } from "node-cron"
 import axios from "axios"
 
-export interface event {title: string, image: Image | undefined, duration: string, elementAdvantage: string | undefined, elementAdvantageImage: Image | undefined}
+export interface event {title: string, image: Image | undefined, start: Date, end: Date, duration: string, elementAdvantage: string | undefined, elementAdvantageImage: Image | undefined}
 export let currentEvents: event[] = []
 export let upcomingEvents: event[] = []
 export let eventsTemplate: Canvas | undefined
@@ -64,7 +64,6 @@ export async function getEventsInformation(eventData: string, type: 'Current' | 
 
     const events: event[] = []
     const eventImagePromises: (Promise<Image>|undefined)[] = []
-    const now = new Date()
     eventsTitles.forEach((title, i) => {
         const eventImageURLs = eventsImgURLs.flatMap(URL => {
             if (URL.includes(title) && URL.includes('src=')) return [`https://gbf.wiki${URL.match(/(?<=src=").+?(?=")/)}`]
@@ -80,22 +79,15 @@ export async function getEventsInformation(eventData: string, type: 'Current' | 
         const eventEpochs = [...thisEventData.matchAll(/data-(?:start|end|time)="(\d+)"/g)].map(match => parseInt(match[1]))
         const [eventStart, eventEnd] = [...new Set(eventEpochs)].map(epoch => new Date(epoch * 1000))
 
-        let eventDuration: string
-        if (type === 'Current'){
-            eventDuration = now < eventStart
-                ? `Starts in ${dateDiff(now, eventStart, true)}`
-                : now < eventEnd
-                    ? `Ends in ${dateDiff(now, eventEnd, true)}`
-                    : 'Event has ended.'
-        } else {
-            const inMonth = thisEventData.match(/(?:In\s)(?:January|February|March|April|May|June|July|August|September|October|November|December)/)?.[0]
-            eventDuration = inMonth ?? `${getSimpleDate(eventStart)} - ${getSimpleDate(eventEnd)}`
-        }
+        const inMonth = thisEventData.match(/(?:In\s)(?:January|February|March|April|May|June|July|August|September|October|November|December)/)?.[0]
+        const eventDuration = inMonth ?? `${getSimpleDate(eventStart)} - ${getSimpleDate(eventEnd)}`
         
         events.push({
             title: decode(title),
             image: undefined,
-            duration: eventDuration,
+            start: eventStart,
+            end: eventEnd,
+            duration: type === 'Upcoming' ? eventDuration : '',
             elementAdvantage: getElementAdvantage(thisEventData)?.advantage,
             elementAdvantageImage: getElementAdvantage(thisEventData)?.image
         })
@@ -104,7 +96,9 @@ export async function getEventsInformation(eventData: string, type: 'Current' | 
     const eventImages = await Promise.all(eventImagePromises)
     events.forEach((event, i) => event.image = eventImages[i])
 
-    return events.length ? events.slice(0, 6) : [{title: 'No events to display', image: undefined, duration: '', elementAdvantage: undefined, elementAdvantageImage: undefined}]
+    // return [{title: 'No events to display'} as event]
+
+    return events.length ? events.slice(0, 6) : [{title: 'No events found'} as event]
 }
 
 /** Draws event banners and their durations. */
@@ -119,6 +113,8 @@ export function drawEvent(ctx: CanvasRenderingContext2D, event: event, textX: nu
     ctx.strokeStyle = 'black'
     ctx.lineWidth = 3
     ctx.fillStyle = 'white'
+
+    let eventDuration = getEventDuration(event)
     
     // Draw the event banner, or text if there is no banner image
     if (event.image) ctx.drawImage(event.image, eventX, eventY, 330, 78)
@@ -126,11 +122,11 @@ export function drawEvent(ctx: CanvasRenderingContext2D, event: event, textX: nu
 
     if (event.elementAdvantageImage){
         textX += 18
-        ctx.drawImage(event.elementAdvantageImage, centerTextX(event.duration, textX) - 35, eventY + 82)
+        ctx.drawImage(event.elementAdvantageImage, centerTextX(eventDuration, textX) - 35, eventY + 82)
     }
 
-    ctx.strokeText(event.duration, textX, eventY + 100)
-    ctx.fillText(event.duration, textX, eventY + 100)
+    ctx.strokeText(eventDuration, textX, eventY + 100)
+    ctx.fillText(eventDuration, textX, eventY + 100)
 }
 
 /** Determines the element advantage and the element advantage image from the event data. */
@@ -146,4 +142,19 @@ export function getElementAdvantage(eventData: string) {
         case 'Light': return {advantage: `Dark Advantage`, image: darkAdvantage}
         case 'Dark': return {advantage: `Light Advantage`, image: lightAdvantage}
     }
+}
+
+/**
+ * Takes an event and outputs the correct duration string for the event.
+ */
+export function getEventDuration(event: event){
+    if (!event.duration){
+        const now = new Date()
+        return now < event.start
+            ? `Starts in ${dateDiff(now, event.start, true)}`
+            : now < event.end
+                ? `Ends in ${dateDiff(now, event.end, true)}`
+                : 'Event has ended.'
+    }
+    return event.duration
 }
