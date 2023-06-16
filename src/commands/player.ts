@@ -88,7 +88,7 @@ module.exports = {
 				.setAuthor({name: 'Player Search', iconURL: 'https://upload.wikimedia.org/wikipedia/en/e/e5/Granblue_Fantasy_logo.png'})
 				.setFooter({text: 'http://info.gbfteamraid.fun/web/about', iconURL: 'http://info.gbfteamraid.fun/view/image/icon.png'})
 
-			await interaction.reply({embeds: [searchEmbed]})
+			await interaction.editReply({embeds: [searchEmbed]})
 
 			interface player {level: string, name: string, userid: string}
 			const options = { // https://info.gbfteamraid.fun version
