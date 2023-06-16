@@ -74,7 +74,7 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
 
         const starXCoords = [405, 510, 620, 725, 405, 510, 620, 725, 405, 510, 620, 725, 505, 635]
         const starYCoords = [ 92,  92,  92,  92, 157, 157, 157, 157, 222, 222, 222, 222, 316, 316]
-        drawStars(ctx, 13, summon.level, summon.uncaps, summon.maxUncaps, starXCoords[i], starYCoords[i])
+        drawStars(ctx, 13, 15, summon.uncaps, summon.maxUncaps, starXCoords[i], starYCoords[i])
     })
 
     // Fetch Star Character info and draw

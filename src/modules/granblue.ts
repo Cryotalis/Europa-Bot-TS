@@ -29,13 +29,28 @@ export async function getAllSummonInfo(rawHtml: string){
         const uncapRegex = new RegExp(`(?<=summon${ID}-info" class="prt-fix-info bless-rank)\\d`)
         const levelRegex = new RegExp(`summon${ID}-name".+?\\d+`)
         const summonURLRegex = new RegExp(`${ID.replace(/(\d)(\d)/, '$1/$2')}".+?img-fix-summon.+?src="(.+?)"`, 's')
+
         const summonInfo = data.find(info => info.summonName === String(rawHtml.match(nameRegex)))
+        const level = parseInt(String(String(rawHtml.match(levelRegex)).match(/(?<=Lvl\s)\d+/i)))
         const uncapRank = parseInt(String(rawHtml.match(uncapRegex)))
+        let uncaps = uncapRank
         summonImagePromises.push(loadImage(rawHtml.match(summonURLRegex)![1]))
+
+        if (uncapRank === 0 || isNaN(uncapRank)) { // Guess the summon uncap level based on level if the summon isn't at least mlb
+            if (isInRange(level, 1, 40))    uncaps = 0
+            if (isInRange(level, 41, 60))   uncaps = 1
+            if (isInRange(level, 61, 80))   uncaps = 2
+            if (isInRange(level, 81, 100))  uncaps = 3
+            if (isInRange(level, 101, 150)) uncaps = 4
+            if (isInRange(level, 151, 200)) uncaps = 5
+        } else {
+            uncaps += 2
+        }
+
         summons.push({
             image: privateSummon,
-            level: parseInt(String(String(rawHtml.match(levelRegex)).match(/(?<=Lvl\s)\d+/i))),
-            uncaps: uncapRank ? uncapRank + 2 : uncapRank,
+            level: level,
+            uncaps: uncaps,
             maxUncaps: summonInfo?.ulbDate ? 5 : summonInfo?.flbDate ? 4 : 3
         })
     })
@@ -51,23 +66,13 @@ export async function getAllSummonInfo(rawHtml: string){
  * Draws uncap stars for summons.
  * @param ctx - The canvas context to draw the stars onto.
  * @param spacing - How far apart the stars should be spaced in pixels.
- * @param level - The current level of the summon.
+ * @param size - The width and height when drawing the stars (defaults to 29x29)
  * @param uncaps - The number of times the summon has been uncapped.
  * @param maxUncaps - The maximum number of times the summon can be uncapped.
  * @param x - The x coordinate from which to start drawing the uncap stars.
  * @param y - The y coordinate from which to start drawing the uncap stars.
  */
-export function drawStars(ctx: CanvasRenderingContext2D, spacing: number, level: number, uncaps: number, maxUncaps: number, x: number, y: number) {
-    // If number of uncaps are unknown, use the level of the summon to (try to) determine uncaps
-    if (isNaN(uncaps)) {
-        if (isInRange(level, 1, 40))    {uncaps = 1}
-        if (isInRange(level, 41, 60))   {uncaps = 1}
-        if (isInRange(level, 61, 80))   {uncaps = 2}
-        if (isInRange(level, 81, 100))  {uncaps = 3}
-        if (isInRange(level, 101, 150)) {uncaps = 4}
-        if (isInRange(level, 151, 200)) {uncaps = 5}
-    }
-
+export function drawStars(ctx: CanvasRenderingContext2D, spacing: number, size: number, uncaps: number, maxUncaps: number, x: number, y: number) {
     ctx.save()
     ctx.shadowColor = 'black'
     ctx.shadowOffsetX = 2
@@ -75,10 +80,10 @@ export function drawStars(ctx: CanvasRenderingContext2D, spacing: number, level:
 
     x += (5 - maxUncaps) * spacing // This ensures that the placement of the stars is consistent no matter the number of stars that need to be drawn
     for (let i = 0; i < maxUncaps; i++) {
-        if (i < 3 && i < uncaps) {ctx.drawImage(regularStar, x + spacing * i, y)}
-        if (i < 3 && i >= uncaps) {ctx.drawImage(blankRegularStar, x + spacing * i, y)}
-        if (i >= 3 && i < uncaps) {ctx.drawImage(blueStar, x + spacing * i, y)}
-        if (i >= 3 && i >= uncaps) {ctx.drawImage(blankBlueStar, x + spacing * i, y)}
+        if (i < 3 && i < uncaps) {ctx.drawImage(regularStar, x + spacing * i, y, size, size)}
+        if (i < 3 && i >= uncaps) {ctx.drawImage(blankRegularStar, x + spacing * i, y, size, size)}
+        if (i >= 3 && i < uncaps) {ctx.drawImage(blueStar, x + spacing * i, y, size, size)}
+        if (i >= 3 && i >= uncaps) {ctx.drawImage(blankBlueStar, x + spacing * i, y, size, size)}
     }
     ctx.restore()
 }

@@ -64,7 +64,7 @@ export async function loadSummons(interaction: ChatInputCommandInteraction, play
 
 		const xCoordinates = [113, 113, 297, 297, 482, 482, 667, 667, 851, 851, 1036, 1036, 1221, 1221]
 		const yCoordinates = [220, 330, 220, 330, 220, 330, 220, 330, 220, 330,  220,  330,  220,  330]
-		drawStars(ctx, 19, summon.level, summon.uncaps, summon.maxUncaps, xCoordinates[i], yCoordinates[i])
+		drawStars(ctx, 19, 29, summon.uncaps, summon.maxUncaps, xCoordinates[i], yCoordinates[i])
 	})
 
 	const attachment = new AttachmentBuilder(canvas.toBuffer(), {name: `${String(String(name).replace(/\s/g, '_').match(/\w+/))}SupportSummons.png`})
