@@ -58,10 +58,10 @@ async function loadAssets(){
         loadImage('https://cdn.discordapp.com/attachments/659229575821131787/842832315213152286/SummonsTemplate.png'),
         loadImage('https://i.imgur.com/kruvcZo.png'),
         loadImage('https://prd-game-a1-granbluefantasy.akamaized.net/assets_en/img/sp/assets/summon/m/empty.jpg'),
-        loadImage('https://i.imgur.com/ICv0syr.png'),
-        loadImage('https://i.imgur.com/KfjU5W5.png'),
-        loadImage('https://i.imgur.com/IzXxg3R.png'),
-        loadImage('https://i.imgur.com/3mnCjnH.png'),
+        loadImage('https://cdn.discordapp.com/attachments/659229575821131787/842840832217579520/regularStar.png'),
+        loadImage('https://cdn.discordapp.com/attachments/659229575821131787/842843224505843772/blueStar.png'),
+        loadImage('https://cdn.discordapp.com/attachments/659229575821131787/842840831311347732/regularStarBlank.png'),
+        loadImage('https://cdn.discordapp.com/attachments/659229575821131787/842843214209482814/blueStarBlank.png'),
         loadImage('https://i.imgur.com/6zQvrJT.png'), // Normal Events Template
         loadImage('https://media.discordapp.net/attachments/647256353844232202/1033487287293579415/EventsHalloweenTemplate.png'), // Halloween Events Template
         loadImage('https://i.imgur.com/8z0eQIk.png'),
