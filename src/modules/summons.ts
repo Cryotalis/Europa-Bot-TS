@@ -67,12 +67,12 @@ export async function loadSummons(interaction: ChatInputCommandInteraction, play
 		drawStars(ctx, 19, 29, summon.uncaps, summon.maxUncaps, xCoordinates[i], yCoordinates[i])
 	})
 
-	const attachment = new AttachmentBuilder(canvas.toBuffer(), {name: `${String(String(name).replace(/\s/g, '_').match(/\w+/))}SupportSummons.png`})
+	const attachment = new AttachmentBuilder(canvas.toBuffer(), {name: `SupportSummons_${playerID}.png`})
     
 	playerEmbed
 		.setTitle(`${name}`)
 		.setURL(`http://game.granbluefantasy.jp/#profile/${playerID}`)
-		.setImage(`attachment://${String(String(name).replace(/\s/g, '_').match(/\w+/))}SupportSummons.png`)
+		.setImage(`attachment://${attachment.name}`)
 		.setFooter({text: `http://game.granbluefantasy.jp/#profile/${playerID}`, iconURL: 'http://game.granbluefantasy.jp/favicon.ico'})
 
 	return interaction.editReply({embeds: [playerEmbed], files: [attachment]})
