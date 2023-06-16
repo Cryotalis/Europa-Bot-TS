@@ -1,6 +1,7 @@
 import { Image, loadImage } from 'canvas'
 
 export let playerTemplate: Image
+export let summonsTemplate: Image
 export let privateSummon: Image
 export let openSummon: Image
 export let regularStar: Image
@@ -29,6 +30,7 @@ export let progressBars: Image[]
 async function loadAssets(){
     [
         playerTemplate,
+        summonsTemplate,
         privateSummon,
         openSummon,
         regularStar,
@@ -53,6 +55,7 @@ async function loadAssets(){
         progressBars,
     ] = await Promise.all([
         loadImage('https://cdn.discordapp.com/attachments/647256353844232202/1097295608148144129/PlayerTemplate.png'),
+        loadImage('https://cdn.discordapp.com/attachments/659229575821131787/842832315213152286/SummonsTemplate.png'),
         loadImage('https://i.imgur.com/kruvcZo.png'),
         loadImage('https://prd-game-a1-granbluefantasy.akamaized.net/assets_en/img/sp/assets/summon/m/empty.jpg'),
         loadImage('https://i.imgur.com/ICv0syr.png'),

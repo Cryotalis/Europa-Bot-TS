@@ -4,12 +4,12 @@ import { compareTwoStrings } from 'string-similarity'
 import { showMenu } from '../modules/menu'
 import axios from 'axios'
 import urlencode from 'urlencode'
-import { loadProfile } from '../modules/player'
+import { loadSummons } from '../modules/summons'
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('player')
-		.setDescription('Search for a player and display their player profile page')
+		.setName('summons')
+		.setDescription('Search for a player and display their support summons')
 		.addSubcommand(subcommand =>
 			subcommand
 				.setName('name')
@@ -32,7 +32,7 @@ module.exports = {
 		if (!data) return interaction.editReply('Unable to connect to database. Please try again in a few seconds.')
 
 		if (playerID){
-			loadProfile(interaction, playerID)
+			loadSummons(interaction, playerID)
 		} else {
 			const searchEmbed = new EmbedBuilder()
 				.setTitle(`Searching for "${playerName}" <a:loading:763160594974244874>`)
@@ -67,7 +67,7 @@ module.exports = {
 
 			if (!players) return interaction.editReply({content: 'Player search is currently unavailable. Please try again later.', embeds: []})
 			if (!players.length) return interaction.editReply({content: 'No players were found.', embeds: []})
-			if (players.length === 1) return loadProfile(interaction, players[0].userid)
+			if (players.length === 1) return loadSummons(interaction, players[0].userid)
 
 			players.sort((a, b) => parseInt(b.level) - parseInt(a.level))
 			players.sort((a, b) => compareTwoStrings(b.name, playerName) - compareTwoStrings(a.name, playerName))
@@ -76,7 +76,7 @@ module.exports = {
 			const userChoice = await showMenu(interaction, playerName, formattedPlayers)
 			if (!userChoice) return
 			
-			loadProfile(interaction, userChoice.match(/(?<=\()\d+/)![0])
+			loadSummons(interaction, userChoice.match(/(?<=\()\d+/)![0])
 		}
 	}
 }
