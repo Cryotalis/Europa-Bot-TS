@@ -28,17 +28,11 @@ export async function loadSummons(interaction: ChatInputCommandInteraction, play
         return await page.close()
     }
 
-    await page.waitForSelector('#wrapper > div.contents > div.cnt-profile > div.prt-status', { timeout: 5000 }).catch(async () => {
-        await interaction.editReply({content: 'Could not connect to Granblue Fantasy. Please try again later.', embeds: []})
-        await page.close()
-    })
-    if (page.isClosed()) return
+	playerEmbed.setTitle('Drawing Support Summons <a:loading:763160594974244874>')
+    interaction.editReply({embeds: [playerEmbed]})
 
     const name = bodyHTML.match(/(?<=<span\sclass="txt-other-name">).+(?=<\/span>)/)?.toString()
     const rank = bodyHTML.match(/(?<=\sRank\s)\d+/)
-
-    playerEmbed.setTitle('Drawing Support Summons <a:loading:763160594974244874>')
-    interaction.editReply({embeds: [playerEmbed]})
 
 	// Draw player name, ID, and template
 	const canvas = createCanvas(1375, 475)
