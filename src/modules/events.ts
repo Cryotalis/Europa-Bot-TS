@@ -59,7 +59,7 @@ schedule('0 * * * *', () => loadEvents())
 
 /** Parses through event data from gbf.wiki and returns a JSON with important information for each event. */
 export async function getEventsInformation(eventData: string, type: 'Current' | 'Upcoming'){
-    const eventsTitles = [...new Set(eventData.match(/(?<=title=").+?(?=")/g))]
+    const eventsTitles = [...new Set(eventData.match(/(?<=title="|<b>).+?(?="|<\/b>)/g))]
     const eventsImgURLs = [...new Set(eventData.match(/<img.+?>/g))] ?? ['']
 
     const events: event[] = []
@@ -95,8 +95,6 @@ export async function getEventsInformation(eventData: string, type: 'Current' | 
 
     const eventImages = await Promise.all(eventImagePromises)
     events.forEach((event, i) => event.image = eventImages[i])
-
-    // return [{title: 'No events to display'} as event]
 
     return events.length ? events.slice(0, 6) : [{title: 'No events found'} as event]
 }
