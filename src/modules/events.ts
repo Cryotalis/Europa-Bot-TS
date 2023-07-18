@@ -6,7 +6,7 @@ import { dateDiff, getSimpleDate } from "./time"
 import { schedule } from "node-cron"
 import axios from "axios"
 
-export interface event {title: string, image: Image | undefined, start: Date, end: Date, duration: string, elementAdvantage: string | undefined, elementAdvantageImage: Image | undefined}
+export interface event {type: 'Current' | 'Upcoming', title: string, image: Image | undefined, start: Date, end: Date, duration: string, elementAdvantage: string | undefined, elementAdvantageImage: Image | undefined}
 export let currentEvents: event[] = []
 export let upcomingEvents: event[] = []
 export let eventsTemplate: Canvas | undefined
@@ -83,11 +83,12 @@ export async function getEventsInformation(eventData: string, type: 'Current' | 
         const eventDuration = inMonth ?? `${getSimpleDate(eventStart)} - ${getSimpleDate(eventEnd)}`
         
         events.push({
+            type: type,
             title: decode(title),
             image: undefined,
             start: eventStart,
             end: eventEnd,
-            duration: type === 'Upcoming' ? eventDuration : '',
+            duration: eventDuration,
             elementAdvantage: getElementAdvantage(thisEventData)?.advantage,
             elementAdvantageImage: getElementAdvantage(thisEventData)?.image
         })
@@ -96,7 +97,7 @@ export async function getEventsInformation(eventData: string, type: 'Current' | 
     const eventImages = await Promise.all(eventImagePromises)
     events.forEach((event, i) => event.image = eventImages[i])
 
-    return events.length ? events.slice(0, 6) : [{title: 'No events found'} as event]
+    return events.length ? events.slice(0, 6) : [{type: 'Upcoming', title: 'No events to display', duration: ''} as event]
 }
 
 /** Draws event banners and their durations. */
@@ -146,7 +147,7 @@ export function getElementAdvantage(eventData: string) {
  * Takes an event and outputs the correct duration string for the event.
  */
 export function getEventDuration(event: event){
-    if (!event.duration){
+    if (event.type === 'Current'){
         const now = new Date()
         return now < event.start
             ? `Starts in ${dateDiff(now, event.start, true)}`
