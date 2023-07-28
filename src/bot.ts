@@ -276,6 +276,7 @@ export let items1: item[] = []
 export let items2: item[] = []
 export let featuredItemIDs: string[]
 export let bannerDuration: {start: string, end: string}
+export let drawRates: {'SS Rare': string, 'S Rare': string, 'Rare': string}
 async function getBannerData(){
 	items1 = [], items2 = [] // Clear the items before each run
     const gameVersion = (await axios.get('http://game.granbluefantasy.jp/')).data.match(/Game.version = "(\d+)"/i)?.[1]
@@ -294,9 +295,14 @@ async function getBannerData(){
 		axios.get(`http://game.granbluefantasy.jp/gacha/provision_ratio/legend/${banner.id}/2`, {headers: headers}),
 		axios.get('https://game.granbluefantasy.jp/gacha/list', {headers: headers})
 	])
-	featuredItemIDs = featured.data.header_images
 	const elements = ['None', 'Fire', 'Water', 'Earth', 'Wind', 'Light', 'Dark']
 	const weaponTypes = ['None', 'Sabre', 'Dagger', 'Spear', 'Axe', 'Staff', 'Gun', 'Melee', 'Bow', 'Harp', 'Katana']
+	featuredItemIDs = featured.data.header_images
+	drawRates = {
+		'SS Rare': items1Info.data.ratio[0].ratio,
+		'S Rare': items1Info.data.ratio[1].ratio,
+		'Rare': items1Info.data.ratio[2].ratio,
+	}
 
 	let cumulativeDropRate1 = 0
 	items1Info.data.appear.forEach(({item, rarity_name}: {item: rawItem[], rarity_name: string}) => {
