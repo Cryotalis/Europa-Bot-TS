@@ -116,8 +116,12 @@ export function drawEvent(ctx: CanvasRenderingContext2D, event: event, textX: nu
     let eventDuration = getEventDuration(event)
     
     // Draw the event banner, or text if there is no banner image
-    if (event.image) ctx.drawImage(event.image, eventX, eventY, 330, 78)
-    else wrapText({ctx: ctx, font: '25px Arial'}, event.title, textX, eventY + 43, 290, 30)
+    if (event.image){
+        let bannerHeight = event.image.height * 11 / 15
+        ctx.drawImage(event.image, eventX, eventY + (77 - bannerHeight) / 2, 330, bannerHeight)
+    } else {
+        wrapText({ctx: ctx, font: '25px Arial'}, event.title, textX, eventY + 43, 290, 30)
+    }
 
     if (event.elementAdvantageImage){
         textX += 18
