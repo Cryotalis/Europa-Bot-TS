@@ -65,12 +65,13 @@ async function loadAssets(){
         loadImage('https://cdn.discordapp.com/attachments/659229575821131787/842843224505843772/blueStar.png'),
         loadImage('https://cdn.discordapp.com/attachments/659229575821131787/842843214209482814/blueStarBlank.png'),
         Promise.all([
-            loadImage('src/assets/Transcendence Star 0.png'),
-            loadImage('src/assets/Transcendence Star 1.png'),
-            loadImage('src/assets/Transcendence Star 2.png'),
-            loadImage('src/assets/Transcendence Star 3.png'),
-            loadImage('src/assets/Transcendence Star 4.png'),
-            loadImage('src/assets/Transcendence Star 5.png'),
+            loadImage('assets/Transcendence Star 0.png'),
+            loadImage('assets/Transcendence Star 1.png'),
+            loadImage('assets/Transcendence Star 2.png'),
+            loadImage('assets/Transcendence Star 3.png'),
+            loadImage('assets/Transcendence Star 4.png'),
+            loadImage('assets/Transcendence Star 5.png'),
+            loadImage('assets/Transcendence Star Blank.png'),
         ]),
         loadImage('https://i.imgur.com/6zQvrJT.png'), // Normal Events Template
         loadImage('https://media.discordapp.net/attachments/647256353844232202/1033487287293579415/EventsHalloweenTemplate.png'), // Halloween Events Template
