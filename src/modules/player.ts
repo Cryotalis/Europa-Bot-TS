@@ -72,9 +72,9 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
         const summonYCoords = [ 50,  50,  50,  50, 115, 115, 115, 115, 180, 180, 180, 180, 275, 275]
         ctx.drawImage(summon.image, 0, 0, 500, 200, summonXCoords[i], summonYCoords[i], 250, 100)
 
-        const starXCoords = [405, 510, 620, 725, 405, 510, 620, 725, 405, 510, 620, 725, 505, 635]
-        const starYCoords = [ 92,  92,  92,  92, 157, 157, 157, 157, 222, 222, 222, 222, 316, 316]
-        drawStars(ctx, 13, 15, summon.uncaps, summon.maxUncaps, starXCoords[i], starYCoords[i])
+        const starXCoords = [398, 503, 613, 718, 398, 503, 613, 718, 398, 503, 613, 718, 498, 628]
+        const starYCoords = [ 91,  91,  91,  91, 156, 156, 156, 156, 221, 221, 221, 221, 316, 316]
+        drawStars(ctx, 15, 17, summon.uncaps, summon.maxUncaps, starXCoords[i], starYCoords[i])
     })
 
     // Fetch Star Character info and draw
