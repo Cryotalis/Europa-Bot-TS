@@ -1,6 +1,6 @@
 import { Canvas, CanvasRenderingContext2D, Image, createCanvas, loadImage } from "canvas"
 import { decode } from "html-entities"
-import { waterAdvantage, earthAdvantage, windAdvantage, fireAdvantage, darkAdvantage, lightAdvantage, currentEventsText, eventsBackground, upcomingEventsText } from "../assets/assets"
+import { waterAdvantage, earthAdvantage, windAdvantage, fireAdvantage, darkAdvantage, lightAdvantage, currentEventsText, eventsBackground, upcomingEventsText } from "./assets"
 import { wrapText } from "./image"
 import { dateDiff, getSimpleDate } from "./time"
 import { schedule } from "node-cron"

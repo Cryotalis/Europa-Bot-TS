@@ -1,7 +1,7 @@
 import { createCanvas } from 'canvas'
 import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
 import { browser, startPuppeteer } from '../bot'
-import { summonsTemplate } from '../assets/assets'
+import { summonsTemplate } from './assets'
 import { getAllSummonInfo, drawStars } from './granblue'
 import { languageCookie, accessCookie } from './variables'
 

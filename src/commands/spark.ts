@@ -5,7 +5,7 @@ import { Image, createCanvas, loadImage } from 'canvas'
 import { getDirectImgurLinks } from '../modules/image'
 import { formatList } from '../modules/string'
 import { isNumber } from '../modules/number'
-import { VIPTitle, clearSparkBG, defaultSparkBG, developerTitle, progressBars, sparkBGMask } from '../assets/assets'
+import { VIPTitle, clearSparkBG, defaultSparkBG, developerTitle, progressBars, sparkBGMask } from '../modules/assets'
 
 module.exports = {
 	data: new SlashCommandBuilder()
