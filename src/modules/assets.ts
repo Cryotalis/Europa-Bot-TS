@@ -9,6 +9,7 @@ export let blankRegularStar: Image
 export let blueStar: Image
 export let blankBlueStar: Image
 export let transcendenceStars: Image[]
+export let perpetuityRingIcon: Image
 
 export let eventsBackground: Image
 export let eventsBackgroundHalloween: Image
@@ -39,6 +40,7 @@ async function loadAssets(){
         blueStar,
         blankBlueStar,
         transcendenceStars,
+        perpetuityRingIcon,
         eventsBackground,
         eventsBackgroundHalloween,
         currentEventsText,
@@ -73,6 +75,7 @@ async function loadAssets(){
             loadImage('assets/Transcendence Star 5.png'),
             loadImage('assets/Transcendence Star Blank.png'),
         ]),
+        loadImage('assets/Perpetuity Ring Icon.png'),
         loadImage('https://i.imgur.com/6zQvrJT.png'), // Normal Events Template
         loadImage('https://media.discordapp.net/attachments/647256353844232202/1033487287293579415/EventsHalloweenTemplate.png'), // Halloween Events Template
         loadImage('https://i.imgur.com/8z0eQIk.png'),
