@@ -71,7 +71,7 @@ export async function getAllSummonInfo(rawHtml: string){
  * Draws uncap stars for summons.
  * @param ctx - The canvas context to draw the stars onto.
  * @param spacing - How far apart the stars should be spaced in pixels.
- * @param size - The width and height when drawing the stars (defaults to 29x29)
+ * @param size - The width and height when drawing the stars
  * @param uncaps - The number of times the summon has been uncapped.
  * @param maxUncaps - The maximum number of times the summon can be uncapped.
  * @param x - The x coordinate from which to start drawing the uncap stars.
