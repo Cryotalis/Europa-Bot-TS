@@ -79,7 +79,7 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
 
     // Fetch Star Character info and draw
     const starCharPrivate = /Star\sCharacter<\/div>\n.+Private/.test(bodyHTML)
-    const starCharRinged = /ico-augment2-s/.test(bodyHTML)
+    const starCharRinged = /"ico-augment2-s"/.test(bodyHTML)
     const starCharURL = String(bodyHTML.match(/(?<=img-pushed-npc"\ssrc=").+?(?=")/))
     let starCharName = String(bodyHTML.match(/(?<=prt-current-npc-name">)\s+?.+?\s+?(?=<)/)).trim()
     let emLvl = String(bodyHTML.match(/(?<=txt-npc-rank">)\d+(?=<)/))
