@@ -89,7 +89,7 @@ module.exports = {
 		const rolesEmbed = new EmbedBuilder()
 			.setAuthor({
 				name: `Server role list for ${interaction.guild?.name} was${addedRoles.concat(removedRoles).length === 0 ? ' not ' : ' '}updated`,
-				iconURL: interaction.guild?.iconURL({extension: 'png'}) ?? ''
+				iconURL: interaction.guild?.iconURL({extension: 'png'}) ?? undefined
 			})
 			.setColor('Blue')
 
