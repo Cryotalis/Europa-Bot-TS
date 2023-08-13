@@ -50,15 +50,18 @@ export async function loadSummons(interaction: ChatInputCommandInteraction, play
 	ctx.fillText(`${name} Rank ${rank}`, 467, 420)
 	ctx.fillText(`ID: ${playerID}`, 908, 420)
 
+	ctx.shadowColor = '#000000'
+    ctx.shadowOffsetX = ctx.shadowOffsetY = 4
+
 	const summons = await getAllSummonInfo(bodyHTML)
 	summons.forEach((summon, i) => {
 		const summonXCoords = [ 50,  50, 234, 234, 419, 419, 604, 604, 788, 788, 973, 973, 1158, 1158]
 		const summonYCoords = [155, 265, 155, 265, 155, 265, 155, 265, 155, 265, 155, 265,  155,  265]
 		ctx.drawImage(summon.image, summonXCoords[i], summonYCoords[i], 168, 96)
 
-		const xCoordinates = [113, 113, 297, 297, 482, 482, 667, 667, 851, 851, 1036, 1036, 1221, 1221]
+		const xCoordinates = [ 88,  88, 272, 272, 457, 457, 642, 642, 826, 826, 1011, 1011, 1196, 1196]
 		const yCoordinates = [220, 330, 220, 330, 220, 330, 220, 330, 220, 330,  220,  330,  220,  330]
-		drawStars(ctx, 19, 29, summon.uncaps, summon.maxUncaps, xCoordinates[i], yCoordinates[i])
+		drawStars(ctx, 25, 29, summon.uncaps, summon.maxUncaps, xCoordinates[i], yCoordinates[i])
 	})
 
 	const attachment = new AttachmentBuilder(canvas.toBuffer(), {name: `SupportSummons_${playerID}.png`})
