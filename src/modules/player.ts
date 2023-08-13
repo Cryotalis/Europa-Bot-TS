@@ -1,7 +1,7 @@
 import { createCanvas, loadImage } from "canvas"
 import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder } from "discord.js"
 import { browser, startPuppeteer } from "../bot"
-import { playerTemplate, openSummon } from "./assets"
+import { playerTemplate, openSummon, perpetuityRingIcon } from "./assets"
 import { getAllSummonInfo, drawStars } from "./granblue"
 import { wrapText } from "./image"
 import { languageCookie, accessCookie } from "./variables"
@@ -79,6 +79,7 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
 
     // Fetch Star Character info and draw
     const starCharPrivate = /Star\sCharacter<\/div>\n.+Private/.test(bodyHTML)
+    const starCharRinged = /ico-augment2-s/.test(bodyHTML)
     const starCharURL = String(bodyHTML.match(/(?<=img-pushed-npc"\ssrc=").+?(?=")/))
     let starCharName = String(bodyHTML.match(/(?<=prt-current-npc-name">)\s+?.+?\s+?(?=<)/)).trim()
     let emLvl = String(bodyHTML.match(/(?<=txt-npc-rank">)\d+(?=<)/))
@@ -105,6 +106,8 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
     ctx.fillText(`${starCharName}`, 580, 390)
 
     wrapText({ctx: ctx, font: '18px Times Bold', textAlign: 'left'}, `${starCharText}`, 525, 435, 240, 15)
+
+    if (starCharRinged) ctx.drawImage(perpetuityRingIcon, 460, 409, 22, 22)
 
     const attachment = new AttachmentBuilder(canvas.toBuffer(), {name: `Player_${playerID}.png`})
 
