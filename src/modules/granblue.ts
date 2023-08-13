@@ -36,13 +36,18 @@ export async function getAllSummonInfo(rawHtml: string){
         let uncaps = uncapRank
         summonImagePromises.push(loadImage(rawHtml.match(summonURLRegex)![1]))
 
-        if (uncapRank === 0 || isNaN(uncapRank)) { // Guess the summon uncap level based on level if the summon isn't at least mlb
+        if (uncapRank === 0 || level > 200 || isNaN(uncapRank)) { // Guess the summon uncap level based on level if the summon isn't at least mlb
             if (isInRange(level, 1, 40))    uncaps = 0
             if (isInRange(level, 41, 60))   uncaps = 1
             if (isInRange(level, 61, 80))   uncaps = 2
             if (isInRange(level, 81, 100))  uncaps = 3
             if (isInRange(level, 101, 150)) uncaps = 4
             if (isInRange(level, 151, 200)) uncaps = 5
+            if (isInRange(level, 201, 210)) uncaps = 6
+            if (isInRange(level, 211, 220)) uncaps = 7
+            if (isInRange(level, 221, 230)) uncaps = 8
+            if (isInRange(level, 231, 240)) uncaps = 9
+            if (isInRange(level, 241, 250)) uncaps = 10
         } else {
             uncaps += 2
         }
@@ -80,10 +85,12 @@ export function drawStars(ctx: CanvasRenderingContext2D, spacing: number, size: 
 
     x += (5 - maxUncaps) * spacing // This ensures that the placement of the stars is consistent no matter the number of stars that need to be drawn
     for (let i = 0; i < maxUncaps; i++) {
-        if (i < 3 && i < uncaps) {ctx.drawImage(regularStar, x + spacing * i, y, size, size)}
-        if (i < 3 && i >= uncaps) {ctx.drawImage(blankRegularStar, x + spacing * i, y, size, size)}
-        if (i >= 3 && i < uncaps) {ctx.drawImage(blueStar, x + spacing * i, y, size, size)}
-        if (i >= 3 && i >= uncaps) {ctx.drawImage(blankBlueStar, x + spacing * i, y, size, size)}
+        if (uncaps > 5 && i < uncaps - 5)  {ctx.drawImage(transcendenceStars[5], x + spacing * i, y, size, size); continue}
+        if (uncaps > 5 && i >= uncaps - 5) {ctx.drawImage(transcendenceStars[6], x + spacing * i, y, size, size); continue}
+        if (i < 3 && i < uncaps)   ctx.drawImage(regularStar, x + spacing * i, y, size, size)
+        if (i < 3 && i >= uncaps)  ctx.drawImage(blankRegularStar, x + spacing * i, y, size, size)
+        if (i >= 3 && i < uncaps)  ctx.drawImage(blueStar, x + spacing * i, y, size, size)
+        if (i >= 3 && i >= uncaps) ctx.drawImage(blankBlueStar, x + spacing * i, y, size, size)
     }
     ctx.restore()
 }
