@@ -8,6 +8,7 @@ export let regularStar: Image
 export let blankRegularStar: Image
 export let blueStar: Image
 export let blankBlueStar: Image
+export let transcendenceStars: Image[]
 
 export let eventsBackground: Image
 export let eventsBackgroundHalloween: Image
@@ -37,6 +38,7 @@ async function loadAssets(){
         blankRegularStar,
         blueStar,
         blankBlueStar,
+        transcendenceStars,
         eventsBackground,
         eventsBackgroundHalloween,
         currentEventsText,
@@ -62,6 +64,14 @@ async function loadAssets(){
         loadImage('https://cdn.discordapp.com/attachments/659229575821131787/842840831311347732/regularStarBlank.png'),
         loadImage('https://cdn.discordapp.com/attachments/659229575821131787/842843224505843772/blueStar.png'),
         loadImage('https://cdn.discordapp.com/attachments/659229575821131787/842843214209482814/blueStarBlank.png'),
+        Promise.all([
+            loadImage('src/modules/Transcendence Star 0.png'),
+            loadImage('src/modules/Transcendence Star 1.png'),
+            loadImage('src/modules/Transcendence Star 2.png'),
+            loadImage('src/modules/Transcendence Star 3.png'),
+            loadImage('src/modules/Transcendence Star 4.png'),
+            loadImage('src/modules/Transcendence Star 5.png'),
+        ]),
         loadImage('https://i.imgur.com/6zQvrJT.png'), // Normal Events Template
         loadImage('https://media.discordapp.net/attachments/647256353844232202/1033487287293579415/EventsHalloweenTemplate.png'), // Halloween Events Template
         loadImage('https://i.imgur.com/8z0eQIk.png'),

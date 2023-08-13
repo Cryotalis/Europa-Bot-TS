@@ -1,6 +1,6 @@
 import { CanvasRenderingContext2D, Image, loadImage } from 'canvas'
 import { data } from '../bot'
-import { blankBlueStar, blankRegularStar, blueStar, privateSummon, regularStar } from './assets'
+import { blankBlueStar, blankRegularStar, blueStar, privateSummon, regularStar } from '../assets/assets'
 import { isInRange } from './number'
 
 /**
