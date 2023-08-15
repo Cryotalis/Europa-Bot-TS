@@ -278,15 +278,16 @@ export let featuredItemIDs: string[]
 export let bannerDuration: {start: string, end: string}
 export let drawRates: {'SS Rare': string, 'S Rare': string, 'Rare': string}
 async function getBannerData(){
-	items1 = [], items2 = [] // Clear the items before each run
-    const gameVersion = (await axios.get('http://game.granbluefantasy.jp/')).data.match(/Game.version = "(\d+)"/i)?.[1]
+	const gameVersion = (await axios.get('http://game.granbluefantasy.jp/')).data.match(/Game.version = "(\d+)"/i)?.[1]
 	if (!gameVersion) return
+	
 	const headers = {
-        Cookie: `wing=${accessCookie.value};ln=${languageCookie.value}`,
+		Cookie: `wing=${accessCookie.value};ln=${languageCookie.value}`,
         'X-Requested-With': 'XMLHttpRequest',
         'X-VERSION': gameVersion
     }
-
+	
+	items1 = [], items2 = [] // Clear the items before each run
 	const bannerInfo = await axios.get('http://game.granbluefantasy.jp/gacha/list', {headers: headers})
 	const banner = bannerInfo.data.legend.lineup.find((banner: {name: string}) => banner.name === 'Premium 10-Part Draw')
 	bannerDuration = {start: banner.service_start, end: banner.service_end}
