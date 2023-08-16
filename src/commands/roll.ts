@@ -104,18 +104,18 @@ module.exports = {
 		}
 
 		function findTarget(target: string){
-			const gachaData = data.filter(item => items1.some(item1 => item1.id === item.weaponID || item1.id === item.summonID)) // Remove items that are not on the current banner
-			const characterNames = gachaData.map(item => item.characterName).filter(i => i)
-			const weaponNames = gachaData.map(item => item.weaponName).filter(i => i)
-			const summonNames = gachaData.map(item => item.summonName).filter(i => i)
-			const allItemNames = characterNames.concat(summonNames).concat(weaponNames)
+			const bannerWeaponNames = items1.map(item => item.name)
+			const characterNames = data.map(item => item.characterName).filter(i => i)
+			const weaponNames = data.map(item => item.weaponName).filter(i => i)
+			const summonNames = data.map(item => item.summonName).filter(i => i)
+			const allItemNames = [characterNames, summonNames, weaponNames, bannerWeaponNames].flat()
 
 			const targetName = /summon/i.test(target)
 				? findBestCIMatch(target.replace(/summon/i, ''), summonNames).bestMatch.target
 				: findBestCIMatch(target, allItemNames).bestMatch.target
-			const targetWeaponID = gachaData.find(item => item.characterName === targetName || item.weaponName === targetName)?.weaponID
-			const targetSummonID = gachaData.find(item => item.summonName === targetName)?.summonID
-			return items1.find(item => item.id === (targetWeaponID ?? targetSummonID))
+			const targetWeaponID = data.find(item => item.characterName === targetName || item.weaponName === targetName)?.weaponID
+			const targetSummonID = data.find(item => item.summonName === targetName)?.summonID
+			return items1.find(item => item.id === (targetWeaponID ?? targetSummonID)) ?? targetName
 		}
 
 		if (!data) return interaction.reply('Database connection failed. Please try again later.')
@@ -123,12 +123,10 @@ module.exports = {
 		await interaction.deferReply()
 		const command = interaction.options.getSubcommand()
 		const amount = interaction.options.getNumber('amount') ?? 1
-		const targetInput = interaction.options.getString('target')
+		const targetInput = interaction.options.getString('target')!
 		const user = sparkProfiles.find(profile => profile.userID === interaction.user.id || profile.userTag === interaction.user.tag)
-		let crystals = 0, 
-			singles = 0,
-			tenparts = 0,
-			target = undefined
+		let crystals = 0, singles = 0, tenparts = 0
+		let	target: item | string = ''
 		
 		switch (command) {
 			case 'singles':
@@ -147,9 +145,11 @@ module.exports = {
 				tenparts = parseInt(user.tenParts)
 				break
 			case 'until':
-				target = findTarget(targetInput!)
+				target = findTarget(targetInput)
 				break
 		}
+
+		if (typeof target === 'string') return interaction.editReply(`**${target}** is not available on the current banner.`)
 
 		const items = gacha(crystals, singles, tenparts, target)
 		return interaction.editReply({embeds: [createGachaEmbed(items, target)]})
