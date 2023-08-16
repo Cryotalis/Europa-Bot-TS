@@ -5,6 +5,7 @@ import { playerTemplate, openSummon, perpetuityRingIcon } from "./assets"
 import { getAllSummonInfo, drawStars } from "./granblue"
 import { wrapText } from "./image"
 import { languageCookie, accessCookie } from "./variables"
+import { decode } from "html-entities"
 
 export async function loadProfile(interaction: ChatInputCommandInteraction, playerID: string) {
     const playerEmbed = new EmbedBuilder()
@@ -83,7 +84,7 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
     const starCharURL = String(bodyHTML.match(/(?<=img-pushed-npc"\ssrc=").+?(?=")/))
     let starCharName = String(bodyHTML.match(/(?<=prt-current-npc-name">)\s+?.+?\s+?(?=<)/)).trim()
     let emLvl = String(bodyHTML.match(/(?<=txt-npc-rank">)\d+(?=<)/))
-    let starCharText = String(bodyHTML.match(/(?<=prt-pushed-info">).+?(?=<)/))
+    let starCharText = decode(String(bodyHTML.match(/(?<=prt-pushed-info">).+?(?=<)/)))
     let starCharImage
     if (starCharURL.includes('empty.jpg')){starCharImage = openSummon; starCharName = 'Not Set'; emLvl = 'N/A'}
     else if (starCharPrivate){starCharName = 'Private'; emLvl = 'N/A'; starCharText = 'Private' }
