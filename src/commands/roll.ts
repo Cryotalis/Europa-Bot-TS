@@ -115,7 +115,8 @@ module.exports = {
 				: findBestCIMatch(target, allItemNames).bestMatch.target
 			const targetWeaponID = data.find(item => item.characterName === targetName || item.weaponName === targetName)?.weaponID
 			const targetSummonID = data.find(item => item.summonName === targetName)?.summonID
-			return items1.find(item => item.id === (targetWeaponID ?? targetSummonID)) ?? targetName
+			const targetItem = items1.find(item => item.id === (targetWeaponID ?? targetSummonID) || item.character === targetName || item.name === targetName)
+			return targetItem ?? targetName
 		}
 
 		if (!data) return interaction.reply('Database connection failed. Please try again later.')
@@ -126,7 +127,7 @@ module.exports = {
 		const targetInput = interaction.options.getString('target')!
 		const user = sparkProfiles.find(profile => profile.userID === interaction.user.id || profile.userTag === interaction.user.tag)
 		let crystals = 0, singles = 0, tenparts = 0
-		let	target: item | string = ''
+		let	target: item | string | undefined = undefined
 		
 		switch (command) {
 			case 'singles':
@@ -146,10 +147,9 @@ module.exports = {
 				break
 			case 'until':
 				target = findTarget(targetInput)
+				if (typeof target === 'string') return interaction.editReply(`**${target}** is not available on the current banner.`)
 				break
 		}
-
-		if (typeof target === 'string') return interaction.editReply(`**${target}** is not available on the current banner.`)
 
 		const items = gacha(crystals, singles, tenparts, target)
 		return interaction.editReply({embeds: [createGachaEmbed(items, target)]})
