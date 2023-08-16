@@ -311,7 +311,7 @@ async function getBannerData(){
 			item.map((item: rawItem) => {
 				cumulativeDropRate1 += parseFloat(item.drop_rate)
 				return {
-					name: item.name + (item.is_season ? ` ${item.season_message}` : ''),
+					name: `${item.name} ${item.season_message}`.trim(),
 					id: String(item.reward_id),
 					rarity: rarity_name,
 					element: elements[parseInt(item.attribute)],
@@ -331,7 +331,7 @@ async function getBannerData(){
 			item.map((item: rawItem) => {
 				cumulativeDropRate2 += parseFloat(item.drop_rate)
 				return {
-					name: item.name,
+					name: `${item.name} ${item.season_message}`.trim(),
 					id: String(item.reward_id),
 					rarity: rarity_name,
 					element: elements[parseInt(item.attribute)],
