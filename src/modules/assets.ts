@@ -11,9 +11,9 @@ export let blankBlueStar: Image
 export let transcendenceStars: Image[]
 export let perpetuityRingIcon: Image
 
-export let eventsBackground: Image
-export let eventsBackgroundHalloween: Image
-export let currentEventsText: Image
+export let eventsBackgroundTop: Image
+export let eventsBackgroundMiddle: Image
+export let eventsBackgroundBottom: Image
 export let upcomingEventsText: Image
 
 export let fireAdvantage: Image
@@ -41,9 +41,9 @@ async function loadAssets(){
         blankBlueStar,
         transcendenceStars,
         perpetuityRingIcon,
-        eventsBackground,
-        eventsBackgroundHalloween,
-        currentEventsText,
+        eventsBackgroundTop,
+        eventsBackgroundMiddle,
+        eventsBackgroundBottom,
         upcomingEventsText,
         fireAdvantage,
         waterAdvantage,
@@ -76,10 +76,10 @@ async function loadAssets(){
             loadImage('assets/Transcendence Star Blank.png'),
         ]),
         loadImage('assets/Perpetuity Ring Icon.png'),
-        loadImage('https://i.imgur.com/6zQvrJT.png'), // Normal Events Template
-        loadImage('https://media.discordapp.net/attachments/647256353844232202/1033487287293579415/EventsHalloweenTemplate.png'), // Halloween Events Template
-        loadImage('https://i.imgur.com/8z0eQIk.png'),
-        loadImage('https://i.imgur.com/dSzz0to.png'),
+        loadImage('assets/Events Background Top.png'),    
+        loadImage('assets/Events Background Middle.png'), 
+        loadImage('assets/Events Background Bottom.png'), 
+        loadImage('assets/Upcoming Events Text.png'),
         loadImage('https://gbf.wiki/images/thumb/7/77/Status_FireAtkUp.png/25px-Status_FireAtkUp.png'),
         loadImage('https://gbf.wiki/images/thumb/0/08/Status_WaterAtkUp.png/25px-Status_WaterAtkUp.png'),
         loadImage('https://gbf.wiki/images/thumb/4/44/Status_EarthAtkUp.png/25px-Status_EarthAtkUp.png'),
