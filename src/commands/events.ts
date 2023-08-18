@@ -28,7 +28,7 @@ module.exports = {
 			const ctx = canvas.getContext('2d')
 			ctx.drawImage(eventsTemplate, 0, 0)
 
-			let X = 25, Y = 120 // Starting position for event banners
+			let X = 25, Y = 110 // Starting position for event banners
 			currentEvents.forEach((event, i) => {
 				if (i % 2 === 0){ // Draw events in the left column
 					const lastEvent = Boolean(i + 1 === currentEvents.length)

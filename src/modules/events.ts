@@ -36,9 +36,9 @@ async function loadEvents(){
     ctx.drawImage(eventsBackgroundBottom, 0, 100 + canvasHeight)
 
     let X = 25
-    let Y = 120 + Math.ceil(currentEvents.length / 2) * 110
-    ctx.drawImage(upcomingEventsText, 165, Y)
-    Y += 40
+    let Y = Math.ceil(currentEvents.length / 2) * 110 + 110 + 5
+    ctx.drawImage(upcomingEventsText, 155, Y)
+    Y += 45
 
     upcomingEvents.forEach((event, i) => {
         if (i % 2 === 0){ // Draw events in the left column
