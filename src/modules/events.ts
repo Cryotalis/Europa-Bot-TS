@@ -1,6 +1,6 @@
 import { Canvas, CanvasRenderingContext2D, Image, createCanvas, loadImage } from "canvas"
 import { decode } from "html-entities"
-import { waterAdvantage, earthAdvantage, windAdvantage, fireAdvantage, darkAdvantage, lightAdvantage, currentEventsText, eventsBackground, upcomingEventsText } from "./assets"
+import { waterAdvantage, earthAdvantage, windAdvantage, fireAdvantage, darkAdvantage, lightAdvantage, eventsBackgroundTop, eventsBackgroundMiddle, eventsBackgroundBottom, upcomingEventsText } from "./assets"
 import { wrapText } from "./image"
 import { dateDiff, getSimpleDate } from "./time"
 import { schedule } from "node-cron"
@@ -27,12 +27,13 @@ async function loadEvents(){
     ])
 
     // Create the events image
-    const canvasHeight = 200 + Math.ceil(currentEvents.length / 2) * 110 + Math.ceil(upcomingEvents.length / 2) * 110
-    const canvas = createCanvas(700, canvasHeight)
+    const canvasHeight = Math.ceil(currentEvents.length / 2) * 110 + Math.ceil(upcomingEvents.length / 2) * 110 + 50
+    const canvas = createCanvas(700, canvasHeight + 150)
     const ctx = canvas.getContext('2d')
 
-    ctx.drawImage(eventsBackground, 0, 0, 700, canvasHeight)
-    ctx.drawImage(currentEventsText, 170, 65)
+    ctx.drawImage(eventsBackgroundTop, 0, 0)
+    ctx.drawImage(eventsBackgroundMiddle, 0, 100, 700, canvasHeight)
+    ctx.drawImage(eventsBackgroundBottom, 0, 100 + canvasHeight)
 
     let X = 25
     let Y = 120 + Math.ceil(currentEvents.length / 2) * 110
