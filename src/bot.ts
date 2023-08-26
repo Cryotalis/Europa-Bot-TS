@@ -8,6 +8,8 @@ import { Browser, launch } from 'puppeteer'
 import axios from 'axios'
 import { accessCookie, languageCookie } from './modules/variables'
 import { greetingConfig, makeGreetingImage } from './modules/greeting'
+import { App } from 'octokit'
+import { dateStringToUnix } from './modules/time'
 
 export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration]})
 export const cryoServerShardID = ShardClientUtil.shardIdForGuildId('379501550097399810', client.shard?.count!)
@@ -347,6 +349,23 @@ async function getBannerData(){
 			'Rare': items1Info.data.ratio[2].ratio,
 		}
 	}
+
+	const bannerStart = new Date(dateStringToUnix(banner.service_start)!)
+	const bannerMonth = bannerStart.toLocaleString('default', {month: 'long', timeZone: 'JST'})
+	const bannerYear = bannerStart.toLocaleString('default', {year: 'numeric', timeZone: 'JST'})
+	const app = new App({
+		appId: process.env.GITHUB_APP_ID!,
+		privateKey: process.env.GITHUB_PRIVATE_KEY!,
+	})
+	
+	const octokit = await app.getInstallationOctokit(parseInt(process.env.GITHUB_INSTALLATION_ID!))
+	const filePath = `/repos/Cryotalis/GBF-Banner-Data/contents/${bannerYear}/${bannerMonth}/${banner.id}.json`
+	const {status} = await octokit.request(`GET ${filePath}`).catch(error => error)
+	if (status !== 404) return // Do not upload if the file already exists
+	await octokit.request(`PUT ${filePath}`, {
+		message: `Uploaded banner data for banner ${banner.id}`,
+		content: Buffer.from(JSON.stringify(bannerData, null, "\t")).toString('base64'),
+	})
 }
 getBannerData()
 schedule('0 * * * *', () => getBannerData())
