@@ -28,7 +28,7 @@ module.exports = {
 		)
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
-		const rolesInput = interaction.options.getString('roles')!.match(/[\w\s]+/g)?.filter(r => /\w/.test(r))
+		const rolesInput = interaction.options.getString('roles')?.match(/[\w\s]+/g)?.filter(r => /\w/.test(r))
 		const category = interaction.options.getString('category') ?? 'General'
 		const newName = interaction.options.getString('name')!
 		if (!rolesInput?.length && !newName) return interaction.reply('The roles you provided were invalid.')
