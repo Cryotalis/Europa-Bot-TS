@@ -93,7 +93,7 @@ module.exports = {
 			})
 			.setColor('Blue')
 
-		if (removedRoles.length > 0) rolesEmbed.addFields([{name: `Roles removed from category '${category}':`, value: `${removedRoles.join(' ')}`}])
+		if (removedRoles.length > 0) rolesEmbed.addFields([{name: `Roles removed:`, value: `${removedRoles.join(' ')}`}])
 		if (addedRoles.length > 0) rolesEmbed.addFields([{name: `Roles added to category '${newName ?? category}':`, value: `${addedRoles.join(' ')}`}])
 		if (invalidRoles.length > 0) rolesEmbed.addFields([{name: 'Invalid roles:', value: `${invalidRoles.join(' ')}`}])
 
