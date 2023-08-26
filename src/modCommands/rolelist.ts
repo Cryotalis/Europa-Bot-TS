@@ -29,8 +29,8 @@ module.exports = {
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
 		const rolesInput = interaction.options.getString('roles')?.match(/[\w\s]+/g)?.filter(r => /\w/.test(r))
-		const category = interaction.options.getString('category') ?? 'General'
 		const newName = interaction.options.getString('name')!
+		let category = interaction.options.getString('category')
 		if (!rolesInput?.length && !newName) return interaction.reply('The roles you provided were invalid.')
 
 		const clientUser = interaction.guild?.members.me! as GuildMember
@@ -44,6 +44,7 @@ module.exports = {
 		const command = interaction.options.getSubcommand()
 		if (command === 'add'){
 			rolesInput!.forEach(roleInput => {
+				if (!category) category = 'General'
 				const role = /^\d+$/.test(roleInput)
 					? serverRoles?.find(role => role.id === roleInput)
 					: serverRoles?.find(role => role.name === findBestMatch(roleInput, serverRoles.map(role => role.name)).bestMatch.target)
@@ -69,6 +70,7 @@ module.exports = {
 				if (!role || !serverRole) {
 					invalidRoles.push(roleInput)
 				} else {
+					category = serverRole.category
 					serverRolesConfig.splice(serverRolesConfig.indexOf(serverRole), 1)
 					removedRoles.push(role)
 				}
@@ -93,7 +95,7 @@ module.exports = {
 			})
 			.setColor('Blue')
 
-		if (removedRoles.length > 0) rolesEmbed.addFields([{name: `Roles removed:`, value: `${removedRoles.join(' ')}`}])
+		if (removedRoles.length > 0) rolesEmbed.addFields([{name: `Roles removed from category '${category}':`, value: `${removedRoles.join(' ')}`}])
 		if (addedRoles.length > 0) rolesEmbed.addFields([{name: `Roles added to category '${newName ?? category}':`, value: `${addedRoles.join(' ')}`}])
 		if (invalidRoles.length > 0) rolesEmbed.addFields([{name: 'Invalid roles:', value: `${invalidRoles.join(' ')}`}])
 
