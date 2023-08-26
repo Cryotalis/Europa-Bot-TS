@@ -267,16 +267,28 @@ export interface item {
 	rarity: string,
 	element: string,
 	type: string,
-	drop_rate: number,
-	weight: number,
+	rate1: number,
+	rate2: number,
+	cum_rate1: number,
+	cum_rate2: number,
 	rate_up: boolean,
 	character: string | null
 }
-export let items1: item[] = []
-export let items2: item[] = []
-export let featuredItemIDs: string[]
-export let bannerDuration: {start: string, end: string}
-export let drawRates: {'SS Rare': string, 'S Rare': string, 'Rare': string}
+interface bannerInfo {
+	id: string,
+	key: string,
+	start: string,
+	end: string,
+	featuredItemIDs: string[],
+	totalRate1: number,
+	totalRate2: number,
+	drawRates: {
+		'SS Rare': string,
+		'S Rare': string,
+		'Rare': string
+	}
+}
+export const bannerData: {bannerInfo: bannerInfo, items: item[]} = {bannerInfo: {} as bannerInfo, items: []}
 async function getBannerData(){
 	const gameVersion = (await axios.get('http://game.granbluefantasy.jp/')).data.match(/Game.version = "(\d+)"/i)?.[1]
 	if (!gameVersion) return
@@ -287,10 +299,8 @@ async function getBannerData(){
         'X-VERSION': gameVersion
     }
 	
-	items1 = [], items2 = [] // Clear the items before each run
 	const bannerInfo = await axios.get('http://game.granbluefantasy.jp/gacha/list', {headers: headers})
 	const banner = bannerInfo.data.legend.lineup.find((banner: {name: string}) => banner.name === 'Premium 10-Part Draw')
-	bannerDuration = {start: banner.service_start, end: banner.service_end}
 	const [items1Info, items2Info, featured] = await Promise.all([
 		axios.get(`http://game.granbluefantasy.jp/gacha/provision_ratio/legend/${banner.id}/1`, {headers: headers}),
 		axios.get(`http://game.granbluefantasy.jp/gacha/provision_ratio/legend/${banner.id}/2`, {headers: headers}),
@@ -298,52 +308,45 @@ async function getBannerData(){
 	])
 	const elements = ['None', 'Fire', 'Water', 'Earth', 'Wind', 'Light', 'Dark']
 	const weaponTypes = ['None', 'Sabre', 'Dagger', 'Spear', 'Axe', 'Staff', 'Gun', 'Melee', 'Bow', 'Harp', 'Katana']
-	featuredItemIDs = featured.data.header_images
-	drawRates = {
-		'SS Rare': items1Info.data.ratio[0].ratio,
-		'S Rare': items1Info.data.ratio[1].ratio,
-		'Rare': items1Info.data.ratio[2].ratio,
-	}
-
+	
 	let cumulativeDropRate1 = 0
-	items1Info.data.appear.forEach(({item, rarity_name}: {item: rawItem[], rarity_name: string}) => {
-		items1 = items1.concat(
-			item.map((item: rawItem) => {
-				cumulativeDropRate1 += parseFloat(item.drop_rate)
-				return {
-					name: `${item.name} ${item.season_message}`.trim(),
-					id: String(item.reward_id),
-					rarity: rarity_name,
-					element: elements[parseInt(item.attribute)],
-					type: item.kind ? weaponTypes[parseInt(item.kind)] : 'Summon',
-					drop_rate: parseFloat(item.drop_rate),
-					weight: parseFloat(cumulativeDropRate1.toFixed(3)),
-					rate_up: Boolean(item.incidence),
-					character: item.character_name
-				}
-			})
-		)
+	let cumulativeDropRate2 = 0
+	let items1: rawItem[] = items1Info.data.appear.flatMap((data: {rarity_name: string, item: rawItem[]}) => data.item.map((item) => ({...item, rarity: data.rarity_name})))
+	let items2: rawItem[] = items2Info.data.appear.flatMap((data: {rarity_name: string, item: rawItem[]}) => data.item.map((item) => ({...item, rarity: data.rarity_name})))
+
+	bannerData.items = items1.map(item1 => {
+		let item2 = items2.find(item2 => item1.reward_id === item2.reward_id)
+		cumulativeDropRate1 += parseFloat(item1.drop_rate)
+		cumulativeDropRate2 += parseFloat(item2?.drop_rate ?? '0')
+		return {
+			name: `${item1.name} ${item1.season_message}`.trim(),
+			id: String(item1.reward_id),
+			rarity: item1.rarity,
+			element: elements[parseInt(item1.attribute)],
+			type: item1.kind ? weaponTypes[parseInt(item1.kind)] : 'Summon',
+			rate1: parseFloat(item1.drop_rate),
+			rate2: parseFloat(item2?.drop_rate ?? '0'),
+			cum_rate1: parseFloat(cumulativeDropRate1.toFixed(3)),
+			cum_rate2: parseFloat(item2 ? cumulativeDropRate2.toFixed(3) : '0'),
+			rate_up: Boolean(item1.incidence),
+			character: item1.character_name
+		}
 	})
 
-	let cumulativeDropRate2 = 0
-	items2Info.data.appear.forEach(({item, rarity_name}: {item: rawItem[], rarity_name: string}) => {
-		items2 = items2.concat(
-			item.map((item: rawItem) => {
-				cumulativeDropRate2 += parseFloat(item.drop_rate)
-				return {
-					name: `${item.name} ${item.season_message}`.trim(),
-					id: String(item.reward_id),
-					rarity: rarity_name,
-					element: elements[parseInt(item.attribute)],
-					type: item.kind ? weaponTypes[parseInt(item.kind)] : 'Summon',
-					drop_rate: parseFloat(item.drop_rate),
-					weight: parseFloat(cumulativeDropRate2.toFixed(3)),
-					rate_up: Boolean(item.incidence),
-					character: item.character_name
-				}
-			})
-		)
-	})
+	bannerData.bannerInfo = {
+		id: banner.id,
+		key: bannerInfo.data.legend.random_key,
+		start: banner.service_start,
+		end: banner.service_end,
+		featuredItemIDs: featured.data.header_images,
+		totalRate1: parseFloat(cumulativeDropRate1.toFixed(3)),
+		totalRate2: parseFloat(cumulativeDropRate2.toFixed(3)),
+		drawRates: {
+			'SS Rare': items1Info.data.ratio[0].ratio,
+			'S Rare': items1Info.data.ratio[1].ratio,
+			'Rare': items1Info.data.ratio[2].ratio,
+		}
+	}
 }
 getBannerData()
 schedule('0 * * * *', () => getBannerData())

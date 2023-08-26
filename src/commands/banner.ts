@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { bannerDuration, drawRates, featuredItemIDs, items1 } from '../bot'
+import { bannerData } from '../bot'
 import { dateStringToUnix } from '../modules/time'
 import { weaponEmotes, rarityEmotes } from '../modules/variables'
 
@@ -12,16 +12,17 @@ module.exports = {
 	async execute(interaction: ChatInputCommandInteraction) {
 		const includeNonSSRItems = interaction.options.getBoolean('detailed')
 		const includedRarities = includeNonSSRItems ? ['SS Rare', 'S Rare', 'Rare'] : ['SS Rare']
+		const {start, end, drawRates, featuredItemIDs} = bannerData.bannerInfo
 		const bannerInfoEmbed = new EmbedBuilder()
 			.setTitle('__Banner Information__')
 			.setDescription(
-				`<t:${dateStringToUnix(bannerDuration.start)!/1000}> ~ <t:${dateStringToUnix(bannerDuration.end)!/1000}> (Ends <t:${dateStringToUnix(bannerDuration.end)!/1000}:R>)\n
+				`<t:${dateStringToUnix(start)!/1000}> ~ <t:${dateStringToUnix(end)!/1000}> (Ends <t:${dateStringToUnix(end)!/1000}:R>)\n
 				**${rarityEmotes['SS Rare']} ${drawRates['SS Rare']} ${rarityEmotes['S Rare']} ${drawRates['S Rare']} ${rarityEmotes['Rare']} ${drawRates['Rare']}**\n
 				**The following items have boosted draw rates:**`
 			)
 			.setColor('Blue')
 
-		const rateUpItems = items1
+		const rateUpItems = bannerData.items
 			.filter(item => item.rate_up && includedRarities.includes(item.rarity))
 			.sort((a, b) => (featuredItemIDs.includes(a.id) ? -1 : featuredItemIDs.includes(b.id) ? 1 : 0))
 
@@ -32,7 +33,7 @@ module.exports = {
 				: item.character
 					? `👤 ${item.character}`
 					: weaponEmotes[item.type] + 'Weapon'
-			bannerInfoEmbed.addFields([{name: `${rarityEmotes[item.rarity]}${item.name} (${featured ? 'Featured | ' : ''}${item.drop_rate}%)`, value: description}])
+			bannerInfoEmbed.addFields([{name: `${rarityEmotes[item.rarity]}${item.name} (${featured ? 'Featured | ' : ''}${item.rate1}%)`, value: description}])
 		})
 		
 		interaction.reply({embeds: [bannerInfoEmbed]})

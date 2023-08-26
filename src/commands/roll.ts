@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { data, item, items1, items2, sparkProfiles } from '../bot'
+import { bannerData, data, item, sparkProfiles } from '../bot'
 import { findBestCIMatch } from '../modules/string'
 import { weaponEmotes, rarityEmotes } from '../modules/variables'
 
@@ -41,16 +41,17 @@ module.exports = {
 			if (target) tenparts = Infinity
 			const rolls = Math.floor(crystals / 300) + singles + tenparts * 10
 			const tenPartDraws = tenparts + Math.floor(crystals / 3000)
+			const {totalRate1, totalRate2} = bannerData.bannerInfo
 
 			// Roll for items
 			const items: item[] = []
 			for (let i = 1; i <= rolls; i++){
 				if (i % 10 === 0 && i <= tenPartDraws * 10){ // Draw from 2nd set of items for 10-Part Draws on the 10th draw
-					const rand = Math.random() * items2[items2.length - 1].weight
-					items.push(items2.find(item => item.weight >= rand)!)
+					const rand = Math.random() * totalRate2
+					items.push(bannerData.items.find(item => item.cum_rate2 >= rand)!)
 				} else {
-					const rand = Math.random() * items1[items1.length - 1].weight
-					items.push(items1.find(item => item.weight >= rand)!)
+					const rand = Math.random() * totalRate1
+					items.push(bannerData.items.find(item => item.cum_rate1 >= rand)!)
 				}
 
 				if (i < tenPartDraws * 10 && target && items.includes(target)) break
@@ -104,7 +105,7 @@ module.exports = {
 		}
 
 		function findTarget(target: string){
-			const bannerWeaponNames = items1.map(item => item.name)
+			const bannerWeaponNames = bannerData.items.map(item => item.name)
 			const characterNames = data.map(item => item.characterName).filter(i => i)
 			const weaponNames = data.map(item => item.weaponName).filter(i => i)
 			const summonNames = data.map(item => item.summonName).filter(i => i)
@@ -115,7 +116,7 @@ module.exports = {
 				: findBestCIMatch(target, allItemNames).bestMatch.target
 			const targetWeaponID = data.find(item => item.characterName === targetName || item.weaponName === targetName)?.weaponID
 			const targetSummonID = data.find(item => item.summonName === targetName)?.summonID
-			const targetItem = items1.find(item => item.id === (targetWeaponID ?? targetSummonID) || item.character === targetName || item.name === targetName)
+			const targetItem = bannerData.items.find(item => item.id === (targetWeaponID ?? targetSummonID) || item.character === targetName || item.name === targetName)
 			return targetItem ?? targetName
 		}
 
