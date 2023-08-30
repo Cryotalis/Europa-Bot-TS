@@ -374,7 +374,7 @@ client.login(process.env.BOT_TOKEN)
 
 // Check every hour, if memory exceeds 400MB, stop accepting commands and kill the shard after 1 minute.
 schedule('0 * * * *', () => {
-	if (process.memoryUsage().heapUsed / 1024 / 1024 > 350){
+	if (process.memoryUsage().heapUsed / 1024 / 1024 > 325){
 		isHost = false
 		setTimeout(() => process.exit(), 6e+4)
 	}
