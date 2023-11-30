@@ -11,7 +11,7 @@ import { greetingConfig, makeGreetingImage } from './modules/greeting'
 import { App } from 'octokit'
 import { dateStringToUnix } from './modules/time'
 
-export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration]})
+export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration], rest: {timeout: 60000}})
 export const cryoServerShardID = ShardClientUtil.shardIdForGuildId('379501550097399810', client.shard?.count!)
 const currentShardID = client.shard?.ids[0]
 // let isHost = os.hostname() !== 'PC-Hywell'
