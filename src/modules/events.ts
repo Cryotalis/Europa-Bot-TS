@@ -80,8 +80,8 @@ export async function getEventsInformation(eventData: string, type: 'Current' | 
         const eventEpochs = [...thisEventData.matchAll(/data-(?:start|end|time)="(\d+)"/g)].map(match => parseInt(match[1]))
         const [eventStart, eventEnd] = [...new Set(eventEpochs)].map(epoch => new Date(epoch * 1000))
 
-        const inMonth = thisEventData.match(/(?:In\s)(?:January|February|March|April|May|June|July|August|September|October|November|December)/)?.[0]
-        const eventDuration = inMonth ?? `${getSimpleDate(eventStart)} - ${getSimpleDate(eventEnd)}`
+        const monthInfo = thisEventData.match(/(?<=>)[^>]+(?:January|February|March|April|May|June|July|August|September|October|November|December)/)?.[0]
+        const eventDuration = eventEpochs.length ? `${getSimpleDate(eventStart)} - ${getSimpleDate(eventEnd)}` : monthInfo
         
         events.push({
             type: type,
@@ -89,7 +89,7 @@ export async function getEventsInformation(eventData: string, type: 'Current' | 
             image: undefined,
             start: eventStart,
             end: eventEnd,
-            duration: eventDuration,
+            duration: eventDuration!,
             elementAdvantage: getElementAdvantage(thisEventData)?.advantage,
             elementAdvantageImage: getElementAdvantage(thisEventData)?.image
         })
