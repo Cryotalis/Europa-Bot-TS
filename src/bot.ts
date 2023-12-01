@@ -329,7 +329,7 @@ async function getBannerData(){
 			rate1: parseFloat(item1.drop_rate),
 			rate2: parseFloat(item2?.drop_rate ?? '0'),
 			cum_rate1: parseFloat(cumulativeDropRate1.toFixed(3)),
-			cum_rate2: parseFloat(item2 ? cumulativeDropRate2.toFixed(3) : '0'),
+			cum_rate2: parseFloat(cumulativeDropRate2.toFixed(3)),
 			rate_up: Boolean(item1.incidence),
 			character: item1.character_name
 		}
