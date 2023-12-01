@@ -12,7 +12,7 @@ module.exports = {
 
 		for (const letter of text){
 			const rand = Math.floor(Math.random() * 100)
-			drunkMsg += rand < 15 && /[a-y]/i.test(letter) // Ignores the letter Z, shifts the letter with a 15% chance
+			drunkMsg += rand < 10 && /[a-y]/i.test(letter) // Ignores the letter Z, shifts the letter with a 10% chance
 				? String.fromCharCode(letter.charCodeAt(0) + 1) // Shift the letter to the right (a -> b, b -> c, etc)
 				: letter // Leave the letter alone otherwise
 		}
