@@ -54,7 +54,7 @@ module.exports = {
 
 		crews.sort((a, b) => a.data[0].rank - b.data[0].rank)
 		crews.sort((a, b) => compareTwoStrings(b.data[0].name, crewName!) - compareTwoStrings(a.data[0].name, crewName!))
-		const formattedCrews = crews.map(crew => `${crew.data[0].name} Rank ${crew.data[0].rank} (${crew.id})`)
+		const formattedCrews = crews.map(crew => `${crew.data[0].name} Rank ${crew.data[0].rank}`)
 
 		const userChoice = await showMenu(interaction, crewName!, formattedCrews)
 		if (!userChoice) return
