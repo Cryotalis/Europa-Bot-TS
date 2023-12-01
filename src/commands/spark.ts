@@ -1,11 +1,8 @@
-import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, GuildMember, SlashCommandBuilder } from 'discord.js'
-import { privateDB, sparkProfiles, info } from '../bot'
-import { GoogleSpreadsheetRow } from 'google-spreadsheet'
-import { Image, createCanvas, loadImage } from 'canvas'
+import { ChatInputCommandInteraction, EmbedBuilder, GuildMember, SlashCommandBuilder } from 'discord.js'
+import { privateDB, sparkProfiles } from '../bot'
 import { getDirectImgurLinks } from '../modules/image'
-import { formatList } from '../modules/string'
 import { isNumber } from '../modules/number'
-import { VIPTitle, clearSparkBG, defaultSparkBG, developerTitle, progressBars, sparkBGMask } from '../modules/assets'
+import { calcDraws, getEmbedProfile, getProfile, manageSpark } from '../modules/spark'
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -63,173 +60,6 @@ module.exports = {
 		)
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
-		async function getProfile(user: GoogleSpreadsheetRow){
-			await interaction.deferReply()
-			let badBackground = false
-			let customBackground
-			if (!user) return interaction.reply('User profile not found.')
-
-			const canvas = createCanvas(500, 300)
-			const ctx = canvas.getContext('2d')
-			
-			const username = String(user.userTag.match(/.+(?=#)/))
-
-			if (user.background){
-				customBackground = await loadImage(String(user.background)).catch(() => {badBackground = true})
-			}
-
-			if (user.background && !badBackground){
-				ctx.drawImage(sparkBGMask, 0, 0)
-				ctx.globalCompositeOperation = 'source-in'
-				ctx.drawImage(customBackground as Image, 0, 0, canvas.width, canvas.height)
-				ctx.globalCompositeOperation = 'source-over'
-				ctx.drawImage(clearSparkBG, 0, 0)
-			} else {
-				ctx.drawImage(defaultSparkBG, 0, 0)
-			}
-			
-			// Work around inconsistencies between number/string in the database 
-			if (typeof user.percent === 'number'){user.percent = `${(user.percent*100).toFixed(2)}%`}
-			const sparkPercent = parseFloat(user.percent)/100.0
-
-			if (Math.floor(sparkPercent)-1 >= 0) ctx.drawImage(progressBars[Math.floor(sparkPercent)-1] ?? progressBars[progressBars.length-1], 0, 0) // Draw a full length progress bar if the user has 1 whole spark or more
-			if (sparkPercent > 0){ // Draw a portion of a progress bar according to the user's spark percentage
-				ctx.drawImage(progressBars[Math.ceil(sparkPercent)-1] ?? progressBars[progressBars.length-1], 0, 0, 35+424*(sparkPercent % 1), canvas.height, 0, 0, 35+424*(sparkPercent % 1), canvas.height)
-			}
-
-			function applyText(text: string){
-				let fontSize = 40
-				do {
-					ctx.font = `${fontSize -= 1}px Times`
-				} while (ctx.measureText(text).width > 200)
-				return ctx.font
-			}
-
-			ctx.font = applyText(username)
-			ctx.fillStyle = 'white'
-			ctx.textAlign = 'center'
-			ctx.textBaseline = 'middle'
-			ctx.fillText(username, 318, 95)
-
-			if (user.userID === '251458435554607114'){
-				ctx.drawImage(developerTitle, 270, 122)
-			}
-
-			if (info.find(row => row.name === 'VIPs')?.value.includes(user.userID)){
-				ctx.drawImage(VIPTitle, 302, 122)
-			}
-			
-			ctx.font = '24px Times'
-			ctx.textAlign = 'right'
-			ctx.fillText(user.crystals, 160, 175)
-			ctx.fillText(user.tickets, 313, 175)
-			ctx.fillText(user.tenParts, 460, 175)
-			ctx.fillText(String(parseInt(user.rolls)), 313, 222)
-
-			ctx.font = '19px Arial'
-			ctx.textAlign = 'left'
-			ctx.strokeStyle = 'black'
-			ctx.lineWidth = 3
-			ctx.strokeText(user.percent, 50, 257)
-			ctx.fillText(user.percent, 50, 257)
-
-			ctx.save()
-			ctx.beginPath()
-			ctx.arc(105, 90, 50, 0, Math.PI * 2, true)
-			ctx.closePath()
-			ctx.clip()
-
-			const avatarURL = (userInput ?? interaction.user).displayAvatarURL({extension: 'png', forceStatic: true})
-			const avatar = await loadImage(avatarURL)
-			ctx.drawImage(avatar, 55, 40, 100, 100)
-			ctx.restore()
-
-			// For Halloween
-			// const cobwebs = await loadImage('https://media.discordapp.net/attachments/647256353844232202/1033487287662690434/SparkProfileCobwebs.png')
-			// ctx.drawImage(cobwebs, 0, 0)
-			
-			const attachment = new AttachmentBuilder(canvas.toBuffer(), {name: `${username}SparkProfile.png`})
-			
-			if (badBackground){ // If the user's custom background caused an error, send a warning.
-				return interaction.editReply({content: 'I could not access your background image. Please make sure your background image is publicly accessible.', files: [attachment]})
-			} else {
-				return interaction.editReply({files: [attachment]})
-			}
-		}
-
-		async function getEmbedProfile(user: GoogleSpreadsheetRow){
-			const username = String(user.userTag.match(/.+(?=#)/))
-			const blank = '⠀'
-			let crystalBlank = '', ticketBlank = '', tenticketBlank = '', sparkBlank = ''
-			const progBar = '▰'.repeat((parseFloat(user.percent) % 100) / 5) + '▱'.repeat(20 - (parseFloat(user.percent) % 100) / 5)
-			const sparkEmbed = new EmbedBuilder()
-				.setColor('Blue')
-				.setAuthor({name: user.userTag, iconURL: interaction.guild?.members.cache.get(user.userID)?.user.displayAvatarURL({extension: 'png', forceStatic: true})!})
-				.setTitle(`${username}'s Spark Progress`)
-	
-			if ((interaction.member as GuildMember).presence?.clientStatus?.mobile){
-				for (let i = 0; i < 4 - String(user.crystals).length / 2; i++) {crystalBlank += blank}
-				for (let i = 0; i < 6 - String(user.tickets).length / 2; i++) {ticketBlank += blank}
-				for (let i = 0; i < 5 - String(user.tenParts).length / 2; i++) {tenticketBlank += blank}
-				for (let i = 0; i < 14 - String(parseInt(user.rolls)).length / 2; i++) {sparkBlank += blank}
-				
-				sparkEmbed
-					.addFields([
-						{
-							name: '<:Crystal:616792937161949189> Crystals:⠀   ⠀<:Ticket:616792937254092800> Tickets:⠀   ⠀<:10Ticket:616792937220669450> 10 Parts:', 
-							value: `${crystalBlank + user.crystals + crystalBlank}${ticketBlank + user.tickets + ticketBlank}${tenticketBlank + user.tenParts}`
-						},
-						{name: '⠀⠀⠀⠀⠀⠀⠀⠀⠀<:Spark:622196123695710208> Rolls/Sparks:', value: sparkBlank + String(parseInt(user.rolls)), inline: false},
-						{name: `⠀⠀You are ${user.percent} of the way to a spark! <:Stronk:585534348695044199>`, value: `⠀[${progBar}]`}
-					])
-			} else {
-				for (let i = 0; i < 6 - String(user.crystals).length / 2; i++) {crystalBlank += blank}
-				for (let i = 0; i < 8 - String(user.tickets).length / 2; i++) {ticketBlank += blank}
-				for (let i = 0; i < 7 - String(user.tenParts).length / 2; i++) {tenticketBlank += blank}
-				for (let i = 0; i < 8 - String(parseInt(user.rolls)).length / 2; i++) {sparkBlank += blank}
-				
-				sparkEmbed
-					.addFields([
-						{name: '⠀⠀<:Crystal:616792937161949189> Crystals:', value: crystalBlank + user.crystals, inline: true},
-						{name: '⠀⠀⠀⠀<:Ticket:616792937254092800> Tickets:', value: ticketBlank + user.tickets, inline: true},
-						{name: '⠀<:10Ticket:616792937220669450> 10 Part Tickets: ⠀', value: tenticketBlank + user.tenParts, inline: true},
-						{name: '\u200B', value: '\u200B', inline: true},
-						{name: '⠀⠀<:Spark:622196123695710208> Rolls/Sparks:', value: sparkBlank + String(parseInt(user.rolls)), inline: true},
-						{name: '\u200B', value: '\u200B', inline: true},
-						{name: `⠀⠀⠀⠀⠀⠀You are ${user.percent} of the way to a spark! <:Stronk:585534348695044199>`, value: `⠀ ⠀ ⠀⠀[${progBar}]`}
-					])
-			}
-	
-			return interaction.reply({embeds: [sparkEmbed]})
-		}
-
-		function calcDraws(user: GoogleSpreadsheetRow, round: boolean = true){
-			if (!round) return (parseInt(user.crystals)+parseInt(user.tickets)*300+parseInt(user.tenParts)*3000)/300
-			return Math.floor((parseInt(user.crystals)+parseInt(user.tickets)*300+parseInt(user.tenParts)*3000)/300)
-		}
-
-		function manageSpark(user: GoogleSpreadsheetRow, operation: string, crystals: number | null, tickets: number | null, tenparts: number | null){
-			const resourceArr = []
-			if (isNumber(crystals)) resourceArr.push('Crystals')
-			if (isNumber(tickets)) resourceArr.push('Tickets')
-			if (isNumber(tenparts)) resourceArr.push('10-Part Tickets')
-
-			user.crystals = parseInt(user.crystals)
-			user.tickets = parseInt(user.tickets)
-			user.tenParts = parseInt(user.tenParts)
-
-			switch(operation){
-				case 'set': user.crystals = crystals ?? user.crystals; user.tickets = tickets ?? user.tickets; user.tenParts = tenparts ?? user.tenParts; break;
-				case 'add': user.crystals += crystals ?? 0; user.tickets += tickets ?? 0; user.tenParts += tenparts ?? 0; break;
-				case 'subtract': user.crystals -= crystals ?? 0; user.tickets -= tickets ?? 0; user.tenParts -= tenparts ?? 0; break;
-			}
-
-			operation = operation === 'add' ? 'added' : operation === 'subtract' ? 'subtracted' : operation
-			user.percent = calcDraws(user, false)/300
-			user.rolls = calcDraws(user, false)
-			return interaction.reply(`${formatList(resourceArr)} ${operation}. You now have ${calcDraws(user)} draws (${calcDraws(user) >= initialRolls ? '+' : ''}${calcDraws(user) - initialRolls}).`)
-		}
-		
 		let user = sparkProfiles.find(profile => profile.userID === interaction.user.id || profile.userTag === interaction.user.tag)
 		if (!user){
 			user = await privateDB.sheetsByTitle['Spark'].addRow({
@@ -256,8 +86,12 @@ module.exports = {
 		if (command === 'profile'){
 			const targetUser = userInput ? sparkProfiles.find(profile => profile.userID === userInput.id || profile.userTag === userInput.tag) : user
 			if (!targetUser) return interaction.reply('I could not find a spark profile for the user you specified.')
-			if (interaction.options.getBoolean('embed')) await getEmbedProfile(targetUser)
-			else await getProfile(targetUser)
+			if (interaction.options.getBoolean('embed')) interaction.reply(getEmbedProfile(targetUser, interaction.member as GuildMember))
+			else {
+				await interaction.deferReply()
+				if (!user) return interaction.editReply('User profile not found.')
+				interaction.editReply(await getProfile(targetUser, userInput ?? interaction.user))
+			}
 		}
 		else if (/\bset\b|add|subtract/.test(command)){
 			if ((!shorthand && !isNumber(crystals) && !isNumber(tickets) && !isNumber(tenparts)) || (shorthand && !/\d+/.test(shorthand))) {
@@ -269,7 +103,7 @@ module.exports = {
 				tickets = shorthandMatch[1] ? parseInt(shorthandMatch[1]) : null
 				tenparts = shorthandMatch[2] ? parseInt(shorthandMatch[2]) : null
 			}
-			await manageSpark(user, command, crystals, tickets, tenparts)
+			interaction.reply(manageSpark(user, command, crystals, tickets, tenparts))
 		}
 		else if (command === 'background'){
 			const validBackground = (await getDirectImgurLinks(backgroundURL))[0]
@@ -286,7 +120,7 @@ module.exports = {
 			await interaction.reply('Spark profile deleted.')
 		}
 
-		await user.save()
+		if (command !== 'profile') await user.save()
 
 		// Sends a congratulatory message when the user saves up a spark (a set of 300 rolls)
 		if (Math.floor(user.rolls/300) - Math.floor(initialRolls/300) >= 1) {
@@ -301,7 +135,7 @@ module.exports = {
 			if (!member.manageable) return interaction.followUp({content: `I could not update your nickname due to missing permissions.`, ephemeral: true})
 			
 			const newNickname = /\(\d+\/300\)/.test(nickname) 
-				? nickname.replace(/\(\d+\/300\)/, `(${parseInt(user.rolls)}/300)`) 
+				? nickname.replace(/\(\d+\/300\)/, `(${calcDraws(user)}/300)`) 
 				: nickname.replace(/\d+\.\d\d%/, `${(user.percent*100).toFixed(2)}%`)
 
 			member.setNickname(newNickname)
