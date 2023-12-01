@@ -98,7 +98,7 @@ module.exports = {
 				return interaction.reply({content: `You must choose a resource to ${command}!`, ephemeral: true})
 			}
 			if (shorthand) {
-				const shorthandMatch = shorthand!.match(/\d+/g)!
+				const shorthandMatch = shorthand.replace(',', '').match(/\d+/g)!
 				crystals = shorthandMatch[0] ? parseInt(shorthandMatch[0]) : null
 				tickets = shorthandMatch[1] ? parseInt(shorthandMatch[1]) : null
 				tenparts = shorthandMatch[2] ? parseInt(shorthandMatch[2]) : null
