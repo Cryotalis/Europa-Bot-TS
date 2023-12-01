@@ -11,8 +11,8 @@ module.exports = {
 		let mockMsg = ''
 
         for (const letter of text){
-			const rand = Math.floor(Math.random() * 6) // Pick a random number between 0 and 6, inclusive (3/6 chance)
-			mockMsg += rand < 3 ? letter.toUpperCase() : letter
+			const rand = Math.floor(Math.random() * 100)
+			mockMsg += rand < 50 ? letter.toUpperCase() : letter
 		}
 		return interaction.reply(mockMsg)
 	}
