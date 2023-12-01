@@ -11,8 +11,8 @@ module.exports = {
 		let drunkMsg = ''
 
 		for (const letter of text){
-			const rand = Math.floor(Math.random() * 5) // Pick a random number between 0 and 4, inclusive (1/5 chance)
-			drunkMsg += !rand && /\w/.test(letter) 
+			const rand = Math.floor(Math.random() * 100)
+			drunkMsg += rand < 15 && /[a-y]/i.test(letter) // Ignores the letter Z, shifts the letter with a 15% chance
 				? String.fromCharCode(letter.charCodeAt(0) + 1) // Shift the letter to the right (a -> b, b -> c, etc)
 				: letter // Leave the letter alone otherwise
 		}
