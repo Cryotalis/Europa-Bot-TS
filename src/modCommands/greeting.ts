@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder, GuildMember, SlashCommandBuilder } from 'discord.js'
 import { servers } from '../bot'
 import { findBestMatch } from 'string-similarity'
-import { getDirectImgurLinks } from '../modules/image'
+import { getImageLink } from '../modules/image'
 import { titleize } from '../modules/string'
 import { greetingConfig, makeGreetingImage, toggleableGreetingSetting } from '../modules/greeting'
 
@@ -55,7 +55,8 @@ module.exports = {
 			subcommand
 				.setName('background')
 				.setDescription('Set the background image for the greeting image')
-				.addStringOption(option => option.setName('link').setDescription('The link to the background image for the greeting image').setRequired(true))	
+				.addAttachmentOption(option => option.setName('image').setDescription('An attached image for the background of the greeting image'))
+				.addStringOption(option => option.setName('link').setDescription('The link to the background image for the greeting image'))	
 		)
 		.addSubcommand(subcommand => 
 			subcommand
@@ -79,7 +80,8 @@ module.exports = {
 		const setting = interaction.options.getString('setting')! as toggleableGreetingSetting
 		const message = interaction.options.getString('message')!
 		const channel = interaction.options.getChannel('channel')!
-		const backgroundURL = interaction.options.getString('link')!
+		const linkInput = interaction.options.getString('link')
+		const imageInput = interaction.options.getAttachment('image')
 		const roleIDs = interaction.options.getString('roles')?.match(/\d+/g)
 
 		const greetingSettings: greetingConfig = server.greeting
@@ -110,9 +112,9 @@ module.exports = {
 			greetingSettings.channelID = channel.id
 			interaction.reply(`Greeting channel set to <#${channel.id}>`)
 		} else if (command === 'background'){
-			const validBackground = (await getDirectImgurLinks(backgroundURL))[0]
-			if (!validBackground) return interaction.reply('The image link you provided was invalid.')
-			greetingSettings.background = validBackground
+			const {errorMsg, imageLink} = await getImageLink(linkInput, imageInput)
+			if (errorMsg) return interaction.reply(errorMsg)
+			greetingSettings.background = imageLink
 			interaction.reply('Join image background set.')
 		} else if (command === 'autorole'){
 			if (!roleIDs) return interaction.reply('The roles you provided were invalid.')
