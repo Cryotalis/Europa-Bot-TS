@@ -60,7 +60,7 @@ schedule('0 * * * *', () => loadEvents())
 
 /** Parses through event data from gbf.wiki and returns a JSON with important information for each event. */
 export async function getEventsInformation(eventData: string, type: 'Current' | 'Upcoming'){
-    const eventsTitles = [...new Set(eventData.match(/(?<=title="|<b>).+?(?="|<\/b>)/g))]
+    const eventsTitles = [...new Set(eventData.match(/(?<=title="|<b>)[^<>]+?(?="|<\/b>)/g))]
     const eventsImgURLs = [...new Set(eventData.match(/<img.+?>/g))] ?? ['']
 
     const events: event[] = []
