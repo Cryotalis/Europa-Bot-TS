@@ -149,12 +149,14 @@ export function calcDraws(user: GoogleSpreadsheetRow, round: boolean = true){
     return round ? Math.floor(preciseDraws) : preciseDraws
 }
 
-export function manageSpark(user: GoogleSpreadsheetRow, operation: string, crystals: number | null, tickets: number | null, tenparts: number | null): InteractionReplyOptions{
+export function manageSpark(user: GoogleSpreadsheetRow, operation: string, crystals: number | null, tickets: number | null, tenparts: number | null){
     const resourceArr = []
     const initialRolls = calcDraws(user)
     if (isNumber(crystals)) resourceArr.push('Crystals')
     if (isNumber(tickets)) resourceArr.push('Tickets')
     if (isNumber(tenparts)) resourceArr.push('10-Part Tickets')
+
+    if (!resourceArr.length) return {errorMsg: `You must choose a resource to ${operation}!`, summary: ''}
 
     user.crystals = parseInt(user.crystals)
     user.tickets = parseInt(user.tickets)
@@ -181,5 +183,5 @@ export function manageSpark(user: GoogleSpreadsheetRow, operation: string, cryst
     if (operation !== 'set') operation += 'ed'
     user.percent = calcDraws(user, false)/300
     user.rolls = calcDraws(user)
-    return {content: `${formatList(resourceArr)} ${operation}. You now have ${user.rolls} draws (${user.rolls >= initialRolls ? '+' : ''}${user.rolls - initialRolls}).`}
+    return {errorMsg: '', summary: `${formatList(resourceArr)} ${operation}. You now have ${user.rolls} draws (${user.rolls >= initialRolls ? '+' : ''}${user.rolls - initialRolls}).`}
 }

@@ -1,7 +1,6 @@
-import { ChatInputCommandInteraction, EmbedBuilder, GuildMember, SlashCommandBuilder } from 'discord.js'
+import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js'
 import { privateDB, sparkProfiles } from '../bot'
-import { getDirectImgurLinks } from '../modules/image'
-import { isNumber } from '../modules/number'
+import { getImageLink } from '../modules/image'
 import { calcDraws, getEmbedProfile, getProfile, manageSpark } from '../modules/spark'
 
 module.exports = {
@@ -46,7 +45,8 @@ module.exports = {
 			subcommand
 				.setName('background')
 				.setDescription('Set your spark profile background')
-				.addStringOption(option => option.setName('link').setDescription('A link to the background image for your spark profile').setRequired(true))
+				.addAttachmentOption(option => option.setName('image').setDescription('An attached image for the background of your spark profile'))
+				.addStringOption(option => option.setName('link').setDescription('A link to the background image for your spark profile'))
 		)
 		.addSubcommand(subcommand => 
 			subcommand
@@ -77,43 +77,44 @@ module.exports = {
 
 		const initialRolls = parseInt(user.rolls)
 		const userInput = interaction.options.getUser('user')
-		const shorthand = interaction.options.getString('sh')
+		const shorthandInput = interaction.options.getString('sh')
 		let crystals = interaction.options.getNumber('crystals')
 		let tickets = interaction.options.getNumber('tickets')
 		let tenparts = interaction.options.getNumber('10-parts')
-		const backgroundURL = interaction.options.getString('link')!
+		const linkInput = interaction.options.getString('link')
+		const imageInput = interaction.options.getAttachment('image')
 		const command = interaction.options.getSubcommand()
+
 		if (command === 'profile'){
 			const targetUser = userInput ? sparkProfiles.find(profile => profile.userID === userInput.id || profile.userTag === userInput.tag) : user
 			if (!targetUser) return interaction.reply('I could not find a spark profile for the user you specified.')
 			if (interaction.options.getBoolean('embed')) interaction.reply(getEmbedProfile(targetUser, interaction.member as GuildMember))
 			else {
 				await interaction.deferReply()
-				if (!user) return interaction.editReply('User profile not found.')
+				if (!user) return interaction.editReply('I could not find your spark profile.')
 				interaction.editReply(await getProfile(targetUser, userInput ?? interaction.user))
 			}
 		}
 		else if (/\bset\b|add|subtract/.test(command)){
-			if ((!shorthand && !isNumber(crystals) && !isNumber(tickets) && !isNumber(tenparts)) || (shorthand && !/\d+/.test(shorthand))) {
-				return interaction.reply({content: `You must choose a resource to ${command}!`, ephemeral: true})
-			}
-			if (shorthand) {
-				const shorthandMatch = shorthand.replace(',', '').match(/\d+/g)!
+			if (shorthandInput) {
+				const shorthandMatch = shorthandInput.replace(',', '').match(/\d+/g)!
 				crystals = shorthandMatch[0] ? parseInt(shorthandMatch[0]) : null
 				tickets = shorthandMatch[1] ? parseInt(shorthandMatch[1]) : null
 				tenparts = shorthandMatch[2] ? parseInt(shorthandMatch[2]) : null
 			}
-			interaction.reply(manageSpark(user, command, crystals, tickets, tenparts))
+
+			const {errorMsg, summary} = manageSpark(user, command, crystals, tickets, tenparts)
+			await interaction.reply(errorMsg ?? summary)
 		}
 		else if (command === 'background'){
-			const validBackground = (await getDirectImgurLinks(backgroundURL))[0]
-			if (!validBackground) return interaction.reply('The image link you provided was invalid.')
-			user.background = validBackground
+			const {errorMsg, imageLink} = await getImageLink(linkInput, imageInput)
+			if (errorMsg) return interaction.reply(errorMsg)
+			user.background = imageLink
 			await interaction.reply('Spark background set.')
 		}
 		else if (command === 'reset'){
 			user.tickets = user.crystals = user.tenParts = user.percent = user.rolls = 0
-			await interaction.reply('Spark profile successfully reset.')
+			await interaction.reply('Spark profile reset.')
 		}
 		else if (command === 'delete'){
 			user.userTag = user.userID = user.crystals = user.tickets = user.tenParts = user.percent = user.rolls = user.background = 'deleted'
