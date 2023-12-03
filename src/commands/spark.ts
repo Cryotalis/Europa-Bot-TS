@@ -104,7 +104,7 @@ module.exports = {
 			}
 
 			const {errorMsg, summary} = manageSpark(user, command, crystals, tickets, tenparts)
-			await interaction.reply(errorMsg ?? summary)
+			await interaction.reply(errorMsg || summary)
 		}
 		else if (command === 'background'){
 			const {errorMsg, imageLink} = await getImageLink(linkInput, imageInput)
