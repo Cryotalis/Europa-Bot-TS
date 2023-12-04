@@ -1,5 +1,6 @@
 import { AttachmentBuilder, User } from 'discord.js'
 import { createCanvas, loadImage } from 'canvas'
+import { skydomWallpaper } from './assets';
 
 export type toggleableGreetingSetting = 'sendJoinMessage' | 'sendLeaveMessage' | 'sendBanMessage' | 'showJoinImage' | 'useAutoRole';
 
@@ -24,14 +25,13 @@ export async function makeGreetingImage(greetingSettings: greetingConfig, user: 
     const canvas = createCanvas(700, 250)
 	const ctx = canvas.getContext('2d')
 	
-	const [background, textBox, userAvatar] = await Promise.all([
-		greetingSettings.background ? loadImage(greetingSettings.background) : loadImage('https://cdn.discordapp.com/attachments/659229575821131787/847525054833360896/GBFBackground.jpg'),
-		loadImage('https://i.imgur.com/5pMqWKz.png'),
-		loadImage(user.displayAvatarURL({extension: 'png', size: 4096, forceStatic: true}))
-	])
+	const background = greetingSettings.background ? await loadImage(greetingSettings.background) : skydomWallpaper
+	const avatar = await loadImage(user.displayAvatarURL({extension: 'png', size: 4096, forceStatic: true}))
 
 	ctx.drawImage(background, 0, 0, canvas.width, canvas.height)
-	ctx.drawImage(textBox, 250, 40, 420, 170)
+	ctx.fillStyle = '#e3deda'
+	ctx.roundRect(250, 40, 420, 170, 10)
+	ctx.fill()
 
 	let fontSize = 40
 	function applyText(text: string){
@@ -52,7 +52,7 @@ export async function makeGreetingImage(greetingSettings: greetingConfig, user: 
 	ctx.closePath()
 	ctx.clip()
 	
-	ctx.drawImage(userAvatar, 25, 25, 200, 200)
+	ctx.drawImage(avatar, 25, 25, 200, 200)
 
 	return new AttachmentBuilder(canvas.toBuffer(), {name: 'welcome.png'})
 }

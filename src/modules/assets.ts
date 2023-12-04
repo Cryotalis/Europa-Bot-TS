@@ -29,6 +29,8 @@ export let defaultSparkBG: Image
 export let developerTitle: Image
 export let VIPTitle: Image
 export let progressBars: Image[]
+
+export let skydomWallpaper: Image
 async function loadAssets(){
     [
         playerTemplate,
@@ -57,6 +59,7 @@ async function loadAssets(){
         developerTitle,
         VIPTitle,
         progressBars,
+        skydomWallpaper,
     ] = await Promise.all([
         loadImage('https://cdn.discordapp.com/attachments/647256353844232202/1097295608148144129/PlayerTemplate.png'),
         loadImage('https://cdn.discordapp.com/attachments/659229575821131787/842832315213152286/SummonsTemplate.png'),
@@ -97,6 +100,7 @@ async function loadAssets(){
             loadImage('https://cdn.discordapp.com/attachments/659229575821131787/762202150599917568/BlueProgressBar.png'),
             loadImage('https://cdn.discordapp.com/attachments/565650781961846784/790744430805123103/PurpleProgressBar_2.png'),
         ]),
+        loadImage('assets/Skydom Wallpaper.png')
 
     ]) 
 }
