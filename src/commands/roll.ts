@@ -42,7 +42,7 @@ module.exports = {
 		const command = interaction.options.getSubcommand()
 		const amount = interaction.options.getNumber('amount') ?? 1
 		const targetInput = interaction.options.getString('target')!
-		const user = sparkProfiles.find(profile => profile.userID === interaction.user.id || profile.userTag === interaction.user.tag)
+		const user = sparkProfiles.find(profile => profile.get('userID') === interaction.user.id || profile.get('userTag') === interaction.user.tag)
 		let crystals = 0, singles = 0, tenparts = 0
 		let	target: item | string | undefined = undefined
 		
@@ -58,9 +58,9 @@ module.exports = {
 				break
 			case 'funds':
 				if (!user) return interaction.editReply('I could not find your spark profile.')
-				crystals = parseInt(user.crystals)
-				singles = parseInt(user.tickets)
-				tenparts = parseInt(user.tenParts)
+				crystals = parseInt(user.get('crystals'))
+				singles = parseInt(user.get('tickets'))
+				tenparts = parseInt(user.get('tenParts'))
 				break
 			case 'until':
 				target = findTarget(targetInput)

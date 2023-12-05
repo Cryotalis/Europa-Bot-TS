@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js'
-import { privateDB, sparkProfiles } from '../bot'
+import { privateDB, sparkProfiles, userData } from '../bot'
 import { getImageLink } from '../modules/image'
 import { calcDraws, getEmbedProfile, getProfile, manageSpark } from '../modules/spark'
 
@@ -60,7 +60,7 @@ module.exports = {
 		)
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
-		let user = sparkProfiles.find(profile => profile.userID === interaction.user.id || profile.userTag === interaction.user.tag)
+		let user = sparkProfiles.find(profile => profile.get('userID') === interaction.user.id || profile.get('userTag') === interaction.user.tag)
 		if (!user){
 			user = await privateDB.sheetsByTitle['Spark'].addRow({
 				userTag: interaction.user.tag,
@@ -73,9 +73,9 @@ module.exports = {
 			})
 			sparkProfiles.push(user)
 		}
-		user.userTag = interaction.user.tag
+		user.set('userTag', interaction.user.tag)
 
-		const initialRolls = parseInt(user.rolls)
+		const initialRolls = parseInt(user.get('rolls'))
 		const userInput = interaction.options.getUser('user')
 		const shorthandInput = interaction.options.getString('sh')
 		let crystals = interaction.options.getNumber('crystals')
@@ -86,7 +86,7 @@ module.exports = {
 		const command = interaction.options.getSubcommand()
 
 		if (command === 'profile'){
-			const targetUser = userInput ? sparkProfiles.find(profile => profile.userID === userInput.id || profile.userTag === userInput.tag) : user
+			const targetUser = userInput ? sparkProfiles.find(profile => profile.get('userID') === userInput.id || profile.get('userTag') === userInput.tag) : user
 			if (!targetUser) return interaction.reply('I could not find a spark profile for the user you specified.')
 			if (interaction.options.getBoolean('embed')) interaction.reply(getEmbedProfile(targetUser, interaction.member as GuildMember))
 			else {
@@ -109,23 +109,34 @@ module.exports = {
 		else if (command === 'background'){
 			const {errorMsg, imageLink} = await getImageLink(linkInput, imageInput)
 			if (errorMsg) return interaction.reply(errorMsg)
-			user.background = imageLink
+			user.set('background', imageLink)
 			await interaction.reply('Spark background set.')
 		}
 		else if (command === 'reset'){
-			user.tickets = user.crystals = user.tenParts = user.percent = user.rolls = 0
+			user.assign({...user.toObject() as userData, tickets: '0', crystals: '0', tenParts: '0', percent: '0', rolls: '0'})
 			await interaction.reply('Spark profile reset.')
 		}
 		else if (command === 'delete'){
-			user.userTag = user.userID = user.crystals = user.tickets = user.tenParts = user.percent = user.rolls = user.background = 'deleted'
+			// user.userTag = user.userID = user.crystals = user.tickets = user.tenParts = user.percent = user.rolls = user.background = 'deleted'
+			user.assign({
+				userID: 'deleted',
+				userTag: 'deleted',
+				crystals: 'deleted',
+				tickets: 'deleted',
+				tenParts: 'deleted',
+				percent: 'deleted',
+				rolls: 'deleted',
+				background: 'deleted',
+			})
+			// await user.delete()
 			await interaction.reply('Spark profile deleted.')
 		}
 
 		if (command !== 'profile') await user.save()
 
 		// Sends a congratulatory message when the user saves up a spark (a set of 300 rolls)
-		if (Math.floor(user.rolls/300) - Math.floor(initialRolls/300) >= 1) {
-			interaction.followUp(`<:mogumogu:563695725951582239>  <:narulove:585534241459273728>  🎊 Congratulations! You've saved up ${Math.floor(user.rolls/300)} spark${Math.floor(user.rolls/300) > 1 ? 's' : ''}! 🎊 <:blue:725143925396078643> <:SatThumb:585533971178324049>`)
+		if (Math.floor(user.get('rolls')/300) - Math.floor(initialRolls/300) >= 1) {
+			interaction.followUp(`<:mogumogu:563695725951582239>  <:narulove:585534241459273728>  🎊 Congratulations! You've saved up ${Math.floor(user.get('rolls')/300)} spark${Math.floor(user.get('rolls')/300) > 1 ? 's' : ''}! 🎊 <:blue:725143925396078643> <:SatThumb:585533971178324049>`)
 		}
 
 		// Nickname Auto-Updater
@@ -137,7 +148,7 @@ module.exports = {
 			
 			const newNickname = /\(\d+\/300\)/.test(nickname) 
 				? nickname.replace(/\(\d+\/300\)/, `(${calcDraws(user)}/300)`) 
-				: nickname.replace(/\d+\.\d\d%/, `${(user.percent*100).toFixed(2)}%`)
+				: nickname.replace(/\d+\.\d\d%/, `${(parseFloat(user.get('percent'))*100).toFixed(2)}%`)
 
 			member.setNickname(newNickname)
 		}

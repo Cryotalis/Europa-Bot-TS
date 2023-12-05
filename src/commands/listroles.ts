@@ -7,8 +7,8 @@ module.exports = {
 		.setDescription('Show the list of available roles for this server')
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
-		const server = servers.find(server => server.guildID === interaction.guildId)
-		const serverRolesConfig: categoryRole[] = JSON.parse(server?.roles ?? '[]')
+		const server = servers.find(server => server.get('guildID') === interaction.guildId)
+		const serverRolesConfig: categoryRole[] = JSON.parse(server?.get('roles') ?? '[]')
 		if (!serverRolesConfig.length) return interaction.reply('No roles are set for your server.')
 		const roleCategories = [...new Set(serverRolesConfig.map(role => role.category))]
 

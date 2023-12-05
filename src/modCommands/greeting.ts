@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, EmbedBuilder, GuildMember, SlashCommandBuilder } from 'discord.js'
+import { ChatInputCommandInteraction, EmbedBuilder, GuildBasedChannel, GuildMember, Role, SlashCommandBuilder } from 'discord.js'
 import { servers } from '../bot'
 import { findBestMatch } from 'string-similarity'
 import { getImageLink } from '../modules/image'
@@ -71,9 +71,9 @@ module.exports = {
 		)
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
-		const server = servers.find(server => server.guildID === interaction.guildId)
+		const server = servers.find(server => server.get('guildID') === interaction.guildId)
 		if (!server) return interaction.reply('Unable to access settings for your server.')
-		const channels = interaction.guild?.channels.cache.map(channel => channel)!
+		const channels: GuildBasedChannel[] = interaction.guild?.channels.cache.map((channel: GuildBasedChannel) => channel)!
 		const generalChannel = channels[findBestMatch('general', channels?.map(channel => channel.name)).bestMatchIndex].id
 
 		const command = interaction.options.getSubcommand()
@@ -84,8 +84,8 @@ module.exports = {
 		const imageInput = interaction.options.getAttachment('image')
 		const roleIDs = interaction.options.getString('roles')?.match(/\d+/g)
 
-		const greetingSettings: greetingConfig = server.greeting
-			? JSON.parse(server.greeting)
+		const greetingSettings: greetingConfig = server.get('greeting')
+			? JSON.parse(server.get('greeting'))
 			: {
 				joinMessage: '👋 Welcome to the server, [member]!',
 				leaveMessage: '👋 Goodbye, [member].',
@@ -123,7 +123,7 @@ module.exports = {
 			greetingSettings.autoRoles = []
 
 			roleIDs.forEach(roleID => {
-				const role = interaction.guild?.roles.cache.find(role => role.id === roleID)
+				const role = interaction.guild?.roles.cache.find((role: Role) => role.id === roleID)
 				if (!role || clientUser.roles.highest.position <= role.position) {
 					invalidRoles.push(`<@&${roleID}>`)
 					greetingSettings.autoRoles.push(roleID)
@@ -179,7 +179,7 @@ module.exports = {
 			return interaction.reply({embeds: [greetingEmbed], files: [await makeGreetingImage(greetingSettings, interaction.user)]})
 		}
 
-		server.greeting = JSON.stringify(greetingSettings)
+		server.set('greeting', JSON.stringify(greetingSettings))
 		server.save()
 	}
 }

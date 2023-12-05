@@ -30,7 +30,7 @@ export async function getAllSummonInfo(rawHtml: string){
         const levelRegex = new RegExp(`summon${ID}-name".+?\\d+`)
         const summonURLRegex = new RegExp(`${ID.replace(/(\d)(\d)/, '$1/$2')}".+?img-fix-summon.+?src="(.+?)"`, 's')
 
-        const summonInfo = data.find(info => info.summonName === String(rawHtml.match(nameRegex)))
+        const summonInfo = data.find(info => info.get('summonName') === String(rawHtml.match(nameRegex)))
         const level = parseInt(String(String(rawHtml.match(levelRegex)).match(/(?<=Lvl\s)\d+/i)))
         const uncapRank = parseInt(String(rawHtml.match(uncapRegex)))
         let uncaps = uncapRank
@@ -56,7 +56,7 @@ export async function getAllSummonInfo(rawHtml: string){
             image: privateSummon,
             level: level,
             uncaps: uncaps,
-            maxUncaps: summonInfo?.ulbDate ? 5 : summonInfo?.flbDate ? 4 : 3
+            maxUncaps: summonInfo?.get('ulbDate') ? 5 : summonInfo?.get('flbDate') ? 4 : 3
         })
     })
 

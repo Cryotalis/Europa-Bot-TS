@@ -1,4 +1,4 @@
-import { ChannelType, Client, Collection, GatewayIntentBits, Guild, GuildMember, REST, Routes, ShardClientUtil, TextChannel } from 'discord.js'
+import { ChannelType, Client, Collection, GatewayIntentBits, Guild, GuildMember, REST, Role, Routes, ShardClientUtil, TextChannel } from 'discord.js'
 import { GoogleSpreadsheet, GoogleSpreadsheetRow } from 'google-spreadsheet'
 import { schedule } from 'node-cron'
 import { inspect } from 'util'
@@ -10,6 +10,7 @@ import { accessCookie, languageCookie } from './modules/variables'
 import { greetingConfig, makeGreetingImage } from './modules/greeting'
 import { App } from 'octokit'
 import { dateStringToUnix } from './modules/time'
+import { JWT } from 'google-auth-library'
 
 export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration], rest: {timeout: 60000}})
 export const cryoServerShardID = ShardClientUtil.shardIdForGuildId('379501550097399810', client.shard?.count!)
@@ -67,29 +68,40 @@ export async function registerCommands() {
 		.catch(console.error)
 }
 
+export interface serverData {guildName: string, guildID: string, greeting: string, roles: string}
+export interface userData {
+	userTag: string,	userID: string,
+	crystals: string,	tickets: string, 
+	tenParts: string, 	percent: string, 
+	rolls: string, 		background: string
+}
 export let publicDB: GoogleSpreadsheet
 export let privateDB: GoogleSpreadsheet
-export let servers: Array<GoogleSpreadsheetRow>
-export let sparkProfiles: Array<GoogleSpreadsheetRow>
-export let data: Array<GoogleSpreadsheetRow>
+export let servers: Array<GoogleSpreadsheetRow<serverData>>
+export let sparkProfiles: Array<GoogleSpreadsheetRow<userData>>
 export let announcements: Array<GoogleSpreadsheetRow>
+export let data: Array<GoogleSpreadsheetRow>
 export let info: Array<GoogleSpreadsheetRow>
 
-const serviceAccountCredentials = {client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!, private_key: process.env.GOOGLE_PRIVATE_KEY!}
+const serviceAccountAuth = new JWT({
+	email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+	key: process.env.GOOGLE_PRIVATE_KEY,
+	scopes: ['https://www.googleapis.com/auth/spreadsheets']
+})
 export async function connectToDB(){
-    publicDB = new GoogleSpreadsheet('1H5oCUOvKSN5AAo_tQvr7ElhDIJxhuYVpaJCbbyFeA0E')
-    await publicDB.useServiceAccountAuth(serviceAccountCredentials)
+    publicDB = new GoogleSpreadsheet('1H5oCUOvKSN5AAo_tQvr7ElhDIJxhuYVpaJCbbyFeA0E', serviceAccountAuth)
     await publicDB.loadInfo()
 	
-    privateDB = new GoogleSpreadsheet(process.env.PRIVATE_DB_ID)
-    await privateDB.useServiceAccountAuth(serviceAccountCredentials)
+    privateDB = new GoogleSpreadsheet(process.env.PRIVATE_DB_ID!, serviceAccountAuth)
     await privateDB.loadInfo()
 
-    servers = await privateDB.sheetsByTitle['Servers'].getRows()
-    sparkProfiles = await privateDB.sheetsByTitle['Spark'].getRows()
-	announcements = await privateDB.sheetsByTitle['Announcements'].getRows()
-	data = await publicDB.sheetsByTitle['Data'].getRows()
-	info = await publicDB.sheetsByTitle['Info'].getRows()
+	;[servers, sparkProfiles, announcements, data, info] = await Promise.all([
+		privateDB.sheetsByTitle['Servers'].getRows(),
+		privateDB.sheetsByTitle['Spark'].getRows(),
+		privateDB.sheetsByTitle['Announcements'].getRows(),
+		publicDB.sheetsByTitle['Data'].getRows(),
+		publicDB.sheetsByTitle['Info'].getRows(),
+	])
 
 	console.log(`Database connection successful for Shard #${currentShardID}`)
 }
@@ -107,7 +119,7 @@ async function renewJSessionID(){
 }
 
 export async function startPuppeteer(){
-	browser = await launch({args: ['--single-process', '--no-zygote', '--no-sandbox']})
+	browser = await launch({args: ['--single-process', '--no-zygote', '--no-sandbox'], headless: 'new'})
 	console.log(`Puppeteer browser launched for Shard #${currentShardID}`)
 	renewJSessionID()
 	schedule('0 * * * *', () => renewJSessionID())
@@ -165,7 +177,7 @@ client.on('interactionCreate', interaction => {
 		interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true })
 	} finally {
 		const logMessage = `:scroll:  **${interaction.user.tag}** ran the ${isModCommand ? 'mod ' : ''}command \`${interaction.commandName}\` in **${interaction.guild?.name}** (${interaction.guildId})`
-		client.shard?.broadcastEval((client: Client, {message}: {message: string}) => {
+		client.shard?.broadcastEval((client: Client, {message}: any): void => {
 			(client.channels.cache.get('577636091834662915') as TextChannel).send(message)
 		}, {shard: cryoServerShardID, context: {message: logMessage}})
 	}
@@ -174,7 +186,7 @@ client.on('interactionCreate', interaction => {
 // Create entry for new guilds for storing settings
 client.on('guildCreate', async guild => {
 	if (!servers) return
-	const server = servers.find(server => server.guildID === guild.id)
+	const server = servers.find(server => server.get('guildID') === guild.id)
 	if (!server){
 		const newServer = await privateDB.sheetsByTitle['Servers'].addRow({
 			guildName: guild.name,
@@ -183,22 +195,22 @@ client.on('guildCreate', async guild => {
 		servers.push(newServer)
 	}
 	const joinMessage = `:man_raising_hand:  Joined server **${guild.name}**`
-	client.shard?.broadcastEval((client: Client, {message}: {message: string}) => {
+	client.shard?.broadcastEval((client: Client, {message}: any): void => {
 		(client.channels.cache.get('577636091834662915') as TextChannel).send(message)
 	}, {shard: cryoServerShardID, context: {message: joinMessage}})
 })
 
 // Greeting System
 client.on('guildMemberAdd', async member => {
-	const server = servers.find(server => server.guildID === member.guild.id)
-	if (!server || !server.greeting) return
+	const server = servers.find(server => server.get('guildID') === member.guild.id)
+	if (!server?.get('greeting')) return
 	const clientUser = member.guild?.members.me! as GuildMember
-	const greetingSettings: greetingConfig = JSON.parse(server.greeting)
+	const greetingSettings: greetingConfig = JSON.parse(server.get('greeting'))
 	const greetingChannel = member.guild.channels.cache.get(greetingSettings.channelID) as TextChannel
 
 	if (greetingSettings.autoRoles.length > 0 && greetingSettings.useAutoRole){
 		greetingSettings.autoRoles.forEach(roleID => {
-			const role = member.guild?.roles.cache.find(role => role.id === roleID)
+			const role = member.guild?.roles.cache.find((role: Role) => role.id === roleID)
 			if (!role || clientUser.roles.highest.position <= role.position) return
 			member.roles.add(role)
 		})
@@ -216,9 +228,9 @@ client.on('guildMemberAdd', async member => {
 })
 
 client.on('guildMemberRemove', async member => {
-	const server = servers.find(server => server.guildID === member.guild.id)
-	if (!server || !server.greeting) return
-	const greetingSettings: greetingConfig = JSON.parse(server.greeting)
+	const server = servers.find(server => server.get('guildID') === member.guild.id)
+	if (!server?.get('greeting')) return
+	const greetingSettings: greetingConfig = JSON.parse(server.get('greeting'))
 	const greetingChannel = member.guild.channels.cache.get(greetingSettings.channelID) as TextChannel
 	
 	if (!greetingSettings.sendLeaveMessage || !greetingChannel) return
@@ -228,9 +240,9 @@ client.on('guildMemberRemove', async member => {
 })
 
 client.on('guildBanAdd', ban => {
-	const server = servers.find(server => server.guildID === ban.guild.id)
-	if (!server || !server.greeting) return
-	const greetingSettings: greetingConfig = JSON.parse(server.greeting)
+	const server = servers.find(server => server.get('guildID') === ban.guild.id)
+	if (!server?.get('greeting')) return
+	const greetingSettings: greetingConfig = JSON.parse(server.get('greeting'))
 	const greetingChannel = ban.guild.channels.cache.get(greetingSettings.channelID) as TextChannel
 	
 	if (!greetingSettings.sendBanMessage || !greetingChannel) return
@@ -240,14 +252,14 @@ client.on('guildBanAdd', ban => {
 // Delete roles from the server role list if they are deleted through Discord
 export interface categoryRole {id: string, category: string}
 client.on('roleDelete', async role => {
-	const server = servers.find(server => server.guildID === role.guild.id)
-	if (!server || !server.roles) return
-	const serverRoles: categoryRole[] = JSON.parse(server.roles)
+	const server = servers.find(server => server.get('guildID') === role.guild.id)
+	if (!server?.get('roles')) return
+	const serverRoles: categoryRole[] = JSON.parse(server.get('roles'))
 	const serverRole = serverRoles.find(r => r.id === role.id)
 	if (!serverRole) return
 
 	serverRoles.splice(serverRoles.indexOf(serverRole), 1)
-	server.roles = JSON.stringify(serverRoles)
+	server.set('roles', JSON.stringify(serverRoles))
 	await server.save()
 })
 
@@ -360,7 +372,7 @@ async function getBannerData(){
 	
 	const octokit = await app.getInstallationOctokit(parseInt(process.env.GITHUB_INSTALLATION_ID!))
 	const filePath = `/repos/Cryotalis/GBF-Banner-Data/contents/${bannerYear}/${bannerMonth}/${banner.id}.json`
-	const {status} = await octokit.request(`GET ${filePath}`).catch(error => error)
+	const {status} = await octokit.request(`GET ${filePath}`).catch((error: any) => error)
 	if (status !== 404) return // Do not upload if the file already exists
 	await octokit.request(`PUT ${filePath}`, {
 		message: `Uploaded banner data for banner ${banner.id}`,

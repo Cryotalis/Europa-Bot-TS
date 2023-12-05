@@ -24,7 +24,7 @@ export function gacha(crystals: number, singles: number, tenparts: number, targe
     }
 
     // const specialSummons = data.map(row => row.nonTixableSummons)
-    const specialCharacters = data.map(row => row.limitedCharacters)
+    const specialCharacters = data.map(row => row.get('limitedCharacters'))
     items.sort((a, b) => a?.character && a?.rarity === 'Rare' ? -1 : b?.character && b.rarity === 'Rare' ? 1 : 0)
     items.sort((a, b) => (a?.rarity === 'S Rare' ? -1 : b?.rarity === 'S Rare' ? 1 : 0))
     items.sort((a, b) => a?.character && a?.rarity === 'S Rare' ? -1 : b?.character && b.rarity === 'S Rare' ? 1 : 0)
@@ -72,16 +72,16 @@ export function createGachaEmbed(items: item[], target?: item){
 
 export function findTarget(target: string){
     const bannerWeaponNames = bannerData.items.map(item => item.name)
-    const characterNames = data.map(item => item.characterName).filter(i => i)
-    const weaponNames = data.map(item => item.weaponName).filter(i => i)
-    const summonNames = data.map(item => item.summonName).filter(i => i)
+    const characterNames = data.map(item => item.get('characterName')).filter(i => i)
+    const weaponNames = data.map(item => item.get('weaponName')).filter(i => i)
+    const summonNames = data.map(item => item.get('summonName')).filter(i => i)
     const allItemNames = [characterNames, summonNames, weaponNames, bannerWeaponNames].flat()
 
     const targetName = /summon/i.test(target)
         ? findBestCIMatch(target.replace(/summon/i, ''), summonNames).bestMatch.target
         : findBestCIMatch(target, allItemNames).bestMatch.target
-    const targetWeaponID = data.find(item => item.characterName === targetName || item.weaponName === targetName)?.weaponID
-    const targetSummonID = data.find(item => item.summonName === targetName)?.summonID
+    const targetWeaponID = data.find(item => item.get('characterName') === targetName || item.get('weaponName') === targetName)?.get('weaponID')
+    const targetSummonID = data.find(item => item.get('summonName') === targetName)?.get('summonID')
     const targetItem = bannerData.items.find(item => item.id === (targetWeaponID ?? targetSummonID) || item.character === targetName || item.name === targetName)
     return targetItem ?? targetName
 }

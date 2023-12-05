@@ -34,11 +34,11 @@ module.exports = {
 		if (!rolesInput?.length && !newName) return interaction.reply('The roles you provided were invalid.')
 
 		const clientUser = interaction.guild?.members.me! as GuildMember
-		const server = servers.find(server => server.guildID === interaction.guildId)
+		const server = servers.find(server => server.get('guildID') === interaction.guildId)
 		if (!server) return interaction.reply('Unable to access settings for your server.')
 
-		const serverRolesConfig: categoryRole[] = server.roles ? JSON.parse(server.roles) : []
-		const serverRoles = interaction.guild?.roles.cache.filter(role => role.name !== '@everyone' && !role.managed)
+		const serverRolesConfig: categoryRole[] = server.get('roles') ? JSON.parse(server.get('roles')) : []
+		const serverRoles = interaction.guild?.roles.cache.filter((role: Role) => role.name !== '@everyone' && !role.managed)
 		const addedRoles: (Role|string)[] = [], removedRoles: (Role|string)[] = [], invalidRoles: (Role|string)[] = []
 
 		const command = interaction.options.getSubcommand()
@@ -46,8 +46,8 @@ module.exports = {
 			rolesInput!.forEach(roleInput => {
 				if (!category) category = 'General'
 				const role = /^\d+$/.test(roleInput)
-					? serverRoles?.find(role => role.id === roleInput)
-					: serverRoles?.find(role => role.name === findBestMatch(roleInput, serverRoles.map(role => role.name)).bestMatch.target)
+					? serverRoles?.find((role: Role) => role.id === roleInput)
+					: serverRoles?.find((role: Role) => role.name === findBestMatch(roleInput, serverRoles.map((role: Role) => role.name)).bestMatch.target)
 				const serverRole = serverRolesConfig.find(serverRole => serverRole.id === role?.id)
 				
 				if (!role || clientUser.roles.highest.position <= role.position) {
@@ -63,8 +63,8 @@ module.exports = {
 		} else if (command === 'remove') {
 			rolesInput!.forEach(roleInput => {
 				const role = /^\d+$/.test(roleInput)
-					? serverRoles?.find(role => role.id === roleInput)
-					: serverRoles?.find(role => role.name === findBestMatch(roleInput, serverRoles.map(role => role.name)).bestMatch.target)
+					? serverRoles?.find((role: Role) => role.id === roleInput)
+					: serverRoles?.find((role: Role) => role.name === findBestMatch(roleInput, serverRoles.map((role: Role) => role.name)).bestMatch.target)
 				const serverRole = serverRolesConfig.find(serverRole => serverRole.id === role?.id)
 				
 				if (!role || !serverRole) {
@@ -85,7 +85,8 @@ module.exports = {
 				}
 			})
 		}
-		server.roles = JSON.stringify(serverRolesConfig)
+
+		server.set('roles', JSON.stringify(serverRolesConfig))
 		await server.save()
 
 		const rolesEmbed = new EmbedBuilder()
