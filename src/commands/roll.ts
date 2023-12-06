@@ -61,6 +61,7 @@ module.exports = {
 				crystals = parseInt(user.get('crystals'))
 				singles = parseInt(user.get('tickets'))
 				tenparts = parseInt(user.get('tenParts'))
+				if (!crystals && !singles && !tenparts) return interaction.editReply('You do not have any funds to roll with!')
 				break
 			case 'until':
 				target = findTarget(targetInput)
