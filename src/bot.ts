@@ -73,7 +73,7 @@ export interface userData {
 	username: string,	userID: string,
 	crystals: string,	tickets: string, 
 	tenParts: string, 	rolls: string, 		
-	background: string
+	background: string,	sparkTitle: string
 }
 export let publicDB: GoogleSpreadsheet
 export let privateDB: GoogleSpreadsheet
@@ -81,7 +81,6 @@ export let servers: Array<GoogleSpreadsheetRow<serverData>>
 export let users: Array<GoogleSpreadsheetRow<userData>>
 export let announcements: Array<GoogleSpreadsheetRow>
 export let data: Array<GoogleSpreadsheetRow>
-export let info: Array<GoogleSpreadsheetRow>
 
 const serviceAccountAuth = new JWT({
 	email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
@@ -95,12 +94,11 @@ export async function connectToDB(){
     privateDB = new GoogleSpreadsheet(process.env.PRIVATE_DB_ID!, serviceAccountAuth)
     await privateDB.loadInfo()
 
-	;[servers, users, announcements, data, info] = await Promise.all([
+	;[servers, users, announcements, data] = await Promise.all([
 		privateDB.sheetsByTitle['Servers'].getRows(),
 		privateDB.sheetsByTitle['Users'].getRows(),
 		privateDB.sheetsByTitle['Announcements'].getRows(),
 		publicDB.sheetsByTitle['Data'].getRows(),
-		publicDB.sheetsByTitle['Info'].getRows(),
 	])
 
 	console.log(`Database connection successful for Shard #${currentShardID}`)

@@ -1,7 +1,7 @@
 import { createCanvas, loadImage, Image } from "canvas"
 import { AttachmentBuilder, EmbedBuilder, GuildMember, InteractionReplyOptions, User } from "discord.js"
 import { GoogleSpreadsheetRow } from "google-spreadsheet"
-import { info, userData } from "../bot"
+import { userData } from "../bot"
 import { sparkBGMask, clearSparkBG, defaultSparkBG, progressBars, developerTitle, VIPTitle } from "./assets"
 import { formatList } from "./string"
 import { round } from "./number"
@@ -13,7 +13,7 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
     const canvas = createCanvas(500, 300)
     const ctx = canvas.getContext('2d')
     
-    const {userID, crystals, tickets, tenParts, rolls, background} = user.toObject() as userData
+    const {crystals, tickets, tenParts, rolls, background, sparkTitle} = user.toObject() as userData
 
     if (background){
         customBackground = await loadImage(background).catch(() => {badBackground = true})
@@ -49,12 +49,9 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
     ctx.textBaseline = 'middle'
     ctx.fillText(discordUser.displayName, 318, 95)
 
-    if (userID === '251458435554607114'){
-        ctx.drawImage(developerTitle, 270, 122)
-    }
-
-    if (info.find(row => row.get('name') === 'VIPs')?.get('value').includes(userID)){
-        ctx.drawImage(VIPTitle, 302, 122)
+    switch (sparkTitle?.toLowerCase()) {
+        case 'developer': ctx.drawImage(developerTitle, 270, 122); break
+        case 'vip': ctx.drawImage(VIPTitle, 302, 122); break
     }
     
     ctx.font = '24px Times'

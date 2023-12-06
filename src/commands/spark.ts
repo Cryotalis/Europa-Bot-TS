@@ -125,6 +125,7 @@ module.exports = {
 				tenParts: 'deleted',
 				rolls: 'deleted',
 				background: 'deleted',
+				sparkTitle: 'deleted'
 			})
 			// await user.delete()
 			await interaction.reply('Spark profile deleted.')
