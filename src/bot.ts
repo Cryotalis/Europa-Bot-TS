@@ -70,7 +70,7 @@ export async function registerCommands() {
 
 export interface serverData {guildName: string, guildID: string, greeting: string, roles: string}
 export interface userData {
-	userTag: string,	userID: string,
+	username: string,	userID: string,
 	crystals: string,	tickets: string, 
 	tenParts: string, 	rolls: string, 		
 	background: string
@@ -78,7 +78,7 @@ export interface userData {
 export let publicDB: GoogleSpreadsheet
 export let privateDB: GoogleSpreadsheet
 export let servers: Array<GoogleSpreadsheetRow<serverData>>
-export let sparkProfiles: Array<GoogleSpreadsheetRow<userData>>
+export let users: Array<GoogleSpreadsheetRow<userData>>
 export let announcements: Array<GoogleSpreadsheetRow>
 export let data: Array<GoogleSpreadsheetRow>
 export let info: Array<GoogleSpreadsheetRow>
@@ -95,9 +95,9 @@ export async function connectToDB(){
     privateDB = new GoogleSpreadsheet(process.env.PRIVATE_DB_ID!, serviceAccountAuth)
     await privateDB.loadInfo()
 
-	;[servers, sparkProfiles, announcements, data, info] = await Promise.all([
+	;[servers, users, announcements, data, info] = await Promise.all([
 		privateDB.sheetsByTitle['Servers'].getRows(),
-		privateDB.sheetsByTitle['Spark'].getRows(),
+		privateDB.sheetsByTitle['Users'].getRows(),
 		privateDB.sheetsByTitle['Announcements'].getRows(),
 		publicDB.sheetsByTitle['Data'].getRows(),
 		publicDB.sheetsByTitle['Info'].getRows(),

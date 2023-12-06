@@ -13,8 +13,7 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
     const canvas = createCanvas(500, 300)
     const ctx = canvas.getContext('2d')
     
-    const {userTag, userID, crystals, tickets, tenParts, rolls, background} = user.toObject() as userData
-    const username = String(userTag.match(/.+(?=#)|.+/))
+    const {username, userID, crystals, tickets, tenParts, rolls, background} = user.toObject() as userData
 
     if (background){
         customBackground = await loadImage(background).catch(() => {badBackground = true})
@@ -97,15 +96,14 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
 }
 
 export function getEmbedProfile(user: GoogleSpreadsheetRow<userData>, discordUser: GuildMember): InteractionReplyOptions{
-    const {userTag, crystals, tickets, tenParts, rolls} = user.toObject() as userData
+    const {username, crystals, tickets, tenParts, rolls} = user.toObject() as userData
     const sparkPercent = calcDraws(user, false) / 300
-    const username = String(userTag.match(/.+(?=#)|.+/))
     const blank = '⠀'
     let crystalBlank = '', ticketBlank = '', tenticketBlank = '', sparkBlank = ''
     const progBar = '▰'.repeat((sparkPercent % 1) / 0.05) + '▱'.repeat(20 - (sparkPercent % 1) / 0.05)
     const sparkEmbed = new EmbedBuilder()
         .setColor('Blue')
-        .setAuthor({name: userTag, iconURL: discordUser.user.displayAvatarURL({extension: 'png', forceStatic: true})!})
+        .setAuthor({name: username, iconURL: discordUser.user.displayAvatarURL({extension: 'png', forceStatic: true})!})
         .setTitle(`${username}'s Spark Progress`)
 
     if (discordUser.presence?.clientStatus?.mobile){

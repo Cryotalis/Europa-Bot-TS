@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
-import { data, item, sparkProfiles } from '../bot'
+import { data, item, users } from '../bot'
 import { createGachaEmbed, findTarget, gacha } from '../modules/roll'
 
 module.exports = {
@@ -42,7 +42,7 @@ module.exports = {
 		const command = interaction.options.getSubcommand()
 		const amount = interaction.options.getNumber('amount') ?? 1
 		const targetInput = interaction.options.getString('target')!
-		const user = sparkProfiles.find(profile => profile.get('userID') === interaction.user.id || profile.get('userTag') === interaction.user.tag)
+		const user = users.find(user => user.get('userID') === interaction.user.id || user.get('username') === interaction.user.username)
 		let crystals = 0, singles = 0, tenparts = 0
 		let	target: item | string | undefined = undefined
 		

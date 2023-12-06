@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js'
-import { privateDB, sparkProfiles, userData } from '../bot'
+import { privateDB, userData, users } from '../bot'
 import { getImageLink } from '../modules/image'
 import { calcDraws, getEmbedProfile, getProfile, manageSpark } from '../modules/spark'
 import { round } from '../modules/number'
@@ -61,9 +61,9 @@ module.exports = {
 		)
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
-		let user = sparkProfiles.find(profile => profile.get('userID') === interaction.user.id || profile.get('userTag') === interaction.user.tag)
+		let user = users.find(user => user.get('userID') === interaction.user.id || user.get('username') === interaction.user.tag)
 		if (!user){
-			user = await privateDB.sheetsByTitle['Spark'].addRow({
+			user = await privateDB.sheetsByTitle['Users'].addRow({
 				userTag: interaction.user.tag,
 				userID: `'${interaction.user.id}`,
 				crystals: 0,
@@ -71,9 +71,9 @@ module.exports = {
 				tenParts: 0,
 				rolls: 0,
 			})
-			sparkProfiles.push(user)
+			users.push(user)
 		}
-		user.set('userTag', interaction.user.tag)
+		user.set('username', interaction.user.username)
 
 		const initialRolls = parseInt(user.get('rolls'))
 		const userInput = interaction.options.getUser('user')
@@ -86,7 +86,7 @@ module.exports = {
 		const command = interaction.options.getSubcommand()
 
 		if (command === 'profile'){
-			const targetUser = userInput ? sparkProfiles.find(profile => profile.get('userID') === userInput.id || profile.get('userTag') === userInput.tag) : user
+			const targetUser = userInput ? users.find(user => user.get('userID') === userInput.id || user.get('username') === userInput.tag) : user
 			if (!targetUser) return interaction.reply('I could not find a spark profile for the user you specified.')
 			if (interaction.options.getBoolean('embed')) interaction.reply(getEmbedProfile(targetUser, interaction.member as GuildMember))
 			else {
@@ -120,7 +120,7 @@ module.exports = {
 			// user.userTag = user.userID = user.crystals = user.tickets = user.tenParts = user.percent = user.rolls = user.background = 'deleted'
 			user.assign({
 				userID: 'deleted',
-				userTag: 'deleted',
+				username: 'deleted',
 				crystals: 'deleted',
 				tickets: 'deleted',
 				tenParts: 'deleted',
