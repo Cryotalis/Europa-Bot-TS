@@ -13,18 +13,19 @@ module.exports = {
 		const includeNonSSRItems = interaction.options.getBoolean('detailed')
 		const includedRarities = includeNonSSRItems ? ['SS Rare', 'S Rare', 'Rare'] : ['SS Rare']
 		const {start, end, drawRates, featuredItemIDs} = bannerData.bannerInfo
+
+		const rateUpItems = bannerData.items
+			.filter(item => item.rate_up && includedRarities.includes(item.rarity))
+			.sort((a, b) => (featuredItemIDs.includes(a.id) ? -1 : featuredItemIDs.includes(b.id) ? 1 : 0))
+
 		const bannerInfoEmbed = new EmbedBuilder()
 			.setTitle('__Banner Information__')
 			.setDescription(
 				`<t:${dateStringToUnix(start)!/1000}> ~ <t:${dateStringToUnix(end)!/1000}> (Ends <t:${dateStringToUnix(end)!/1000}:R>)\n
 				**${rarityEmotes['SS Rare']} ${drawRates['SS Rare']} ${rarityEmotes['S Rare']} ${drawRates['S Rare']} ${rarityEmotes['Rare']} ${drawRates['Rare']}**\n
-				**The following items have boosted draw rates:**`
+				${rateUpItems.length ? '**The following items have boosted draw rates:**' : '**No items are on rate up**'}`
 			)
 			.setColor('Blue')
-
-		const rateUpItems = bannerData.items
-			.filter(item => item.rate_up && includedRarities.includes(item.rarity))
-			.sort((a, b) => (featuredItemIDs.includes(a.id) ? -1 : featuredItemIDs.includes(b.id) ? 1 : 0))
 
 		rateUpItems.slice(0,25).forEach(item => {
 			const featured = featuredItemIDs.includes(item.id)
