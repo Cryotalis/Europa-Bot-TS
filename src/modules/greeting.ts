@@ -44,8 +44,8 @@ export async function makeGreetingImage(greetingSettings: greetingConfig, user: 
 	ctx.font = `28px Times`
 	ctx.fillStyle = '#000000'
 	ctx.fillText('Welcome to the server,', canvas.width / 2.5, canvas.height / 2.8)
-	ctx.font = applyText(user.username + '!')
-	ctx.fillText(`${user.username}!`, canvas.width / 2.5, 160 - (40 - fontSize * 0.5))
+	ctx.font = applyText(user.displayName + '!')
+	ctx.fillText(`${user.displayName}!`, canvas.width / 2.5, 160 - (40 - fontSize * 0.5))
 
 	ctx.beginPath()
 	ctx.arc(125, 125, 100, 0, Math.PI * 2, true)

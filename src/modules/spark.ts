@@ -13,7 +13,7 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
     const canvas = createCanvas(500, 300)
     const ctx = canvas.getContext('2d')
     
-    const {username, userID, crystals, tickets, tenParts, rolls, background} = user.toObject() as userData
+    const {userID, crystals, tickets, tenParts, rolls, background} = user.toObject() as userData
 
     if (background){
         customBackground = await loadImage(background).catch(() => {badBackground = true})
@@ -43,11 +43,11 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
         return ctx.font
     }
 
-    ctx.font = applyText(username)
+    ctx.font = applyText(discordUser.displayName)
     ctx.fillStyle = 'white'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.fillText(username, 318, 95)
+    ctx.fillText(discordUser.displayName, 318, 95)
 
     if (userID === '251458435554607114'){
         ctx.drawImage(developerTitle, 270, 122)
@@ -86,7 +86,7 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
     // const cobwebs = await loadImage('https://media.discordapp.net/attachments/647256353844232202/1033487287662690434/SparkProfileCobwebs.png')
     // ctx.drawImage(cobwebs, 0, 0)
     
-    const attachment = new AttachmentBuilder(canvas.toBuffer(), {name: `${username}SparkProfile.png`})
+    const attachment = new AttachmentBuilder(canvas.toBuffer(), {name: `${discordUser.displayName}SparkProfile.png`})
     
     if (badBackground){ // If the user's custom background caused an error, send a warning.
         return {content: 'I could not access your background image. Please make sure your background image is publicly accessible.', files: [attachment]}
@@ -96,15 +96,15 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
 }
 
 export function getEmbedProfile(user: GoogleSpreadsheetRow<userData>, discordUser: GuildMember): InteractionReplyOptions{
-    const {username, crystals, tickets, tenParts, rolls} = user.toObject() as userData
+    const {crystals, tickets, tenParts, rolls} = user.toObject() as userData
     const sparkPercent = calcDraws(user, false) / 300
     const blank = '⠀'
     let crystalBlank = '', ticketBlank = '', tenticketBlank = '', sparkBlank = ''
     const progBar = '▰'.repeat((sparkPercent % 1) / 0.05) + '▱'.repeat(20 - (sparkPercent % 1) / 0.05)
     const sparkEmbed = new EmbedBuilder()
         .setColor('Blue')
-        .setAuthor({name: username, iconURL: discordUser.user.displayAvatarURL({extension: 'png', forceStatic: true})!})
-        .setTitle(`${username}'s Spark Progress`)
+        .setAuthor({name: discordUser.displayName, iconURL: discordUser.user.displayAvatarURL({extension: 'png', forceStatic: true})!})
+        .setTitle(`${discordUser.displayName}'s Spark Progress`)
 
     if (discordUser.presence?.clientStatus?.mobile){
         for (let i = 0; i < 4 - crystals.length / 2; i++) {crystalBlank += blank}

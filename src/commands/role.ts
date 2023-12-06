@@ -45,7 +45,7 @@ module.exports = {
 		})
 		
 		const rolesEmbed = new EmbedBuilder()
-			.setAuthor({name: `Roles changes for ${member.nickname ?? member.user.username}:`, iconURL: interaction.user.displayAvatarURL({extension: 'png'})})
+			.setAuthor({name: `Roles changes for ${member.displayName}:`, iconURL: interaction.user.displayAvatarURL({extension: 'png'})})
 			.setColor('Blue')
 
 		if (addedRoles.length) rolesEmbed.addFields([{name: 'Added Roles:', value: `${addedRoles.join(' ')}`}])
