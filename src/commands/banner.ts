@@ -23,7 +23,7 @@ module.exports = {
 			.setDescription(
 				`<t:${dateStringToUnix(start)!/1000}> ~ <t:${dateStringToUnix(end)!/1000}> (Ends <t:${dateStringToUnix(end)!/1000}:R>)\n
 				**${rarityEmotes['SS Rare']} ${drawRates['SS Rare']} ${rarityEmotes['S Rare']} ${drawRates['S Rare']} ${rarityEmotes['Rare']} ${drawRates['Rare']}**\n
-				${rateUpItems.length ? '**The following items have boosted draw rates:**' : '**No items are on rate up**'}`
+				${rateUpItems.length ? '**The following items have boosted draw rates:**' : '**No items have boosted draw rates**'}`
 			)
 			.setColor('Blue')
 
