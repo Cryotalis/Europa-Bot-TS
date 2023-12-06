@@ -64,7 +64,7 @@ module.exports = {
 		let user = users.find(user => user.get('userID') === interaction.user.id || user.get('username') === interaction.user.username)
 		if (!user){
 			user = await privateDB.sheetsByTitle['Users'].addRow({
-				userTag: interaction.user.tag,
+				username: interaction.user.tag,
 				userID: `'${interaction.user.id}`,
 				crystals: 0,
 				tickets: 0,
@@ -117,7 +117,6 @@ module.exports = {
 			await interaction.reply('Spark profile reset.')
 		}
 		else if (command === 'delete'){
-			// user.userTag = user.userID = user.crystals = user.tickets = user.tenParts = user.percent = user.rolls = user.background = 'deleted'
 			user.assign({
 				userID: 'deleted',
 				username: 'deleted',
