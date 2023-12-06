@@ -61,7 +61,7 @@ module.exports = {
 		)
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
-		let user = users.find(user => user.get('userID') === interaction.user.id || user.get('username') === interaction.user.tag)
+		let user = users.find(user => user.get('userID') === interaction.user.id || user.get('username') === interaction.user.username)
 		if (!user){
 			user = await privateDB.sheetsByTitle['Users'].addRow({
 				userTag: interaction.user.tag,
@@ -86,7 +86,7 @@ module.exports = {
 		const command = interaction.options.getSubcommand()
 
 		if (command === 'profile'){
-			const targetUser = userInput ? users.find(user => user.get('userID') === userInput.id || user.get('username') === userInput.tag) : user
+			const targetUser = userInput ? users.find(user => user.get('userID') === userInput.id || user.get('username') === userInput.username) : user
 			if (!targetUser) return interaction.reply('I could not find a spark profile for the user you specified.')
 			if (interaction.options.getBoolean('embed')) interaction.reply(getEmbedProfile(targetUser, interaction.member as GuildMember))
 			else {
