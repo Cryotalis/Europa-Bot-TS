@@ -4,6 +4,7 @@ import { GoogleSpreadsheetRow } from "google-spreadsheet"
 import { info, userData } from "../bot"
 import { sparkBGMask, clearSparkBG, defaultSparkBG, progressBars, developerTitle, VIPTitle } from "./assets"
 import { formatList } from "./string"
+import { round } from "./number"
 
 export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUser: User): Promise<InteractionReplyOptions>{
     let badBackground = false
@@ -12,8 +13,8 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
     const canvas = createCanvas(500, 300)
     const ctx = canvas.getContext('2d')
     
-    const {userTag, userID, crystals, tickets, tenParts, percent, rolls, background} = user.toObject() as userData
-    const username = String(userTag.match(/.+(?=#)/))
+    const {userTag, userID, crystals, tickets, tenParts, rolls, background} = user.toObject() as userData
+    const username = String(userTag.match(/.+(?=#)|.+/))
 
     if (background){
         customBackground = await loadImage(background).catch(() => {badBackground = true})
@@ -29,8 +30,7 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
         ctx.drawImage(defaultSparkBG, 0, 0)
     }
     
-    const sparkPercent = parseFloat(percent)/100.0
-
+    const sparkPercent = calcDraws(user, false)/300
     if (Math.floor(sparkPercent)-1 >= 0) ctx.drawImage(progressBars[Math.floor(sparkPercent)-1] ?? progressBars[progressBars.length-1], 0, 0) // Draw a full length progress bar if the user has 1 whole spark or more
     if (sparkPercent > 0){ // Draw a portion of a progress bar according to the user's spark percentage
         ctx.drawImage(progressBars[Math.ceil(sparkPercent)-1] ?? progressBars[progressBars.length-1], 0, 0, 35+424*(sparkPercent % 1), canvas.height, 0, 0, 35+424*(sparkPercent % 1), canvas.height)
@@ -69,8 +69,8 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
     ctx.textAlign = 'left'
     ctx.strokeStyle = 'black'
     ctx.lineWidth = 3
-    ctx.strokeText(percent, 50, 257)
-    ctx.fillText(percent, 50, 257)
+    ctx.strokeText(round(sparkPercent * 100) + '%', 50, 257)
+    ctx.fillText(round(sparkPercent * 100) + '%', 50, 257)
 
     ctx.save()
     ctx.beginPath()
@@ -97,11 +97,12 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
 }
 
 export function getEmbedProfile(user: GoogleSpreadsheetRow<userData>, discordUser: GuildMember): InteractionReplyOptions{
-    const {userTag, crystals, tickets, tenParts, percent, rolls} = user.toObject() as userData
+    const {userTag, crystals, tickets, tenParts, rolls} = user.toObject() as userData
+    const sparkPercent = calcDraws(user, false) / 300
     const username = String(userTag.match(/.+(?=#)|.+/))
     const blank = '⠀'
     let crystalBlank = '', ticketBlank = '', tenticketBlank = '', sparkBlank = ''
-    const progBar = '▰'.repeat((parseFloat(percent) % 100) / 5) + '▱'.repeat(20 - (parseFloat(percent) % 100) / 5)
+    const progBar = '▰'.repeat((sparkPercent % 1) / 0.05) + '▱'.repeat(20 - (sparkPercent % 1) / 0.05)
     const sparkEmbed = new EmbedBuilder()
         .setColor('Blue')
         .setAuthor({name: userTag, iconURL: discordUser.user.displayAvatarURL({extension: 'png', forceStatic: true})!})
@@ -120,7 +121,7 @@ export function getEmbedProfile(user: GoogleSpreadsheetRow<userData>, discordUse
                     value: `${crystalBlank + crystals + crystalBlank}${ticketBlank + tickets + ticketBlank}${tenticketBlank + tenParts}`
                 },
                 {name: '⠀⠀⠀⠀⠀⠀⠀⠀⠀<:Spark:622196123695710208> Rolls/Sparks:', value: sparkBlank + rolls, inline: false},
-                {name: `⠀⠀You are ${percent} of the way to a spark! <:Stronk:585534348695044199>`, value: `⠀[${progBar}]`}
+                {name: `⠀⠀You are ${round(sparkPercent * 100)}% of the way to a spark! <:Stronk:585534348695044199>`, value: `⠀[${progBar}]`}
             ])
     } else {
         for (let i = 0; i < 6 - crystals.length / 2; i++) {crystalBlank += blank}
@@ -136,7 +137,7 @@ export function getEmbedProfile(user: GoogleSpreadsheetRow<userData>, discordUse
                 {name: '\u200B', value: '\u200B', inline: true},
                 {name: '⠀⠀<:Spark:622196123695710208> Rolls/Sparks:', value: sparkBlank + rolls, inline: true},
                 {name: '\u200B', value: '\u200B', inline: true},
-                {name: `⠀⠀⠀⠀⠀⠀You are ${percent} of the way to a spark! <:Stronk:585534348695044199>`, value: `⠀ ⠀ ⠀⠀[${progBar}]`}
+                {name: `⠀⠀⠀⠀⠀⠀You are ${round(sparkPercent * 100)}% of the way to a spark! <:Stronk:585534348695044199>`, value: `⠀ ⠀ ⠀⠀[${progBar}]`}
             ])
     }
 
@@ -181,7 +182,6 @@ export function manageSpark(user: GoogleSpreadsheetRow<userData>, operation: str
     }
 
     if (operation !== 'set') operation += 'ed'
-    user.set('percent', String(calcDraws(user, false)/300))
     user.set('rolls', String(calcDraws(user)))
     const rolls = calcDraws(user)
     return {errorMsg: '', summary: `${formatList(resourceArr)} ${operation}. You now have ${rolls} draws (${rolls >= initialRolls ? '+' : ''}${rolls - initialRolls}).`}

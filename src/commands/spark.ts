@@ -2,6 +2,7 @@ import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'd
 import { privateDB, sparkProfiles, userData } from '../bot'
 import { getImageLink } from '../modules/image'
 import { calcDraws, getEmbedProfile, getProfile, manageSpark } from '../modules/spark'
+import { round } from '../modules/number'
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -68,7 +69,6 @@ module.exports = {
 				crystals: 0,
 				tickets: 0,
 				tenParts: 0,
-				percent: 0,
 				rolls: 0,
 			})
 			sparkProfiles.push(user)
@@ -113,7 +113,7 @@ module.exports = {
 			await interaction.reply('Spark background set.')
 		}
 		else if (command === 'reset'){
-			user.assign({...user.toObject() as userData, tickets: '0', crystals: '0', tenParts: '0', percent: '0', rolls: '0'})
+			user.assign({...user.toObject() as userData, tickets: '0', crystals: '0', tenParts: '0', rolls: '0'})
 			await interaction.reply('Spark profile reset.')
 		}
 		else if (command === 'delete'){
@@ -124,7 +124,6 @@ module.exports = {
 				crystals: 'deleted',
 				tickets: 'deleted',
 				tenParts: 'deleted',
-				percent: 'deleted',
 				rolls: 'deleted',
 				background: 'deleted',
 			})
@@ -135,8 +134,9 @@ module.exports = {
 		if (command !== 'profile') await user.save()
 
 		// Sends a congratulatory message when the user saves up a spark (a set of 300 rolls)
-		if (Math.floor(user.get('rolls')/300) - Math.floor(initialRolls/300) >= 1) {
-			interaction.followUp(`<:mogumogu:563695725951582239>  <:narulove:585534241459273728>  🎊 Congratulations! You've saved up ${Math.floor(user.get('rolls')/300)} spark${Math.floor(user.get('rolls')/300) > 1 ? 's' : ''}! 🎊 <:blue:725143925396078643> <:SatThumb:585533971178324049>`)
+		const sparkPercent = user.get('rolls')/300
+		if (Math.floor(sparkPercent) - Math.floor(initialRolls/300) >= 1) {
+			interaction.followUp(`<:mogumogu:563695725951582239>  <:narulove:585534241459273728>  🎊 Congratulations! You've saved up ${Math.floor(sparkPercent)} spark${Math.floor(sparkPercent) > 1 ? 's' : ''}! 🎊 <:blue:725143925396078643> <:SatThumb:585533971178324049>`)
 		}
 
 		// Nickname Auto-Updater
@@ -148,7 +148,7 @@ module.exports = {
 			
 			const newNickname = /\(\d+\/300\)/.test(nickname) 
 				? nickname.replace(/\(\d+\/300\)/, `(${calcDraws(user)}/300)`) 
-				: nickname.replace(/\d+\.\d\d%/, `${(parseFloat(user.get('percent'))*100).toFixed(2)}%`)
+				: nickname.replace(/\d+\.\d\d%/, round(sparkPercent * 100) + '%')
 
 			member.setNickname(newNickname)
 		}

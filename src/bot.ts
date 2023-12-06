@@ -72,8 +72,8 @@ export interface serverData {guildName: string, guildID: string, greeting: strin
 export interface userData {
 	userTag: string,	userID: string,
 	crystals: string,	tickets: string, 
-	tenParts: string, 	percent: string, 
-	rolls: string, 		background: string
+	tenParts: string, 	rolls: string, 		
+	background: string
 }
 export let publicDB: GoogleSpreadsheet
 export let privateDB: GoogleSpreadsheet
