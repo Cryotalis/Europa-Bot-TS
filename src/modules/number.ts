@@ -36,3 +36,11 @@ export function getOrdinal(number: number | string) {
 
     return String(number) + ordinal
 }
+
+/**
+ * Rounds a number correctly, preventing Javascript issues like rounding 5 down instead of up.
+ * - https://stackoverflow.com/a/18358056/12109293
+ */
+export function round(num: number, places: number = 2){
+    return Number(Math.round(Number(num + 'e+' + places)) + 'e-' + places)
+}
