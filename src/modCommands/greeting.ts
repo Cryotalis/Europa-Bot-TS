@@ -1,8 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder, GuildBasedChannel, GuildMember, Role, SlashCommandBuilder } from 'discord.js'
 import { servers } from '../bot'
-import { findBestMatch } from 'string-similarity'
 import { getImageLink } from '../modules/image'
-import { titleize } from '../modules/string'
+import { findBestCIMatch, titleize } from '../modules/string'
 import { greetingConfig, makeGreetingImage, toggleableGreetingSetting } from '../modules/greeting'
 
 module.exports = {
@@ -74,7 +73,7 @@ module.exports = {
 		const server = servers.find(server => server.get('guildID') === interaction.guildId)
 		if (!server) return interaction.reply('Unable to access settings for your server.')
 		const channels: GuildBasedChannel[] = interaction.guild?.channels.cache.map((channel: GuildBasedChannel) => channel)!
-		const generalChannel = channels[findBestMatch('general', channels?.map(channel => channel.name)).bestMatchIndex].id
+		const generalChannel = channels[findBestCIMatch('general', channels?.map(channel => channel.name)).bestMatchIndex].id
 
 		const command = interaction.options.getSubcommand()
 		const setting = interaction.options.getString('setting')! as toggleableGreetingSetting

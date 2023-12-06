@@ -1,7 +1,6 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { findBestMatch } from 'string-similarity'
 import { Translate } from '@google-cloud/translate/build/src/v2'
-import { truncateText } from '../modules/string'
+import { findBestCIMatch, truncateText } from '../modules/string'
 import { languageCodes } from '../modules/variables'
 
 module.exports = {
@@ -20,8 +19,8 @@ module.exports = {
 		const userLocale = /-/.test(interaction.locale) ? interaction.locale.match(/.+(?=-)/)![0] : interaction.locale
 		const gTranslate = new Translate({credentials: {client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!, private_key: process.env.GOOGLE_PRIVATE_KEY!}})
 		
-		const sourceLangBestMatch = findBestMatch(String(sourceLangInput), languageCodes.map(lang => lang.name.toLowerCase())).bestMatch.target
-		const outputLangBestMatch = findBestMatch(String(outputLangInput), languageCodes.map(lang => lang.name.toLowerCase())).bestMatch.target
+		const sourceLangBestMatch = findBestCIMatch(String(sourceLangInput), languageCodes.map(lang => lang.name.toLowerCase())).bestMatch.target
+		const outputLangBestMatch = findBestCIMatch(String(outputLangInput), languageCodes.map(lang => lang.name.toLowerCase())).bestMatch.target
 		const sourceLanguage = languageCodes.find(lang => lang.name.toLowerCase() === sourceLangBestMatch)!
 		const outputLanguage = outputLangInput
 			? languageCodes.find(lang => lang.name.toLowerCase() === outputLangBestMatch)!

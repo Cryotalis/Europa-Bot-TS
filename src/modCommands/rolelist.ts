@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, EmbedBuilder, GuildMember, Role, SlashCommandBuilder } from 'discord.js'
 import { categoryRole, servers } from '../bot'
-import { findBestMatch } from 'string-similarity'
+import { findBestCIMatch } from '../modules/string'
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -47,7 +47,7 @@ module.exports = {
 				if (!category) category = 'General'
 				const role = /^\d+$/.test(roleInput)
 					? serverRoles?.find((role: Role) => role.id === roleInput)
-					: serverRoles?.find((role: Role) => role.name === findBestMatch(roleInput, serverRoles.map((role: Role) => role.name)).bestMatch.target)
+					: serverRoles?.find((role: Role) => role.name === findBestCIMatch(roleInput, serverRoles.map((role: Role) => role.name)).bestMatch.target)
 				const serverRole = serverRolesConfig.find(serverRole => serverRole.id === role?.id)
 				
 				if (!role || clientUser.roles.highest.position <= role.position) {
@@ -64,7 +64,7 @@ module.exports = {
 			rolesInput!.forEach(roleInput => {
 				const role = /^\d+$/.test(roleInput)
 					? serverRoles?.find((role: Role) => role.id === roleInput)
-					: serverRoles?.find((role: Role) => role.name === findBestMatch(roleInput, serverRoles.map((role: Role) => role.name)).bestMatch.target)
+					: serverRoles?.find((role: Role) => role.name === findBestCIMatch(roleInput, serverRoles.map((role: Role) => role.name)).bestMatch.target)
 				const serverRole = serverRolesConfig.find(serverRole => serverRole.id === role?.id)
 				
 				if (!role || !serverRole) {

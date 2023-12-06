@@ -1,6 +1,6 @@
-import { ChatInputCommandInteraction, Collection, EmbedBuilder, GuildMember, Role, SlashCommandBuilder } from 'discord.js'
+import { ChatInputCommandInteraction, EmbedBuilder, GuildMember, Role, SlashCommandBuilder } from 'discord.js'
 import { categoryRole, servers } from '../bot'
-import { findBestMatch } from 'string-similarity'
+import { findBestCIMatch } from '../modules/string'
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -27,7 +27,7 @@ module.exports = {
 		rolesInput.forEach(roleInput => {
 			const role = /<@&\d+>/.test(roleInput)
 				? serverRoles.find((role: Role) => role.id === roleInput.match(/\d+/)![0])
-				: serverRoles.find((role: Role) => role.name === findBestMatch(roleInput, serverRoles.map((role: Role) => role.name)).bestMatch.target)
+				: serverRoles.find((role: Role) => role.name === findBestCIMatch(roleInput, serverRoles.map((role: Role) => role.name)).bestMatch.target)
 			
 			if (!role){
 				notAddedRoles.push(roleInput)
