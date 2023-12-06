@@ -42,6 +42,6 @@
     "@types/node-cron": "^3.0.11",
     "@types/string-similarity": "^4.0.2",
     "@types/urlencode": "^1.1.4",
-    "typescript": "^5.3.2"
+    "typescript": "^5.3.3"
   }
 }
