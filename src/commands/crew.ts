@@ -59,7 +59,7 @@ module.exports = {
 		const userChoice = await showMenu(interaction, crewName!, formattedCrews)
 		if (!userChoice) return
 
-		const targetCrew = crews.find(crew => String(crew.id) === userChoice.match(/(?<=\()\d+/)![0])!
+		const targetCrew = crews.find(crew => `${crew.data[0].name} Rank ${crew.data[0].rank}` === String(userChoice.match(/(?<= ).+/)))!
 		loadCrew(interaction, targetCrew)
 	}
 }
