@@ -174,7 +174,7 @@ client.on('interactionCreate', interaction => {
 		}, {shard: cryoServerShardID, context: {error: inspect(error, {depth: null})}})
 		interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true })
 	} finally {
-		const logMessage = `:scroll:  **${interaction.user.tag}** ran the ${isModCommand ? 'mod ' : ''}command \`${interaction.commandName}\` in **${interaction.guild?.name}** (${interaction.guildId})`
+		const logMessage = `:scroll:  **${interaction.user.username}** (${interaction.user.id}) ran the ${isModCommand ? 'mod ' : ''}command \`${interaction.commandName}\` in **${interaction.guild?.name}** (${interaction.guildId})`
 		client.shard?.broadcastEval((client: Client, {message}: any): void => {
 			(client.channels.cache.get('577636091834662915') as TextChannel).send(message)
 		}, {shard: cryoServerShardID, context: {message: logMessage}})
