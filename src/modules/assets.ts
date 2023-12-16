@@ -1,4 +1,5 @@
 import { Image, loadImage } from 'canvas'
+import { currentShardID } from '../bot'
 
 export let playerTemplate: Image
 export let summonsTemplate: Image
@@ -101,6 +102,6 @@ export async function loadAssets(){
             loadImage('https://cdn.discordapp.com/attachments/565650781961846784/790744430805123103/PurpleProgressBar_2.png'),
         ]),
         loadImage('assets/Skydom Wallpaper.png')
-
     ])
+    console.log(`Assets loaded for Shard #${currentShardID}`)
 }

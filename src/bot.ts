@@ -13,7 +13,7 @@ import { getBannerData } from './modules/banner'
 
 export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration], rest: {timeout: 60000}})
 export const cryoServerShardID = ShardClientUtil.shardIdForGuildId('379501550097399810', client.shard?.count!)
-const currentShardID = client.shard?.ids[0]
+export const currentShardID = client.shard?.ids[0]
 // let isHost = os.hostname() !== 'PC-Hywell'
 let isHost = true
 
@@ -63,7 +63,6 @@ export async function registerCommands() {
 		.catch(console.error)
 
 	rest.put(Routes.applicationGuildCommands('585514230967566338', '379501550097399810'), { body: privateCommands })
-		.then(() => console.log(`Successfully registered private commands to The Cryo Chamber for Shard #${currentShardID}`))
 		.catch(console.error)
 }
 
