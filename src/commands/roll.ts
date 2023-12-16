@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
-import { data, item, users } from '../bot'
+import { data, users } from '../bot'
 import { createGachaEmbed, findTarget, gacha } from '../modules/roll'
+import { item } from '../modules/banner'
 
 module.exports = {
 	data: new SlashCommandBuilder()

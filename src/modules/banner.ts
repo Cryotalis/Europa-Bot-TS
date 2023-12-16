@@ -1,0 +1,121 @@
+import axios from "axios"
+import { App } from "octokit"
+import { dateStringToUnix } from "./time"
+import { accessCookie, languageCookie } from "./variables"
+
+export interface rawItem {
+	name: string,
+	drop_rate: string,
+	rarity: string,
+	attribute: string,
+	kind: string | null,
+	incidence: string | null,
+	reward_id: number,
+	character_name: string | null,
+	is_season: boolean,
+	season_message: string
+}
+export interface item {
+	name: string,
+	id: string,
+	rarity: string,
+	element: string,
+	type: string,
+	rate1: number,
+	rate2: number,
+	cum_rate1: number,
+	cum_rate2: number,
+	rate_up: boolean,
+	character: string | null
+}
+export interface bannerInfo {
+	id: string,
+	key: string,
+	start: string,
+	end: string,
+	featuredItemIDs: string[],
+	totalRate1: number,
+	totalRate2: number,
+	drawRates: {
+		'SS Rare': string,
+		'S Rare': string,
+		'Rare': string
+	}
+}
+export const bannerData: {bannerInfo: bannerInfo, items: item[]} = {bannerInfo: {} as bannerInfo, items: []}
+export async function getBannerData(){
+	const gameVersion = (await axios.get('http://game.granbluefantasy.jp/')).data.match(/Game.version = "(\d+)"/i)?.[1]
+	if (!gameVersion) return
+	
+	const headers = {
+		Cookie: `wing=${accessCookie.value};ln=${languageCookie.value}`,
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-VERSION': gameVersion
+    }
+	
+	const bannerInfo = await axios.get('http://game.granbluefantasy.jp/gacha/list', {headers: headers})
+	const banner = bannerInfo.data.legend.lineup.find((banner: {name: string}) => banner.name === 'Premium 10-Part Draw')
+	const [items1Info, items2Info, featured] = await Promise.all([
+		axios.get(`http://game.granbluefantasy.jp/gacha/provision_ratio/legend/${banner.id}/1`, {headers: headers}),
+		axios.get(`http://game.granbluefantasy.jp/gacha/provision_ratio/legend/${banner.id}/2`, {headers: headers}),
+		axios.get('https://game.granbluefantasy.jp/gacha/list', {headers: headers})
+	])
+	const elements = ['None', 'Fire', 'Water', 'Earth', 'Wind', 'Light', 'Dark']
+	const weaponTypes = ['None', 'Sabre', 'Dagger', 'Spear', 'Axe', 'Staff', 'Gun', 'Melee', 'Bow', 'Harp', 'Katana']
+	
+	let cumulativeDropRate1 = 0
+	let cumulativeDropRate2 = 0
+	let items1: rawItem[] = items1Info.data.appear.flatMap((data: {rarity_name: string, item: rawItem[]}) => data.item.map((item) => ({...item, rarity: data.rarity_name})))
+	let items2: rawItem[] = items2Info.data.appear.flatMap((data: {rarity_name: string, item: rawItem[]}) => data.item.map((item) => ({...item, rarity: data.rarity_name})))
+
+	bannerData.items = items1.map(item1 => {
+		let item2 = items2.find(item2 => item1.reward_id === item2.reward_id)
+		cumulativeDropRate1 += parseFloat(item1.drop_rate)
+		cumulativeDropRate2 += parseFloat(item2?.drop_rate ?? '0')
+		return {
+			name: `${item1.name} ${item1.season_message}`.trim(),
+			id: String(item1.reward_id),
+			rarity: item1.rarity,
+			element: elements[parseInt(item1.attribute)],
+			type: item1.kind ? weaponTypes[parseInt(item1.kind)] : 'Summon',
+			rate1: parseFloat(item1.drop_rate),
+			rate2: parseFloat(item2?.drop_rate ?? '0'),
+			cum_rate1: parseFloat(cumulativeDropRate1.toFixed(3)),
+			cum_rate2: parseFloat(cumulativeDropRate2.toFixed(3)),
+			rate_up: Boolean(item1.incidence),
+			character: item1.character_name
+		}
+	})
+
+	bannerData.bannerInfo = {
+		id: banner.id,
+		key: bannerInfo.data.legend.random_key,
+		start: banner.service_start,
+		end: banner.service_end,
+		featuredItemIDs: featured.data.header_images,
+		totalRate1: parseFloat(cumulativeDropRate1.toFixed(3)),
+		totalRate2: parseFloat(cumulativeDropRate2.toFixed(3)),
+		drawRates: {
+			'SS Rare': items1Info.data.ratio[0].ratio,
+			'S Rare': items1Info.data.ratio[1].ratio,
+			'Rare': items1Info.data.ratio[2].ratio,
+		}
+	}
+
+	const bannerStart = new Date(dateStringToUnix(banner.service_start)!)
+	const bannerMonth = bannerStart.toLocaleString('default', {month: 'long', timeZone: 'JST'})
+	const bannerYear = bannerStart.toLocaleString('default', {year: 'numeric', timeZone: 'JST'})
+	const app = new App({
+		appId: process.env.GITHUB_APP_ID!,
+		privateKey: process.env.GITHUB_PRIVATE_KEY!,
+	})
+	
+	const octokit = await app.getInstallationOctokit(parseInt(process.env.GITHUB_INSTALLATION_ID!))
+	const filePath = `/repos/Cryotalis/GBF-Banner-Data/contents/${bannerYear}/${bannerMonth}/${banner.id}.json`
+	const {status} = await octokit.request(`GET ${filePath}`).catch((error: any) => error)
+	if (status !== 404) return // Do not upload if the file already exists
+	await octokit.request(`PUT ${filePath}`, {
+		message: `Uploaded banner data for banner ${banner.id}`,
+		content: Buffer.from(JSON.stringify(bannerData, null, "\t")).toString('base64'),
+	})
+}
