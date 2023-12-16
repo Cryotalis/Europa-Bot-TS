@@ -31,7 +31,7 @@ export let VIPTitle: Image
 export let progressBars: Image[]
 
 export let skydomWallpaper: Image
-async function loadAssets(){
+export async function loadAssets(){
     [
         playerTemplate,
         summonsTemplate,
@@ -102,6 +102,5 @@ async function loadAssets(){
         ]),
         loadImage('assets/Skydom Wallpaper.png')
 
-    ]) 
+    ])
 }
-loadAssets()

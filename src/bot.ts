@@ -11,6 +11,8 @@ import { greetingConfig, makeGreetingImage } from './modules/greeting'
 import { App } from 'octokit'
 import { dateStringToUnix } from './modules/time'
 import { JWT } from 'google-auth-library'
+import { loadAssets } from './modules/assets'
+import { loadEvents } from './modules/events'
 
 export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration], rest: {timeout: 60000}})
 export const cryoServerShardID = ShardClientUtil.shardIdForGuildId('379501550097399810', client.shard?.count!)
@@ -103,11 +105,10 @@ export async function connectToDB(){
 
 	console.log(`Database connection successful for Shard #${currentShardID}`)
 }
-connectToDB().then(() => registerCommands())
 
 export let browser: Browser
 export let jsessionID: string // Required for player name search
-async function renewJSessionID(){
+async function getJSessionID(){
 	const page = await browser.newPage()
 	await page.goto('http://info.gbfteamraid.fun/web/about', { timeout: 30000 })
 	await page.click('#login')
@@ -119,10 +120,9 @@ async function renewJSessionID(){
 export async function startPuppeteer(){
 	browser = await launch({args: ['--single-process', '--no-zygote', '--no-sandbox'], headless: 'new'})
 	console.log(`Puppeteer browser launched for Shard #${currentShardID}`)
-	renewJSessionID()
-	schedule('0 * * * *', () => renewJSessionID())
+	getJSessionID()
+	schedule('0 * * * *', () => getJSessionID())
 }
-startPuppeteer()
 
 async function getServerCount(){
 	const results = await client.shard?.fetchClientValues('guilds.cache.size')
@@ -377,8 +377,19 @@ async function getBannerData(){
 		content: Buffer.from(JSON.stringify(bannerData, null, "\t")).toString('base64'),
 	})
 }
-getBannerData()
-schedule('0 * * * *', () => getBannerData())
+
+async function startUp(){
+	startPuppeteer()
+	getBannerData()
+	await connectToDB()
+	registerCommands()
+	await loadAssets()
+	loadEvents()
+
+	schedule('0 * * * *', () => getBannerData())
+	schedule('0 * * * *', () => loadEvents())
+}
+startUp()
 
 client.login(process.env.BOT_TOKEN)
 

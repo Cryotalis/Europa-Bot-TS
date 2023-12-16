@@ -14,7 +14,7 @@ export let eventsTemplate: Canvas | undefined
 /**
  * Loads event information and event template. The template includes upcoming events and leaves a blank space for current events.
  */
-async function loadEvents(){
+export async function loadEvents(){
     let {data}: {data: string} = await axios.get('https://gbf.wiki/Template:MainPageEvents').catch(() => ({data: ''}))
     if (!data) return
 
@@ -54,9 +54,6 @@ async function loadEvents(){
 
     eventsTemplate = canvas
 }
-
-loadEvents()
-schedule('0 * * * *', () => loadEvents())
 
 /** Parses through event data from gbf.wiki and returns a JSON with important information for each event. */
 export async function getEventsInformation(eventData: string, type: 'Current' | 'Upcoming'){
