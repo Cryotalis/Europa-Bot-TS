@@ -125,29 +125,27 @@ async function getServerCount(){
     return results?.reduce((a: any, b: any) => a + b, 0)
 }
 
-client.on('ready', () => {
-    setTimeout(async () => {
-        if (isHost){
-            await client.shard?.broadcastEval((client: Client<boolean>, { shard }: any) => {
-                (client.channels.cache.get('577636091834662915') as TextChannel).send(`:white_check_mark:  **Europa Shard #${shard} is now online**`)
-            }, {shard: cryoServerShardID, context: {shard: currentShardID}})
-        }
-        console.log(`Shard #${currentShardID} is now online`)
-		
-		client.user?.setActivity('Granblue Fantasy')
-		
-		async function updateCounter() {
-			const serverCount = await getServerCount()
-            await client.shard?.broadcastEval((client: Client<boolean>, { count }: any) => {
-                const cryoServer = client.guilds.cache.get('379501550097399810') as Guild;
-                (cryoServer.channels.cache.get('657766651441315840') as TextChannel).edit({name: `Server Count: ${count}`});
-                (cryoServer.channels.cache.get('666696864716029953') as TextChannel).edit({name: `Member Count: ${cryoServer.memberCount}`});
-            }, {shard: cryoServerShardID, context: {count: serverCount}})
-		}
+client.on('ready', async () => {
+	if (isHost){
+		await client.shard?.broadcastEval((client: Client<boolean>, { shard }: any) => {
+			(client.channels.cache.get('577636091834662915') as TextChannel).send(`:white_check_mark:  **Europa Shard #${shard} is now online**`)
+		}, {shard: cryoServerShardID, context: {shard: currentShardID}})
+	}
+	console.log(`Shard #${currentShardID} is now online`)
+	
+	client.user?.setActivity('Granblue Fantasy')
+	
+	async function updateCounter() {
+		const serverCount = await getServerCount()
+		await client.shard?.broadcastEval((client: Client<boolean>, { count }: any) => {
+			const cryoServer = client.guilds.cache.get('379501550097399810') as Guild;
+			(cryoServer.channels.cache.get('657766651441315840') as TextChannel).edit({name: `Server Count: ${count}`});
+			(cryoServer.channels.cache.get('666696864716029953') as TextChannel).edit({name: `Member Count: ${cryoServer.memberCount}`});
+		}, {shard: cryoServerShardID, context: {count: serverCount}})
+	}
 
-		updateCounter()
-		setInterval(() => { updateCounter() }, 1.8e+6) //Updates Europa's server count and my own server's member count every 30 minutes
-	}, 10000)
+	updateCounter()
+	setInterval(() => { updateCounter() }, 1.8e+6) //Updates Europa's server count and my own server's member count every 30 minutes
 })
 
 // Slash Command Handler
