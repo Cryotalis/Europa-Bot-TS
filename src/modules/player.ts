@@ -93,7 +93,7 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
     if (starCharImage) ctx.drawImage(starCharImage, 0, 0, 500, 200, 400, 410, 250, 100)
 
     ctx.textAlign = 'center'
-    ctx.font = `20px Times Bold`
+    ctx.font = `20px Default Bold`
     ctx.fillStyle = 'white'
     ctx.lineWidth = 2
 
@@ -101,12 +101,13 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
     ctx.strokeText(`${emLvl}`, 760, 390)
     ctx.fillText(`${emLvl}`, 760, 390)
 
+    ctx.font = `20px Default`
     ctx.shadowOffsetX = ctx.shadowOffsetY = 0
     ctx.strokeStyle = 'black'
     ctx.strokeText(`${starCharName}`, 580, 390)
     ctx.fillText(`${starCharName}`, 580, 390)
 
-    wrapText({ctx: ctx, font: '18px Times Bold', textAlign: 'left'}, `${starCharText}`, 525, 435, 240, 15)
+    wrapText({ctx: ctx, font: '18px Default', textAlign: 'left'}, `${starCharText}`, 525, 435, 240, 15)
 
     if (starCharRinged) ctx.drawImage(perpetuityRingIcon, 460, 409, 22, 22)
 

@@ -41,7 +41,7 @@ export async function loadSummons(interaction: ChatInputCommandInteraction, play
 	ctx.drawImage(summonsTemplate, 0, 0)
 
 	ctx.textAlign = 'center'
-	ctx.font = '35px Times Bold'
+	ctx.font = '35px Default Bold'
 	ctx.strokeStyle = 'black'
 	ctx.fillStyle = 'white'
 	ctx.lineWidth = 2

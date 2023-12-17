@@ -10,12 +10,16 @@ import { JWT } from 'google-auth-library'
 import { loadAssets } from './modules/assets'
 import { loadEvents } from './modules/events'
 import { getBannerData } from './modules/banner'
+import { registerFont } from 'canvas'
 
 export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration], rest: {timeout: 60000}})
 export const cryoServerShardID = ShardClientUtil.shardIdForGuildId('379501550097399810', client.shard?.count!)
 export const currentShardID = client.shard?.ids[0]
 // let isHost = os.hostname() !== 'PC-Hywell'
 let isHost = true
+
+registerFont(require('@canvas-fonts/arial'), {family: 'Default'})
+registerFont(require('@canvas-fonts/arial-bold'), {family: 'Default Bold'})
 
 const privateCommandFiles = ['connect.js', 'say.js', 'respawn.js', 'log.js']
 const gameCommandNames = ['spark', 'crew', 'events', 'player', 'roll', 'banner']

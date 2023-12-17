@@ -36,12 +36,12 @@ export async function makeGreetingImage(greetingSettings: greetingConfig, user: 
 	let fontSize = 40
 	function applyText(text: string){
 		do {
-			ctx.font = `${fontSize -= 1}px Times`
+			ctx.font = `${fontSize -= 1}px Default`
 		} while (ctx.measureText(text).width > 200)
 		return ctx.font
 	}
 
-	ctx.font = `28px Times`
+	ctx.font = `28px Default`
 	ctx.fillStyle = '#000000'
 	ctx.fillText('Welcome to the server,', canvas.width / 2.5, canvas.height / 2.8)
 	ctx.font = applyText(user.displayName + '!')

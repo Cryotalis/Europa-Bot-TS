@@ -104,7 +104,7 @@ export function drawEvent(ctx: CanvasRenderingContext2D, event: event, textX: nu
         return center - ctx.measureText(text).width / text.length * text.length / 2
     }
 
-    ctx.font = '20px Arial'
+    ctx.font = '20px Default'
     ctx.textAlign = 'center'
     ctx.strokeStyle = 'black'
     ctx.lineWidth = 3
@@ -117,7 +117,7 @@ export function drawEvent(ctx: CanvasRenderingContext2D, event: event, textX: nu
         let bannerHeight = event.image.height * 11 / 15
         ctx.drawImage(event.image, eventX, eventY + (77 - bannerHeight) / 2, 330, bannerHeight)
     } else {
-        wrapText({ctx: ctx, font: '25px Arial'}, event.title, textX, eventY + 43, 290, 30)
+        wrapText({ctx: ctx, font: '25px Default'}, event.title, textX, eventY + 43, 290, 30)
     }
 
     if (event.elementAdvantageImage){
