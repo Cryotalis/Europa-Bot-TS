@@ -3,7 +3,6 @@ import { decode } from "html-entities"
 import { waterAdvantage, earthAdvantage, windAdvantage, fireAdvantage, darkAdvantage, lightAdvantage, eventsBackgroundTop, eventsBackgroundMiddle, eventsBackgroundBottom, upcomingEventsText } from "./assets"
 import { wrapText } from "./image"
 import { dateDiff, getSimpleDate } from "./time"
-import { schedule } from "node-cron"
 import axios from "axios"
 
 export interface event {type: 'Current' | 'Upcoming', title: string, image: Image | undefined, start: Date, end: Date, duration: string, elementAdvantage: string | undefined, elementAdvantageImage: Image | undefined}
