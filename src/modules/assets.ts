@@ -26,7 +26,9 @@ export let darkAdvantage: Image
 
 export let sparkBGMask: Image
 export let clearSparkBG: Image
+export let clearMBSparkBG: Image
 export let defaultSparkBG: Image
+export let defaultMBSparkBG: Image
 export let developerTitle: Image
 export let VIPTitle: Image
 export let progressBars: Image[]
@@ -56,7 +58,9 @@ export async function loadAssets(){
         darkAdvantage,
         sparkBGMask,
         clearSparkBG,
+        clearMBSparkBG,
         defaultSparkBG,
+        defaultMBSparkBG,
         developerTitle,
         VIPTitle,
         progressBars,
@@ -92,7 +96,9 @@ export async function loadAssets(){
         loadImage('assets/Dark Advantage.png'),
         loadImage('assets/Spark Template Background Mask.png'),
         loadImage('assets/Spark Template Translucent BG.png'),
+        loadImage('assets/Spark Template Translucent BG with MobaCoin.png'),
         loadImage('assets/Spark Template.png'),
+        loadImage('assets/Spark Template with MobaCoin.png'),
         loadImage('assets/Developer Title.png'),
         loadImage('assets/VIP Title.png'),
         Promise.all([
