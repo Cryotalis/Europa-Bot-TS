@@ -7,22 +7,18 @@ import { formatList } from "./string"
 import { round } from "./number"
 
 export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUser: User): Promise<InteractionReplyOptions>{
-    let badBackground = false
-    let customBackground
-
     const canvas = createCanvas(500, 300)
     const ctx = canvas.getContext('2d')
     
     const {crystals, tickets, tenParts, rolls, background, sparkTitle} = user.toObject() as userData
+    let customBackground: Image | undefined
 
-    if (background){
-        customBackground = await loadImage(background).catch(() => {badBackground = true})
-    }
+    if (background) customBackground = await loadImage(background).catch(() => undefined)
 
-    if (background && !badBackground){
+    if (customBackground){
         ctx.drawImage(sparkBGMask, 0, 0)
         ctx.globalCompositeOperation = 'source-in'
-        ctx.drawImage(customBackground as Image, 0, 0, canvas.width, canvas.height)
+        ctx.drawImage(customBackground, 0, 0, canvas.width, canvas.height)
         ctx.globalCompositeOperation = 'source-over'
         ctx.drawImage(clearSparkBG, 0, 0)
     } else {
@@ -85,7 +81,7 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
     
     const attachment = new AttachmentBuilder(canvas.toBuffer(), {name: `${discordUser.displayName}SparkProfile.png`})
     
-    if (badBackground){ // If the user's custom background caused an error, send a warning.
+    if (background && !customBackground){ // If the user's custom background caused an error, send a warning.
         return {content: 'I could not access your background image. Please make sure your background image is publicly accessible.', files: [attachment]}
     }
     
