@@ -108,7 +108,6 @@ export async function loadAssets(){
             loadImage('assets/Progress Bar 4.png'),
             loadImage('assets/Progress Bar 5.png'),
             loadImage('assets/Progress Bar 6.png'),
-            loadImage('assets/Progress Bar 7.png'),
         ]),
         loadImage('assets/Skydom Wallpaper.png')
     ])
