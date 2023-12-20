@@ -13,27 +13,30 @@ module.exports = {
 				.setName('set')
 				.setDescription('Set your spark resources')
 				.addStringOption(option => option.setName('sh').setDescription('Add to all resources at once (shorthand option)'))
-				.addNumberOption(option => option.setName('crystals').setDescription('The number of crystals to set').setMinValue(0))
-				.addNumberOption(option => option.setName('tickets').setDescription('The number of tickets to set').setMinValue(0))
-				.addNumberOption(option => option.setName('10-parts').setDescription('The number of 10-part tickets to set').setMinValue(0))
+				.addNumberOption(option => option.setName('crystals').setDescription('The number of Crystals to set').setMinValue(0))
+				.addNumberOption(option => option.setName('tickets').setDescription('The number of Tickets to set').setMinValue(0))
+				.addNumberOption(option => option.setName('10-parts').setDescription('The number of 10-Part Tickets to set').setMinValue(0))
+				.addNumberOption(option => option.setName('mobacoin').setDescription('The number of MobaCoin to set').setMinValue(0))
 		)
 		.addSubcommand(subcommand => 
 			subcommand
 				.setName('add')
 				.setDescription('Add to your spark resources')
 				.addStringOption(option => option.setName('sh').setDescription('Add to all resources at once (shorthand option)'))
-				.addNumberOption(option => option.setName('crystals').setDescription('The number of crystals to add').setMinValue(0))
-				.addNumberOption(option => option.setName('tickets').setDescription('The number of tickets to add').setMinValue(0))
-				.addNumberOption(option => option.setName('10-parts').setDescription('The number of 10-part tickets to add').setMinValue(0))
+				.addNumberOption(option => option.setName('crystals').setDescription('The number of Crystals to add').setMinValue(0))
+				.addNumberOption(option => option.setName('tickets').setDescription('The number of Tickets to add').setMinValue(0))
+				.addNumberOption(option => option.setName('10-parts').setDescription('The number of 10-Part Tickets to add').setMinValue(0))
+				.addNumberOption(option => option.setName('mobacoin').setDescription('The number of MobaCoin to add').setMinValue(0))
 		)
 		.addSubcommand(subcommand => 
 			subcommand
 				.setName('subtract')
 				.setDescription('Subtract from your spark resources')
 				.addStringOption(option => option.setName('sh').setDescription('Add to all resources at once (shorthand option)'))
-				.addNumberOption(option => option.setName('crystals').setDescription('The number of crystals to subtract').setMinValue(0))
-				.addNumberOption(option => option.setName('tickets').setDescription('The number of tickets to subtract').setMinValue(0))
-				.addNumberOption(option => option.setName('10-parts').setDescription('The number of 10-part tickets to subtract').setMinValue(0))
+				.addNumberOption(option => option.setName('crystals').setDescription('The number of Crystals to subtract').setMinValue(0))
+				.addNumberOption(option => option.setName('tickets').setDescription('The number of Tickets to subtract').setMinValue(0))
+				.addNumberOption(option => option.setName('10-parts').setDescription('The number of 10-Part Tickets to subtract').setMinValue(0))
+				.addNumberOption(option => option.setName('mobacoin').setDescription('The number of MobaCoin to subtract').setMinValue(0))
 		)
 		.addSubcommand(subcommand => 
 			subcommand
@@ -67,6 +70,7 @@ module.exports = {
 				username: interaction.user.tag,
 				userID: `'${interaction.user.id}`,
 				crystals: 0,
+				mobaCoin: 0,
 				tickets: 0,
 				tenParts: 0,
 				rolls: 0,
@@ -79,6 +83,7 @@ module.exports = {
 		const userInput = interaction.options.getUser('user')
 		const shorthandInput = interaction.options.getString('sh')
 		let crystals = interaction.options.getNumber('crystals')
+		let mobaCoin = interaction.options.getNumber('mobacoin')
 		let tickets = interaction.options.getNumber('tickets')
 		let tenparts = interaction.options.getNumber('10-parts')
 		const linkInput = interaction.options.getString('link')
@@ -101,9 +106,10 @@ module.exports = {
 				crystals = shorthandMatch[0] ? parseInt(shorthandMatch[0]) : null
 				tickets = shorthandMatch[1] ? parseInt(shorthandMatch[1]) : null
 				tenparts = shorthandMatch[2] ? parseInt(shorthandMatch[2]) : null
+				mobaCoin = shorthandMatch[3] ? parseInt(shorthandMatch[3]) : null
 			}
 
-			const {errorMsg, summary} = manageSpark(user, command, crystals, tickets, tenparts)
+			const {errorMsg, summary} = manageSpark(user, command, crystals, mobaCoin, tickets, tenparts)
 			await interaction.reply(errorMsg || summary)
 		}
 		else if (command === 'background'){
@@ -121,6 +127,7 @@ module.exports = {
 				userID: 'deleted',
 				username: 'deleted',
 				crystals: 'deleted',
+				mobaCoin: 'deleted',
 				tickets: 'deleted',
 				tenParts: 'deleted',
 				rolls: 'deleted',

@@ -2,7 +2,7 @@ import { createCanvas, loadImage, Image } from "canvas"
 import { AttachmentBuilder, EmbedBuilder, GuildMember, InteractionReplyOptions, User } from "discord.js"
 import { GoogleSpreadsheetRow } from "google-spreadsheet"
 import { userData } from "../bot"
-import { sparkBGMask, clearSparkBG, defaultSparkBG, progressBars, developerTitle, VIPTitle } from "./assets"
+import { sparkBGMask, clearSparkBG, defaultSparkBG, progressBars, developerTitle, VIPTitle, clearMBSparkBG, defaultMBSparkBG } from "./assets"
 import { formatList } from "./string"
 import { round } from "./number"
 
@@ -10,7 +10,7 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
     const canvas = createCanvas(500, 300)
     const ctx = canvas.getContext('2d')
     
-    const {crystals, tickets, tenParts, rolls, background, sparkTitle} = user.toObject() as userData
+    const {crystals, mobaCoin, tickets, tenParts, rolls, background, sparkTitle} = user.toObject() as userData
     let customBackground: Image | undefined
 
     if (background) customBackground = await loadImage(background).catch(() => undefined)
@@ -20,9 +20,9 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
         ctx.globalCompositeOperation = 'source-in'
         ctx.drawImage(customBackground, 0, 0, canvas.width, canvas.height)
         ctx.globalCompositeOperation = 'source-over'
-        ctx.drawImage(clearSparkBG, 0, 0)
+        ctx.drawImage(+mobaCoin ? clearMBSparkBG : clearSparkBG, 0, 0)
     } else {
-        ctx.drawImage(defaultSparkBG, 0, 0)
+        ctx.drawImage(+mobaCoin ? defaultMBSparkBG : defaultSparkBG, 0, 0)
     }
     
     const sparkPercent = calcDraws(user, false)/300
@@ -52,10 +52,15 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
     
     ctx.font = '24px Default'
     ctx.textAlign = 'right'
-    ctx.fillText(crystals, 160, 175)
-    ctx.fillText(tickets, 313, 175)
-    ctx.fillText(tenParts, 460, 175)
-    ctx.fillText(rolls, 313, 222)
+    ctx.fillText(crystals, 165, 174)
+    ctx.fillText(tickets, 315, 174)
+    ctx.fillText(tenParts, 465, 174)
+    if (+mobaCoin){
+        ctx.fillText(mobaCoin, 240, 220)
+        ctx.fillText(rolls, 390, 220)
+    } else {
+        ctx.fillText(rolls, 315, 220)
+    }
 
     ctx.font = '19px Default'
     ctx.textAlign = 'left'
@@ -136,37 +141,42 @@ export function getEmbedProfile(user: GoogleSpreadsheetRow<userData>, discordUse
 }
 
 export function calcDraws(user: GoogleSpreadsheetRow<userData>, round: boolean = true){
-    const {crystals, tickets, tenParts} = user.toObject() as userData
-    const preciseDraws = (parseInt(crystals) + parseInt(tickets) * 300 + parseInt(tenParts) * 3000) / 300
+    const {crystals, mobaCoin, tickets, tenParts} = user.toObject() as userData
+    const preciseDraws = (parseInt(crystals) + parseInt(mobaCoin) + parseInt(tickets) * 300 + parseInt(tenParts) * 3000) / 300
     return round ? Math.floor(preciseDraws) : preciseDraws
 }
 
-export function manageSpark(user: GoogleSpreadsheetRow<userData>, operation: string, crystals: number | null, tickets: number | null, tenParts: number | null){
+export function manageSpark(user: GoogleSpreadsheetRow<userData>, operation: string, crystals: number | null, mobaCoin: number | null, tickets: number | null, tenParts: number | null){
     const resourceArr = []
     const initialRolls = calcDraws(user)
     if (crystals !== null) resourceArr.push('Crystals')
+    if (mobaCoin !== null) resourceArr.push('MobaCoin')
     if (tickets !== null) resourceArr.push('Tickets')
     if (tenParts !== null) resourceArr.push('10-Part Tickets')
 
     if (!resourceArr.length) return {errorMsg: `You must choose a resource to ${operation}!`, summary: ''}
 
     const userCrystals = parseInt(user.get('crystals'))
+    const userMobaCoin = parseInt(user.get('mobaCoin'))
     const userTickets = parseInt(user.get('tickets'))
     const userTenParts = parseInt(user.get('tenParts'))
 
     switch(operation){
         case 'set':
             user.set('crystals', String(crystals ?? userCrystals))
+            user.set('mobaCoin', String(mobaCoin ?? userMobaCoin))
             user.set('tickets', String(tickets ?? userTickets))
             user.set('tenParts', String(tenParts ?? userTenParts))
             break
         case 'add':
             user.set('crystals', String(userCrystals + (crystals ?? 0)))
+            user.set('mobaCoin', String(userMobaCoin + (mobaCoin ?? 0)))
             user.set('tickets', String(userTickets + (tickets ?? 0)))
             user.set('tenParts', String(userTenParts + (tenParts ?? 0)))
             break
         case 'subtract':
             user.set('crystals', String(userCrystals - (crystals ?? 0)))
+            user.set('mobaCoin', String(userMobaCoin - (mobaCoin ?? 0)))
             user.set('tickets', String(userTickets - (tickets ?? 0)))
             user.set('tenParts', String(userTenParts - (tenParts ?? 0)))
             break

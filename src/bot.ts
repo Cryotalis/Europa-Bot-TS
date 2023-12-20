@@ -73,9 +73,10 @@ export async function registerCommands() {
 export interface serverData {guildName: string, guildID: string, greeting: string, roles: string}
 export interface userData {
 	username: string,	userID: string,
-	crystals: string,	tickets: string, 
-	tenParts: string, 	rolls: string, 		
-	background: string,	sparkTitle: string
+	crystals: string,	mobaCoin: string,
+	tickets: string,    tenParts: string, 	
+	rolls: string, 		background: string,	
+	sparkTitle: string
 }
 export let publicDB: GoogleSpreadsheet
 export let privateDB: GoogleSpreadsheet
