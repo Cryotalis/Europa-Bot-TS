@@ -119,7 +119,7 @@ module.exports = {
 			await interaction.reply('Spark background set.')
 		}
 		else if (command === 'reset'){
-			user.assign({...user.toObject() as userData, tickets: '0', crystals: '0', tenParts: '0', rolls: '0'})
+			user.assign({...user.toObject() as userData, crystals: '0', mobaCoin: '0', tickets: '0', tenParts: '0', rolls: '0'})
 			await interaction.reply('Spark profile reset.')
 		}
 		else if (command === 'delete'){
