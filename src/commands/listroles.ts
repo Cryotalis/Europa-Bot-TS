@@ -12,6 +12,10 @@ module.exports = {
 		if (!serverRolesConfig.length) return interaction.reply('No roles are set for your server.')
 		const roleCategories = [...new Set(serverRolesConfig.map(role => role.category))]
 
+		if (roleCategories.some(category => serverRolesConfig.filter(role => role.category === category).length > 45)){
+			return interaction.reply('Server role list could not be displayed because more than 45 roles are assigned to one category.')
+		}
+
 		const rolesEmbed = new EmbedBuilder()
 			.setTitle('Server Role List')
 			.setColor('Blue')

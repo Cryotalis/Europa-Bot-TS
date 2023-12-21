@@ -43,6 +43,9 @@ module.exports = {
 
 		const command = interaction.options.getSubcommand()
 		if (command === 'add'){
+			if (serverRolesConfig.filter(role => role.category === category).length >= 45){
+				return interaction.reply('You cannot add any more roles to this category!')
+			}
 			rolesInput!.forEach(roleInput => {
 				if (!category) category = 'General'
 				const role = /^\d+$/.test(roleInput)
