@@ -10,7 +10,7 @@ module.exports = {
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
 		if (interaction.user.id !== '251458435554607114') {
-			return interaction.reply('This command is reserved for Cryo.')
+			return interaction.reply('This command is reserved for my creator.')
 		}
         
         const channelID = interaction.options.getString('channel')!

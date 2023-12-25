@@ -3,7 +3,7 @@ import { App } from "octokit"
 import { dateStringToUnix } from "./time"
 import { accessCookie, languageCookie } from "./variables"
 import { decode } from "urlencode"
-import { cryoServerShardID, currentShardID } from "../bot"
+import { homeServerShardID, currentShardID } from "../bot"
 
 export interface rawItem {
 	name: string,
@@ -160,7 +160,7 @@ export async function getBannerData(){
 		}
 	}
 
-	if (currentShardID !== cryoServerShardID) return
+	if (currentShardID !== homeServerShardID) return
 
 	const bannerStart = new Date(dateStringToUnix(banner.service_start)!)
 	const bannerMonth = bannerStart.toLocaleString('default', {month: 'long', timeZone: 'JST'})

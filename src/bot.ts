@@ -12,7 +12,7 @@ import { getBannerData } from './modules/banner'
 import { registerFont } from 'canvas'
 
 export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration], rest: {timeout: 60000}})
-export const cryoServerShardID = ShardClientUtil.shardIdForGuildId('379501550097399810', client.shard?.count!)
+export const homeServerShardID = ShardClientUtil.shardIdForGuildId('379501550097399810', client.shard?.count!)
 export const currentShardID = client.shard?.ids[0]
 
 registerFont(require('@canvas-fonts/arial'), {family: 'Default'})
@@ -123,12 +123,12 @@ export async function startPuppeteer(){
 }
 
 async function updateCounter() {
-	if (currentShardID !== cryoServerShardID) return
+	if (currentShardID !== homeServerShardID) return
 	const serverCounts = await client.shard?.fetchClientValues('guilds.cache.size')
 	const serverCount = serverCounts?.reduce((a: any, b: any) => a + b, 0)
-	const cryoServer = client.guilds.cache.get('379501550097399810') as Guild
-	;(cryoServer.channels.cache.get('657766651441315840') as TextChannel).edit({name: `Server Count: ${serverCount}`})
-	;(cryoServer.channels.cache.get('666696864716029953') as TextChannel).edit({name: `Member Count: ${cryoServer.memberCount}`})
+	const homeServer = client.guilds.cache.get('379501550097399810') as Guild
+	;(homeServer.channels.cache.get('657766651441315840') as TextChannel).edit({name: `Server Count: ${serverCount}`})
+	;(homeServer.channels.cache.get('666696864716029953') as TextChannel).edit({name: `Member Count: ${homeServer.memberCount}`})
 }
 
 async function startUp(){
@@ -151,7 +151,7 @@ client.on('ready', async () => {
 	client.user?.setActivity('Granblue Fantasy')
 	startUp()
 	
-	if (currentShardID !== cryoServerShardID) return
+	if (currentShardID !== homeServerShardID) return
 	
 	(client.channels.cache.get('577636091834662915') as TextChannel).send(`:white_check_mark:  **Europa is now online**`)
 })
@@ -173,13 +173,13 @@ client.on('interactionCreate', interaction => {
 	} catch (error) {
 		client.shard?.broadcastEval((client: Client, {error}: any) => {
 			(client.channels.cache.get('672715578347094026') as TextChannel).send({files: [{attachment: Buffer.from(error, 'utf-8'), name: 'error.ts'}]})
-		}, {shard: cryoServerShardID, context: {error: inspect(error, {depth: null})}})
+		}, {shard: homeServerShardID, context: {error: inspect(error, {depth: null})}})
 		interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true })
 	} finally {
 		const logMessage = `:scroll:  **${interaction.user.username}** (${interaction.user.id}) ran the ${isModCommand ? 'mod ' : ''}command \`${interaction.commandName}\` in **${interaction.guild?.name}** (${interaction.guildId})`
 		client.shard?.broadcastEval((client: Client, {message}: any): void => {
 			(client.channels.cache.get('577636091834662915') as TextChannel).send(message)
-		}, {shard: cryoServerShardID, context: {message: logMessage}})
+		}, {shard: homeServerShardID, context: {message: logMessage}})
 	}
 })
 
@@ -197,7 +197,7 @@ client.on('guildCreate', async guild => {
 	const joinMessage = `:man_raising_hand:  Joined server **${guild.name}**`
 	client.shard?.broadcastEval((client: Client, {message}: any): void => {
 		(client.channels.cache.get('577636091834662915') as TextChannel).send(message)
-	}, {shard: cryoServerShardID, context: {message: joinMessage}})
+	}, {shard: homeServerShardID, context: {message: joinMessage}})
 })
 
 // Greeting System
@@ -275,5 +275,5 @@ schedule('0 * * * *', () => {
 process.on('uncaughtException', error => {
 	client.shard?.broadcastEval((client: Client, {error}: any) => {
 		(client.channels.cache.get('672715578347094026') as TextChannel)?.send({files: [{attachment: Buffer.from(error, 'utf-8'), name: 'error.ts'}]})
-	}, {shard: cryoServerShardID, context: {error: inspect(error, {depth: null})}})
+	}, {shard: homeServerShardID, context: {error: inspect(error, {depth: null})}})
 })
