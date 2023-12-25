@@ -78,13 +78,13 @@ export function timeToUnix(time: string) { //Converts a day/hour/minute/second t
  * Converts date/time input to unix. Format: 1:23 AM/PM TimeZone
  */
 export function dateStringToUnix(dateString: string) {
-    dateString = dateString.toLowerCase().replace(/[^a-zA-Z0-9\s\/:]/g, '') //Remove any characters that aren't words/numbers/spaces/slashes
-    dateString = dateString.replace('noon', 'pm')
+    dateString = dateString.toLowerCase().replace(/[^a-zA-Z0-9\s\/:]/g, '') // Remove any characters that aren't words/numbers/spaces/slashes/colons
+    dateString = dateString.replace('noon', 'pm').replace('midnight', 'am')
     const now = new Date()
     const year = now.getFullYear().toString()
     const months = [ 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec' ]
     const month = months.find(m => dateString.toLowerCase().includes(m))
-    const timeFormat = new RegExp(/(\d+\s*:\s*\d+\s*:?\s*\d*\s*(AM|PM)?)|(\d+\s*(AM|PM))/i)
+    const timeFormat = new RegExp(/(\d+:){1,2}\d+ ?(am|pm)?|\d+\s*(am|pm)/i)
     const abbreviated = new RegExp('(\\d\\d?)\\s*/\\s*(\\d\\d?)\\s*/?\\s*(\\d*)') // 1/1/1970
     const american = new RegExp(`(${month}\\w*)\\s+(\\d+)(?:\\w*)\\s*(\\d*)`) // January 1, 1970
     const british = new RegExp(`(\\d+)(?:\\w*)\\s*(${month}\\w*)\\s*(\\d*)`) // 1 January, 1970
@@ -98,13 +98,14 @@ export function dateStringToUnix(dateString: string) {
         'MHT',  'PHT',  'AOE',  'WAKT',
         'HST',  'AKDT'
     ] // Timezones that use the Month/Day/Year format
-    let date = '', time = dateString.match(timeFormat)![0], timeZone = TZdefault.name
+    let date = '', time = dateString.match(timeFormat)?.[0], timeZone = TZdefault.name
 
-    if (time) { //Extracts the time, if it was provided
-        dateString = dateString.replace(timeFormat, '').trim() //Remove the time from dateString
-        if (time.match(/\d+/)![0] !== '12' && /pm/i.test(time)) {time = time.replace(/\d+/, String(parseInt(time.match(/\d+/)![0]) + 12))} //Convert the time input to military time
-        time = time.replace(/\s*(am|pm)/i, '') //Remove AM or PM from the time input   
-        while (!/.+:.+:.+/.test(time)) {time += ':00'} //Coerce time input to format hh:mm:ss (hours, minutes, and seconds)
+    if (time) { // Extracts the time, if it was provided
+        dateString = dateString.replace(timeFormat, '').trim() // Remove the time from dateString
+        if (/^(?!12).+pm/i.test(time)) time = time.replace(/\d+/, String(parseInt(time.match(/\d+/)![0]) + 12)) // Convert the time input to military time (add 12 hours for 1pm ~ 11pm)
+        if (/^12.*am/i.test(time)) time = time.replace(/\d+/, '00') // Convert the time input to military time (replace 12am with 00am)
+        time = time.replace(/\s*(am|pm)/i, '') // Remove AM or PM from the time input   
+        while (!/\d+:\d+:\d+/.test(time)) {time += ':00'} // Coerce time input to format hh:mm:ss (hours, minutes, and seconds)
     }
 
     let dateData: RegExpMatchArray = ['']
@@ -152,7 +153,7 @@ export function dateToString(date: Date, timeZone: string = 'UTC', showTZ: boole
     const ampm = hours < 12 ? 'AM' : 'PM'
 
     if (hours > 12) {dateString = dateString.replace(`${hours}:`, `${hours - 12}:`)} //Coerce the output to 12 hour format
-    if (hours === 0) {dateString = dateString.replace(`${hours}:`, `${hours + 12}:`)} //Coerce the output to 12 hour format
+    if (hours === 0) {dateString = dateString.replace(/00:/, '12:')} //Coerce the output to 12 hour format
     if (!showTZ) {timeZone = ''}
     return `${dateString} ${ampm} ${timeZone.toUpperCase()}`.trim()
 }
