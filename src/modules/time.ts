@@ -62,7 +62,7 @@ export function dateDiff(firstDate: Date, secondDate: Date, shortFormat: boolean
         .replace(/,(?=[^,]*$)/, ' and') //replaces last comma in string with "and"
         .trim()
     if (shortFormat) dateString = dateString.replace(/\sdays?/, 'd').replace(/\shours?/, 'h').replace(/\sminutes?/, 'm').replace(/\sseconds?/, 's').replace(/\sand/, '').replace(/,/g, '')
-    return secondDate > firstDate ? dateString : `-${dateString}` //Removes extra whitespace from both ends, make time negative if applicable
+    return secondDate > firstDate ? dateString : '-' + dateString // If applicable, add a negative sign
 }
 
 /**
