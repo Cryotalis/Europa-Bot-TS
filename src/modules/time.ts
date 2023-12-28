@@ -57,10 +57,12 @@ export function dateDiff(firstDate: Date, secondDate: Date, shortFormat: boolean
     const minutesOutput = minutes === 1 ? `${minutes} minute,` : minutes ? `${minutes} minutes,` : ''
     const secondsOutput = seconds === 1 ? `${seconds} second,` : seconds ? `${seconds} seconds,` : ''
     let dateString = `${daysOutput} ${hoursOutput} ${minutesOutput} ${secondsOutput}`
+        .replace(/\s+/g, ' ') // Removes any extra spaces between words
         .replace(/,(?=[^,]*$)/, '') //removes extra comma at the end of the string
         .replace(/,(?=[^,]*$)/, ' and') //replaces last comma in string with "and"
+        .trim()
     if (shortFormat) dateString = dateString.replace(/\sdays?/, 'd').replace(/\shours?/, 'h').replace(/\sminutes?/, 'm').replace(/\sseconds?/, 's').replace(/\sand/, '').replace(/,/g, '')
-    return secondDate > firstDate ? dateString.trim() : `-${dateString.trim()}` //Removes extra whitespace from both ends, make time negative if applicable
+    return secondDate > firstDate ? dateString : `-${dateString}` //Removes extra whitespace from both ends, make time negative if applicable
 }
 
 /**
