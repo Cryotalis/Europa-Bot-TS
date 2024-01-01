@@ -1,6 +1,6 @@
 import { createCanvas, loadImage } from "canvas"
 import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder } from "discord.js"
-import { browser, startPuppeteer } from "../bot"
+import { browser, fontFallBacks, startPuppeteer } from "../bot"
 import { playerTemplate, openSummon, perpetuityRingIcon } from "./assets"
 import { getAllSummonInfo, drawStars } from "./granblue"
 import { wrapText } from "./image"
@@ -93,7 +93,7 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
     if (starCharImage) ctx.drawImage(starCharImage, 0, 0, 500, 200, 400, 410, 250, 100)
 
     ctx.textAlign = 'center'
-    ctx.font = `20px Default Bold Code2000`
+    ctx.font = `20px Default Bold ${fontFallBacks}`
     ctx.fillStyle = 'white'
     ctx.lineWidth = 2
 
@@ -101,7 +101,7 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
     ctx.strokeText(`${emLvl}`, 760, 390)
     ctx.fillText(`${emLvl}`, 760, 390)
 
-    ctx.font = `20px Default Code2000`
+    ctx.font = `20px Default ${fontFallBacks}`
     ctx.shadowOffsetX = ctx.shadowOffsetY = 0
     ctx.strokeStyle = 'black'
     ctx.strokeText(`${starCharName}`, 580, 390)

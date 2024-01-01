@@ -4,6 +4,7 @@ import { waterAdvantage, earthAdvantage, windAdvantage, fireAdvantage, darkAdvan
 import { wrapText } from "./image"
 import { dateDiff, getSimpleDate } from "./time"
 import axios from "axios"
+import { fontFallBacks } from "../bot"
 
 export interface event {type: 'Current' | 'Upcoming', title: string, image: Image | undefined, start: Date, end: Date, duration: string, elementAdvantage: string | undefined, elementAdvantageImage: Image | undefined}
 export let currentEvents: event[] = []
@@ -104,7 +105,7 @@ export function drawEvent(ctx: CanvasRenderingContext2D, event: event, textX: nu
         return center - ctx.measureText(text).width / text.length * text.length / 2
     }
 
-    ctx.font = '20px Default Code2000'
+    ctx.font = `20px Default ${fontFallBacks}`
     ctx.textAlign = 'center'
     ctx.strokeStyle = 'black'
     ctx.lineWidth = 3

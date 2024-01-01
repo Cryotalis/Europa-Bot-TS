@@ -1,6 +1,7 @@
 import { AttachmentBuilder, User } from 'discord.js'
 import { createCanvas, loadImage } from 'canvas'
 import { skydomWallpaper } from './assets';
+import { fontFallBacks } from '../bot';
 
 export type toggleableGreetingSetting = 'sendJoinMessage' | 'sendLeaveMessage' | 'sendBanMessage' | 'showJoinImage' | 'useAutoRole';
 
@@ -36,12 +37,12 @@ export async function makeGreetingImage(greetingSettings: greetingConfig, user: 
 	let fontSize = 40
 	function applyText(text: string){
 		do {
-			ctx.font = `${fontSize -= 1}px Default Code2000`
+			ctx.font = `${fontSize -= 1}px Default ${fontFallBacks}`
 		} while (ctx.measureText(text).width > 200)
 		return ctx.font
 	}
 
-	ctx.font = `28px Default Code2000`
+	ctx.font = `28px Default ${fontFallBacks}`
 	ctx.fillStyle = '#000000'
 	ctx.fillText('Welcome to the server,', canvas.width / 2.5, canvas.height / 2.8)
 	ctx.font = applyText(user.displayName + '!')

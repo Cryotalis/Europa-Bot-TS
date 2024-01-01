@@ -1,7 +1,7 @@
 import { createCanvas, loadImage, Image } from "canvas"
 import { AttachmentBuilder, EmbedBuilder, GuildMember, InteractionReplyOptions, User } from "discord.js"
 import { GoogleSpreadsheetRow } from "google-spreadsheet"
-import { userData } from "../bot"
+import { fontFallBacks, userData } from "../bot"
 import { sparkBGMask, clearSparkBG, defaultSparkBG, progressBars, developerTitle, VIPTitle, clearMBSparkBG, defaultMBSparkBG } from "./assets"
 import { formatList } from "./string"
 import { round } from "./number"
@@ -34,7 +34,7 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
     function applyText(text: string){
         let fontSize = 40
         do {
-            ctx.font = `${fontSize -= 1}px Default Code2000`
+            ctx.font = `${fontSize -= 1}px Default ${fontFallBacks}`
         } while (ctx.measureText(text).width > 200)
         return ctx.font
     }
@@ -50,7 +50,7 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
         case 'vip': ctx.drawImage(VIPTitle, 302, 122); break
     }
     
-    ctx.font = '24px Default Code2000'
+    ctx.font = `24px Default ${fontFallBacks}`
     ctx.textAlign = 'right'
     ctx.fillText(crystals, 165, 174)
     ctx.fillText(tickets, 315, 174)
@@ -62,7 +62,7 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
         ctx.fillText(rolls, 315, 220)
     }
 
-    ctx.font = '19px Default Code2000'
+    ctx.font = `19px Default ${fontFallBacks}`
     ctx.textAlign = 'left'
     ctx.strokeStyle = 'black'
     ctx.lineWidth = 3

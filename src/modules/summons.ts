@@ -1,6 +1,6 @@
 import { createCanvas } from 'canvas'
 import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
-import { browser, startPuppeteer } from '../bot'
+import { browser, fontFallBacks, startPuppeteer } from '../bot'
 import { summonsTemplate } from './assets'
 import { getAllSummonInfo, drawStars } from './granblue'
 import { languageCookie, accessCookie } from './variables'
@@ -41,7 +41,7 @@ export async function loadSummons(interaction: ChatInputCommandInteraction, play
 	ctx.drawImage(summonsTemplate, 0, 0)
 
 	ctx.textAlign = 'center'
-	ctx.font = '35px Default Bold Code2000'
+	ctx.font = `35px Default Bold ${fontFallBacks}`
 	ctx.strokeStyle = 'black'
 	ctx.fillStyle = 'white'
 	ctx.lineWidth = 2
