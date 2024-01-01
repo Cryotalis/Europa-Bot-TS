@@ -36,8 +36,8 @@ export let progressBars: Image[]
 
 export let skydomWallpaper: Image
 export async function loadAssets(){
-    const assetPaths = readdirSync('assets/')
-    const loadedAssets = await Promise.all(assetPaths.filter(asset => /.png/i.test(asset)).map(asset => loadImage(`assets/${asset}`)))
+    const assetPaths = readdirSync('assets/').filter(asset => /.png/i.test(asset))
+    const loadedAssets = await Promise.all(assetPaths.map(asset => loadImage(`assets/${asset}`)))
     const assets = Object.fromEntries(loadedAssets.map((asset, i) => [String(assetPaths[i].match(/[^.]+/)), asset]));
 
     playerTemplate = assets['Player Template']
