@@ -15,7 +15,7 @@ export const client: Client<boolean> & {commands?: Collection<unknown, unknown>}
 export const homeServerShardID = ShardClientUtil.shardIdForGuildId('379501550097399810', client.shard?.count!)
 export const currentShardID = client.shard?.ids[0]
 
-registerFont('assets/Code2000.ttf', {family: 'Code2000'})
+registerFont('assets/Code2000.TTF', {family: 'Code2000'})
 registerFont(require('@canvas-fonts/arial'), {family: 'Default'})
 registerFont(require('@canvas-fonts/arial-bold'), {family: 'Default Bold'})
 
