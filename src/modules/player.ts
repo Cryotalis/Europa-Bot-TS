@@ -15,7 +15,7 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
     interaction.editReply({embeds: [playerEmbed], components: []})
 
     // Access the Player profile page
-    if (!browser.connected) await startPuppeteer()
+    if (!browser?.connected) await startPuppeteer()
     const page = await browser.newPage()
     await page.setCookie(languageCookie, accessCookie)
     await page.goto(`http://game.granbluefantasy.jp/#profile/${playerID}`, { waitUntil: 'networkidle0' })

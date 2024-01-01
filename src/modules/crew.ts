@@ -1,11 +1,11 @@
 import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder } from "discord.js"
-import { browser } from "../bot"
+import { browser, startPuppeteer } from "../bot"
 import { formatList } from "./string"
 import { languageCookie, accessCookie } from "./variables"
 
 export interface crew {data: {is_seed: number, points: number, gw_num: number, rank: number, name: string}[], id: number}
 export async function loadCrew(interaction: ChatInputCommandInteraction, crew: crew){
-    if (!browser) return interaction.editReply({content: 'Browser is currently unavailable. Please try again later.', embeds: []})
+    if (!browser?.connected) await startPuppeteer()
     
     const crewEmbed = new EmbedBuilder()
         .setTitle('Loading Crew Page <a:loading:763160594974244874>')
