@@ -34,7 +34,7 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
     function applyText(text: string){
         let fontSize = 40
         do {
-            ctx.font = `${fontSize -= 1}px Default`
+            ctx.font = `${fontSize -= 1}px Default Code2000`
         } while (ctx.measureText(text).width > 200)
         return ctx.font
     }
@@ -50,7 +50,7 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
         case 'vip': ctx.drawImage(VIPTitle, 302, 122); break
     }
     
-    ctx.font = '24px Default'
+    ctx.font = '24px Default Code2000'
     ctx.textAlign = 'right'
     ctx.fillText(crystals, 165, 174)
     ctx.fillText(tickets, 315, 174)
@@ -62,7 +62,7 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
         ctx.fillText(rolls, 315, 220)
     }
 
-    ctx.font = '19px Default'
+    ctx.font = '19px Default Code2000'
     ctx.textAlign = 'left'
     ctx.strokeStyle = 'black'
     ctx.lineWidth = 3

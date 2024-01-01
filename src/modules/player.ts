@@ -93,7 +93,7 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
     if (starCharImage) ctx.drawImage(starCharImage, 0, 0, 500, 200, 400, 410, 250, 100)
 
     ctx.textAlign = 'center'
-    ctx.font = `20px Default Bold`
+    ctx.font = `20px Default Bold Code2000`
     ctx.fillStyle = 'white'
     ctx.lineWidth = 2
 
@@ -101,7 +101,7 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
     ctx.strokeText(`${emLvl}`, 760, 390)
     ctx.fillText(`${emLvl}`, 760, 390)
 
-    ctx.font = `20px Default`
+    ctx.font = `20px Default Code2000`
     ctx.shadowOffsetX = ctx.shadowOffsetY = 0
     ctx.strokeStyle = 'black'
     ctx.strokeText(`${starCharName}`, 580, 390)

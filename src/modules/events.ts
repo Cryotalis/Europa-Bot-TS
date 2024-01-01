@@ -104,7 +104,7 @@ export function drawEvent(ctx: CanvasRenderingContext2D, event: event, textX: nu
         return center - ctx.measureText(text).width / text.length * text.length / 2
     }
 
-    ctx.font = '20px Default'
+    ctx.font = '20px Default Code2000'
     ctx.textAlign = 'center'
     ctx.strokeStyle = 'black'
     ctx.lineWidth = 3
