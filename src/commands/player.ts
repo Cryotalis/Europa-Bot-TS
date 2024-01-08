@@ -54,7 +54,7 @@ module.exports = {
 		
 		let players = await axios.request(options).then(({data: {result}}) => result as player[]).catch(() => undefined) 
 		
-		if (!players){ // Try searching https://gbfdata.com if teamraid is not available
+		if (!players?.length){ // Try searching https://gbfdata.com if teamraid is not available
 			searchEmbed.setFooter({text: 'https://gbfdata.com/', iconURL: 'https://gbfdata.com/favicon.ico'})
 			interaction.editReply({embeds: [searchEmbed]})
 			players = await axios.get(`https://gbfdata.com/user/search?q=${urlencode(playerName)}&is_fulltext=1`).then(({data}) => {
