@@ -38,7 +38,7 @@ export async function loadCrew(interaction: ChatInputCommandInteraction, crew: c
         .setURL(`http://game.granbluefantasy.jp/#guild/detail/${crew.id}`)
         .setImage(`attachment://${attachment.name}`)
         .addFields([
-            {name: 'Ranking', value: `Ranked #${crew.data[0].rank} in GW #${crew.data[0].gw_num} with ${String(crew.data[0].points).match(/\d{3}/g)?.join(',')} points`},
+            {name: 'Ranking', value: `Ranked #${crew.data[0].rank} in GW #${crew.data[0].gw_num} with ${crew.data[0].points.toLocaleString()} points`},
             {name: 'Name History', value: `${formatList([...new Set(crew.data.map(crew => crew.name))])}`}
         ])
     
