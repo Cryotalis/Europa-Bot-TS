@@ -51,7 +51,7 @@ module.exports = {
 		if (addedRoles.length) rolesEmbed.addFields([{name: 'Added Roles:', value: `${addedRoles.join(' ')}`}])
 		if (removedRoles.length) rolesEmbed.addFields([{name: 'Removed Roles:', value: `${removedRoles.join(' ')}`}])
 		if (notAddedRoles.length) rolesEmbed.addFields([{name: 'Roles not available on the server role list:', value: `${notAddedRoles.join(' ')}`}])
-		if (notPermittedRoles.length) rolesEmbed.addFields([{name: 'Roles I don\'t have permission to assign:', value: `${notAddedRoles.join(' ')}`}])
+		if (notPermittedRoles.length) rolesEmbed.addFields([{name: 'Roles I don\'t have permission to assign:', value: `${notPermittedRoles.join(' ')}`}])
 
 		return interaction.reply({embeds: [rolesEmbed]})
 	}
