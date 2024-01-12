@@ -23,17 +23,14 @@ registerFont('assets/NotoSerifJP.otf', {family: 'Noto Serif JP'})
 registerFont(require('@canvas-fonts/arial'), {family: 'Default'})
 registerFont(require('@canvas-fonts/arial-bold'), {family: 'Default Bold'})
 
-const privateCommandFiles = ['connect.js', 'say.js', 'respawn.js', 'log.js']
-const gameCommandNames = ['spark', 'crew', 'events', 'player', 'roll', 'banner']
-
-export const regCommands = fs.readdirSync('./prod/commands').filter(file => file.endsWith('.js'))
-export const modCommands = fs.readdirSync('./prod/modCommands').filter(file => file.endsWith('.js'))
+const privateCommandFiles = ['connect.js', 'say.js', 'respawn.js']
+const regCommands = fs.readdirSync('./prod/commands').filter(file => file.endsWith('.js'))
+const modCommands = fs.readdirSync('./prod/modCommands').filter(file => file.endsWith('.js'))
 const commandFiles = regCommands.concat(modCommands)
 
 export async function registerCommands() {
 	const commands = []
 	const privateCommands = []
-	const commandInfo = []
 	client.commands = new Collection()
 
 	for (const file of commandFiles) {
@@ -41,28 +38,10 @@ export async function registerCommands() {
 		if (privateCommandFiles.includes(file)) privateCommands.push(command.data.toJSON())
 		else {
 			commands.push(command.data.toJSON())
-			commandInfo.push([
-				command.data.name, 
-				command.data.description, 
-				gameCommandNames.includes(command.data.name) 
-					? 'game' 
-					: modCommands.includes(`${command.data.name}.js`) 
-						? 'moderator' 
-						: 'regular'
-			])
 		}
 		client.commands.set(command.data.name, command)
 	}
 
-	for (const command of commandInfo) {
-		if (/translate text/.test(command[0])) {
-			command[1] = 'Translates text to your own language'
-			command[2] += ' context'
-		}
-	}
-
-	await publicDB.sheetsByTitle['Commands'].clearRows()
-	await publicDB.sheetsByTitle['Commands'].addRows(commandInfo)
 	const rest = new REST({ version: '9' }).setToken(process.env.BOT_TOKEN!)
 	rest.put(Routes.applicationCommands('585514230967566338'), { body: commands })
 		.then(() => console.log(`Successfully registered application commands globally for Shard #${currentShardID}`))
