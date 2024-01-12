@@ -30,7 +30,7 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
         return await page.close()
     }
 
-    await page.waitForSelector('#wrapper > div.contents > div.cnt-profile > div.prt-status', { timeout: 5000 }).catch(async () => {
+    await page.waitForSelector('#wrapper > div.contents > div.cnt-profile > div.prt-status', { timeout: 10000 }).catch(async () => {
         await interaction.editReply({content: 'Could not connect to Granblue Fantasy. Please try again later.', embeds: []})
         await page.close()
     })
