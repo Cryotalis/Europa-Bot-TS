@@ -46,7 +46,7 @@ module.exports = {
 		
 		const crews: crew[] = await axios.request(options).then(({data}) => crewName ? data.result : [data]).catch((error) => {
 			console.error(error)
-			return interaction.reply({content: 'Crew Search is currently unavailable. Please try again later.'})
+			return interaction.editReply({content: 'Crew Search is currently unavailable. Please try again later.'})
 		})
 
 		if (!crews[0]?.data[0]) return interaction.editReply({content: `No crews were found for ${crewName ?? crewID}.`, embeds: []})
