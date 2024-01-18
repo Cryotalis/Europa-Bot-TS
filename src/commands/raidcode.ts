@@ -12,7 +12,6 @@ module.exports = {
 		.addIntegerOption(option => option.setName('hp-percent').setDescription('The percentage of hp the boss currently has. (Omit the % sign)').setMinValue(1).setMaxValue(100))
 		.addIntegerOption(option => option.setName('hp').setDescription('The amount of hp the boss currently has'))
 		.addStringOption(option => option.setName('participants').setDescription('The number of participants / max participants for the raid. (Ex: 1/6)'))
-		.addStringOption(option => option.setName('raid-id').setDescription('The url to join the raid'))
 		.addStringOption(option => option.setName('quest-id').setDescription('The quest id for the raid'))
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
@@ -24,14 +23,12 @@ module.exports = {
 		const hpPercent = interaction.options.getInteger('hp-percent')
 		const hp = interaction.options.getInteger('hp')?.toLocaleString()
 		const participants = interaction.options.getString('participants')
-		const raidID = interaction.options.getString('raid-id')
 		const questID = interaction.options.getString('quest-id')
 
 		const raidEmbed = new EmbedBuilder()
 			.setAuthor({
 				iconURL: 'https://raw.githubusercontent.com/Cryotalis/Europa-Bot-TS/main/assets/Raid%20Icon.png',
 				name: name ?? role?.name ?? 'Unknown Raid',
-				url: questID && raidID ? `https://game.granbluefantasy.jp/#quest/supporter_raid/${raidID}/${questID}/1/2/0/6` : undefined
 			})
 			.setDescription(message)
 			.setTitle(code)
