@@ -3,7 +3,7 @@ import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from '
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('raidcode')
-		.setDescription('Share a raid code')
+		.setDescription('Share a raid code (use with bookmarklet for best results)')
 		.addStringOption(option => option.setName('code').setDescription('The code for the raid').setRequired(true))
 		.addRoleOption(option => option.setName('role').setDescription('The role to ping for the raid'))
 		.addStringOption(option => option.setName('name').setDescription('The name of the boss'))
