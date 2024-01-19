@@ -15,7 +15,7 @@ module.exports = {
 		.addStringOption(option => option.setName('quest-id').setDescription('The quest id for the raid'))
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
-		const code = interaction.options.getString('code')!
+		const code = interaction.options.getString('code')!.substring(0, 10)
 		const role = interaction.options.getRole('role')
 		const name = interaction.options.getString('name')
 		const message = interaction.options.getString('message')
@@ -40,5 +40,6 @@ module.exports = {
 		if (questID) 		 raidEmbed.setThumbnail(`https://prd-game-a1-granbluefantasy.akamaized.net/assets_en/img/sp/quest/assets/lobby/${questID}.png`)
 		if (!(name && time && hp && hpPercent && participants && questID)) raidEmbed.addFields({name: '\u200B', value: '❗ For best results, use the associated [bookmarklet](https://cryotalis.github.io/Demo/bookmarklets.html).'})
 		await interaction.reply({content: role ? '## ' + String(role) : undefined, embeds: [raidEmbed], allowedMentions: {roles: role ? [role.id] : undefined}})
+		await interaction.followUp(code)
 	}
 }
