@@ -39,7 +39,7 @@ module.exports = {
 		if (participants) 	 raidEmbed.addFields({name: 'Participants', value: participants, inline: true})
 		if (questID) 		 raidEmbed.setThumbnail(`https://prd-game-a1-granbluefantasy.akamaized.net/assets_en/img/sp/quest/assets/lobby/${questID}.png`)
 		if (!(name && time && hp && hpPercent && participants && questID)) raidEmbed.addFields({name: '\u200B', value: '❗ For best results, use the associated [bookmarklet](https://cryotalis.github.io/Demo/bookmarklets.html).'})
-		await interaction.reply({content: role ? '## ' + String(role) : undefined, embeds: [raidEmbed], allowedMentions: {roles: role ? [role.id] : undefined}})
+		await interaction.reply({content: role ? '### ' + String(role) : undefined, embeds: [raidEmbed], allowedMentions: {roles: role ? [role.id] : undefined}})
 		await interaction.followUp(code)
 	}
 }
