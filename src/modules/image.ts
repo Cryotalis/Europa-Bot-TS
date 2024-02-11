@@ -26,7 +26,7 @@ export async function getImageLink(url?: string | null, image?: Attachment | nul
     
     if (image) {
         if (!/image\/(jpeg|png|gif)/.test(image.contentType!)) return {errorMsg: 'The image must either be a JPG, PNG, or GIF.', imageLink: ''}
-        imageLink = image.proxyURL
+        imageLink = image.url
     }
 
     const validImage = await loadImage(imageLink).catch(() => undefined)
