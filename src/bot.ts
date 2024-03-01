@@ -100,7 +100,7 @@ async function getJSessionID(){
 }
 
 export async function startPuppeteer(){
-	browser = await launch({args: ['--single-process', '--no-zygote', '--no-sandbox'], headless: 'new'})
+	browser = await launch({args: ['--single-process', '--no-zygote', '--no-sandbox']})
 	console.log(`Puppeteer browser launched for Shard #${currentShardID}`)
 	getJSessionID()
 	schedule('0 * * * *', () => getJSessionID())
