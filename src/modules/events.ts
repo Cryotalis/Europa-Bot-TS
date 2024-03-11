@@ -15,7 +15,7 @@ export let eventsTemplate: Canvas | undefined
  * Loads event information and event template. The template includes upcoming events and leaves a blank space for current events.
  */
 export async function loadEvents(){
-    let {data}: {data: string} = await axios.get('https://gbf.wiki/Template:MainPageEvents').catch(() => ({data: ''}))
+    const {data} = await axios.get('https://gbf.wiki/Template:MainPageEvents', {headers: {'User-Agent': 'Europa Bot'}}).catch(() => ({data: ''}))
     if (!data) return
 
     const eventData = data.match(/vertical-align: top.+<!--/s)!.toString()
