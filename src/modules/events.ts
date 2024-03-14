@@ -5,6 +5,7 @@ import { wrapText } from "./image"
 import { dateDiff, getSimpleDate } from "./time"
 import axios from "axios"
 import { fontFallBacks } from "../bot"
+import { escapeRegExp } from "./string"
 
 export interface event {type: 'Current' | 'Upcoming', title: string, image: Image | undefined, start: Date, end: Date, duration: string, elementAdvantage: string | undefined, elementAdvantageImage: Image | undefined}
 export let currentEvents: event[] = []
@@ -73,7 +74,7 @@ export async function getEventsInformation(eventData: string, type: 'Current' | 
             : undefined
         eventImagePromises.push(imagePromise)
 
-        const thisEventData = eventData.match(new RegExp(`${title}.+?${eventsTitles[i+1]}|${title}.+`, 's'))![0] // All data for the event currently being parsed
+        const thisEventData = eventData.match(new RegExp(`${escapeRegExp(title)}.+?${escapeRegExp(eventsTitles[i+1])}|${escapeRegExp(title)}.+`, 's'))![0] // All data for the event currently being parsed
         const eventEpochs = [...thisEventData.matchAll(/data-(?:start|end|time)="(\d+)"/g)].map(match => parseInt(match[1]))
         const [eventStart, eventEnd] = [...new Set(eventEpochs)].map(epoch => new Date(epoch * 1000))
 
