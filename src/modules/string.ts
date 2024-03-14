@@ -52,3 +52,10 @@ export function findBestCIMatch(searchString: string, targetStrings: string[]){
     matches.ratings.forEach(rating => rating.target = targetStrings.find(string => string.toLowerCase() === rating.target)!)
     return matches
 }
+
+/**
+ * Escapes Regex characters in a string (so that the string can be used in a regular expression)
+ */
+export function escapeRegExp(string: string) {
+    return string && string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
