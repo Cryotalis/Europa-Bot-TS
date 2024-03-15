@@ -71,7 +71,7 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
     summons.forEach((summon, i) => {
         const summonXCoords = [370, 475, 585, 690, 370, 475, 585, 690, 370, 475, 585, 690, 470, 600]
         const summonYCoords = [ 50,  50,  50,  50, 115, 115, 115, 115, 180, 180, 180, 180, 275, 275]
-        ctx.drawImage(summon.image, 0, 0, 500, 200, summonXCoords[i], summonYCoords[i], 250, 100)
+        ctx.drawImage(summon.image, summonXCoords[i], summonYCoords[i], 105, 60)
 
         const starXCoords = [398, 503, 613, 718, 398, 503, 613, 718, 398, 503, 613, 718, 498, 628]
         const starYCoords = [ 91,  91,  91,  91, 156, 156, 156, 156, 221, 221, 221, 221, 316, 316]
@@ -90,7 +90,7 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
     else if (starCharPrivate){starCharName = 'Private'; emLvl = 'N/A'; starCharText = 'Private' }
     else starCharImage = await loadImage(starCharURL)
 
-    if (starCharImage) ctx.drawImage(starCharImage, 0, 0, 500, 200, 400, 410, 250, 100)
+    if (starCharImage) ctx.drawImage(starCharImage, 400, 410, 105, 60)
 
     ctx.textAlign = 'center'
     ctx.font = `20px Default Bold ${fontFallBacks}`
