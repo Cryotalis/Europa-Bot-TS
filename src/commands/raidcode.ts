@@ -10,7 +10,7 @@ module.exports = {
 		.addStringOption(option => option.setName('message').setDescription('A message to send along with the raid code'))
 		.addIntegerOption(option => option.setName('time').setDescription('The amount of time (in minutes) remaining in the raid'))
 		.addIntegerOption(option => option.setName('hp').setDescription('The amount of hp the boss currently has'))
-		.addIntegerOption(option => option.setName('hp-percent').setDescription('The percentage of hp the boss currently has. (Omit the % sign)').setMinValue(1).setMaxValue(100))
+		.addNumberOption(option => option.setName('hp-percent').setDescription('The percentage of hp the boss currently has. (Omit the % sign)').setMinValue(1).setMaxValue(100))
 		.addStringOption(option => option.setName('participants').setDescription('The number of participants / max participants for the raid. (Ex: 1/6)'))
 		.addStringOption(option => option.setName('quest-id').setDescription('The quest id for the raid'))
 	,
@@ -21,7 +21,7 @@ module.exports = {
 		const message = interaction.options.getString('message')
 		const time = interaction.options.getInteger('time')
 		const hp = interaction.options.getInteger('hp')?.toLocaleString()
-		const hpPercent = interaction.options.getInteger('hp-percent')
+		const hpPercent = interaction.options.getNumber('hp-percent')
 		const participants = interaction.options.getString('participants')
 		const questID = interaction.options.getString('quest-id')
 
