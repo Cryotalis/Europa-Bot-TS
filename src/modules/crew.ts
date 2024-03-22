@@ -3,7 +3,7 @@ import { browser, startPuppeteer } from "../bot"
 import { formatList } from "./string"
 import { languageCookie, accessCookie } from "./variables"
 
-export interface crew {data: {is_seed: number, points: number, gw_num: number, rank: number, name: string}[], id: number}
+export interface crew {data: {is_seed: number | string, points: number | string, gw_num: number | string, rank: number | string, name: string}[], id: number}
 export async function loadCrew(interaction: ChatInputCommandInteraction, crew: crew){
     if (!browser?.connected) await startPuppeteer()
     
