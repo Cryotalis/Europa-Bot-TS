@@ -73,8 +73,8 @@ module.exports = {
 		const formattedPlayers = players.map(player => `${player.name} Rank ${player.level} (${player.userid})`)
 
 		const userChoice = await showMenu(interaction, playerName, formattedPlayers)
-		if (!userChoice) return
+		if (userChoice === null) return
 		
-		loadSummons(interaction, userChoice.match(/(?<=\()\d+/)![0])
+		loadSummons(interaction, players[userChoice].userid)
 	}
 }
