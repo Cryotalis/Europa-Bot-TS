@@ -14,7 +14,7 @@ export async function showMenu(interaction: ChatInputCommandInteraction, userInp
 
     let pageNum = 0
     const numbers = [ '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟' ]
-    const numberedItems = items.map(item => numbers[items.indexOf(item)%10] + ' ' + item)
+    const numberedItems = items.map((item, index) => numbers[index % 10] + ' ' + item)
 
     function setPage(page: number){
         const index = page*10
@@ -89,5 +89,5 @@ export async function showMenu(interaction: ChatInputCommandInteraction, userInp
     const result = await choiceCollector?.next.catch(() => {interaction.editReply({content: 'Select menu closed.', embeds: [], components: []})})
     buttonCollector?.stop()
 
-    return result?.values[0] ?? undefined
+    return result?.values[0] ? pageNum * 10 + parseInt(result?.values[0].match(/.+?/)![0]) - 1 : null
 }
