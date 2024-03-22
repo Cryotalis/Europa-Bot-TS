@@ -44,22 +44,29 @@ module.exports = {
 				url: `http://gbf.gw.lt/gw-guild-searcher/info/${crewID}`
 			}
 		
-		const crews: crew[] = await axios.request(options).then(({data}) => crewName ? data.result : [data]).catch((error) => {
-			console.error(error)
-			return interaction.editReply({content: 'Crew Search is currently unavailable. Please try again later.'})
-		})
+		let crews: crew[] | null = await axios.request(options).then(({data}) => crewName ? data.result : [data]).catch(() => null)
 
+		if (!crews){
+			crewEmbed.setFooter({text: 'https://gbfdata.com/', iconURL: 'https://pbs.twimg.com/profile_images/1484899620907991047/gypDoVwq_200x200.jpg'})
+			interaction.editReply({embeds: [crewEmbed]})
+			crews = await axios.get(`https://gbfdata.com/guild/search?q=${crewName ?? crewID}&is_fulltext=${crewName ? 1 : 0}`).then(({data}) => {
+				const crewData = String(data.match(/(?<=\/thead>).+(?=<\/table)/s))
+				const crewMatches = crewData.matchAll(/href=".+?guild\/(\d+)">\n(.+?)\n/gs)
+				return [...crewMatches].map(crew => ({data: [{is_seed: '?', points: '?', gw_num: '?', rank: '?', name: crew[2]}], id: parseInt(crew[1])}))
+			}).catch(() => null)
+		}
+
+		if (!crews) 			return interaction.editReply({content: 'Crew Search is currently unavailable. Please try again later.', embeds: []})
 		if (!crews[0]?.data[0]) return interaction.editReply({content: `No crews were found for ${crewName ?? crewID}.`, embeds: []})
 		if (crews.length === 1) return loadCrew(interaction, crews[0])
 
-		crews.sort((a, b) => a.data[0].rank - b.data[0].rank)
+		crews.sort((a, b) => +a.data[0].rank - +b.data[0].rank)
 		crews.sort((a, b) => compareTwoStrings(b.data[0].name, crewName!) - compareTwoStrings(a.data[0].name, crewName!))
-		const formattedCrews = crews.map(crew => `${crew.data[0].name} Rank ${crew.data[0].rank}`)
+		const formattedCrews = crews.map(crew => crew.data[0].name + (+crew.data[0].rank ? ' Rank ' + crew.data[0].rank : ` (${crew.id})`))
 
 		const userChoice = await showMenu(interaction, crewName!, formattedCrews)
-		if (!userChoice) return
+		if (userChoice === null) return
 
-		const targetCrew = crews.find(crew => `${crew.data[0].name} Rank ${crew.data[0].rank}` === String(userChoice.match(/(?<= ).+/)))!
-		loadCrew(interaction, targetCrew)
+		loadCrew(interaction, crews[userChoice])
 	}
 }
