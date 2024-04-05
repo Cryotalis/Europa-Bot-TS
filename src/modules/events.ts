@@ -170,3 +170,30 @@ export function getEventDuration(event: event){
     }
     return event.duration
 }
+
+/**
+ * Creates scheduled events according to the in-game events for each subscribed server
+ */
+export async function createScheduledEvents(){
+    const subscribedServers = servers.filter(server => server.get('events') === 'TRUE')
+
+    subscribedServers.forEach(server => {
+        const eventsManager = client.guilds.cache.get(server.get('guildID'))?.scheduledEvents
+        if (!eventsManager) return
+        const newEvents = upcomingEvents.filter(({title, start}) => !eventsManager.cache.some(({name, scheduledStartTimestamp}) => title === name && scheduledStartTimestamp === start.getTime()))
+
+        newEvents.forEach(event => {
+            if (!event.start || event.start < new Date()) return
+            eventsManager?.create({
+                name: event.title,
+                description: event.elementAdvantage ?? undefined,
+                image: event.imageURL,
+                scheduledStartTime: event.start,
+                scheduledEndTime: event.end,
+                privacyLevel: 2,                    // Only Guild Members can see the event (this is currently only valid value)
+                entityType: 3,                      // 3 = External event
+                entityMetadata: {location: 'Granblue Fantasy Skydom'}
+            })
+        })
+    })
+}

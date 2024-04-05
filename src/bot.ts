@@ -7,7 +7,7 @@ import { Browser, launch } from 'puppeteer'
 import { greetingConfig, makeGreetingImage } from './modules/greeting'
 import { JWT } from 'google-auth-library'
 import { loadAssets } from './modules/assets'
-import { loadEvents } from './modules/events'
+import { createScheduledEvents, loadEvents } from './modules/events'
 import { getBannerData } from './modules/banner'
 import { registerFont } from 'canvas'
 
@@ -51,7 +51,7 @@ export async function registerCommands() {
 		.catch(console.error)
 }
 
-export interface serverData {guildName: string, guildID: string, greeting: string, roles: string}
+export interface serverData {guildName: string, guildID: string, greeting: string, roles: string, events: string}
 export interface userData {
 	username: string,	userID: string,
 	crystals: string,	mobaCoin: string,
@@ -123,10 +123,12 @@ async function startUp(){
 	await loadAssets()
 	loadEvents()
 
-	schedule('0 * * * *', () => {
+	schedule('0 * * * *', async () => {
 		getBannerData()
-		loadEvents()
 		updateCounter()
+		await connectToDB()
+		await loadEvents()
+		createScheduledEvents()
 	})
 }
 
