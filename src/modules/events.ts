@@ -176,14 +176,13 @@ export function getEventDuration(event: event){
  */
 export async function createScheduledEvents(){
     const subscribedServers = servers.filter(server => server.get('events') === 'TRUE')
-
     subscribedServers.forEach(server => {
         const eventsManager = client.guilds.cache.get(server.get('guildID'))?.scheduledEvents
         if (!eventsManager) return
         const newEvents = upcomingEvents.filter(({title, start}) => !eventsManager.cache.some(({name, scheduledStartTimestamp}) => title === name && scheduledStartTimestamp === start.getTime()))
 
         newEvents.forEach(event => {
-            if (!event.start || event.start < new Date()) return
+            if (!event.start || event.start < new Date() || event.duration.startsWith('In')) return
             eventsManager?.create({
                 name: event.title,
                 description: event.elementAdvantage ?? undefined,
