@@ -92,7 +92,8 @@ export let browser: Browser
 export let jsessionID: string // Required for player name search
 async function getJSessionID(){
 	const page = await browser.newPage()
-	await page.goto('http://info.gbfteamraid.fun/web/about', { timeout: 30000 })
+	const res = await page.goto('http://info.gbfteamraid.fun/web/about', { timeout: 30000 }).catch(() => null)
+	if (!res) return
 	await page.click('#login')
 	await page.waitForNetworkIdle()
 	jsessionID = (await page.cookies())[0].value
