@@ -1,31 +1,53 @@
-import { Canvas, CanvasRenderingContext2D, Image, createCanvas, loadImage } from "canvas"
-import { decode } from "html-entities"
-import { waterAdvantage, earthAdvantage, windAdvantage, fireAdvantage, darkAdvantage, lightAdvantage, eventsBackgroundTop, eventsBackgroundMiddle, eventsBackgroundBottom, upcomingEventsText } from "./assets"
-import { wrapText } from "./image"
-import { dateDiff, getSimpleDate } from "./time"
-import axios from "axios"
-import { fontFallBacks } from "../bot"
-import { escapeRegExp } from "./string"
+import { waterAdvantage, earthAdvantage, windAdvantage, fireAdvantage, darkAdvantage, lightAdvantage, eventsBackgroundTop, eventsBackgroundMiddle, eventsBackgroundBottom, upcomingEventsText } from './assets'
+import { Canvas, CanvasRenderingContext2D, Image, createCanvas, loadImage } from 'canvas'
+import { dateDiff, getSimpleDate, parseOffset } from './time'
+import { client, fontFallBacks, servers } from '../bot'
+import { capFirstLetter} from './string'
+import { wrapText } from './image'
+import axios from 'axios'
+import md5 from 'md5'
 
-export interface event {type: 'Current' | 'Upcoming', title: string, image: Image | undefined, start: Date, end: Date, duration: string, elementAdvantage: string | undefined, elementAdvantageImage: Image | undefined}
+export interface event {
+    title: string
+    type: string
+    start: Date
+    end: Date
+    duration: string
+    image: Image | null
+    imageURL: string | null
+    elementAdvantage: string | null
+    elementAdvantageImg: Image | null
+}
+export interface rawEvent {
+    name: string
+    'utc start': number
+    'utc end': number
+    element: string | null
+    image: string
+    'time known': string
+}
 export let currentEvents: event[] = []
 export let upcomingEvents: event[] = []
 export let eventsTemplate: Canvas | undefined
+
+const eventParams = {
+    tables: 'event_history',
+    fields: 'event_history.name, event_history.utc_start, event_history.utc_end, event_history.element, event_history.image, event_history.time_known',
+    'order by': 'event_history.utc_start DESC',
+    limit: 20,
+    format: 'json'
+}
 
 /**
  * Loads event information and event template. The template includes upcoming events and leaves a blank space for current events.
  */
 export async function loadEvents(){
-    const {data} = await axios.get('https://gbf.wiki/Template:MainPageEvents', {headers: {'User-Agent': 'Europa Bot'}}).catch(() => ({data: ''}))
-    if (!data) return
+    const {data: rawEvents} = await axios.get('https://gbf.wiki/index.php?title=Special:CargoExport', {headers: {'User-Agent': 'Europa Bot'}, params: eventParams}).catch(() => ({data: null}))
+    if (!rawEvents) return
 
-    const eventData = data.match(/vertical-align: top.+<!--/s)!.toString()
-    const currentEventsData = eventData.match(/.+(?=<hr \/>)/s)?.[0] ?? ''
-    const upcomingEventsData = eventData.match(/(?<=<hr \/>).+/s)?.[0] ?? ''
-    ;[currentEvents, upcomingEvents] = await Promise.all([
-        getEventsInformation(currentEventsData, 'Current'),
-        getEventsInformation(upcomingEventsData, 'Upcoming')
-    ])
+    const events = (await processEvents(rawEvents)).reverse()
+    currentEvents = events.filter(event => event.type === 'Current')
+    upcomingEvents = events.filter(event => event.type === 'Upcoming')
 
     // Create the events image
     const canvasHeight = Math.ceil(currentEvents.length / 2) * 110 + Math.ceil(upcomingEvents.length / 2) * 110 + 50
@@ -56,47 +78,50 @@ export async function loadEvents(){
     eventsTemplate = canvas
 }
 
-/** Parses through event data from gbf.wiki and returns a JSON with important information for each event. */
-export async function getEventsInformation(eventData: string, type: 'Current' | 'Upcoming'){
-    const eventsTitles = [...new Set(eventData.match(/(?<=title="|<b>)[^<>]+?(?="|<\/b>)/g))]
-    const eventsImgURLs = [...new Set(eventData.match(/<img.+?>/g))] ?? ['']
+export async function processEvents(events: rawEvent[]){
+    const now = new Date()
+    const currentStart = (now.getTime() / 1000) - (3 * 60 * 60)
+    const currentEnd = (now.getTime() / 1000) + (36 * 60 * 60)
+    const filteredEvents = events.filter(event => {
+        if (event['utc end'] === 0) return true
+        else return event['utc end'] > currentStart && event['utc end'] < (now.getTime() / 1000) + (90 * 24 * 60 * 60)
+    }) // Only take events that end after now - 3 hours and before now + 90 days
 
-    const events: event[] = []
-    const eventImagePromises: (Promise<Image>|undefined)[] = []
-    eventsTitles.forEach((title, i) => {
-        const eventImageURLs = eventsImgURLs.flatMap(URL => {
-            if (URL.includes(title) && URL.includes('src=')) return [`https://gbf.wiki${URL.match(/(?<=src=").+?(?=")/)}`]
-            else return []
-        })
-        
-        const imagePromise = eventImageURLs.length > 0
-            ? loadImage(eventImageURLs[Math.floor(Math.random()*eventImageURLs.length)])
-            : undefined
-        eventImagePromises.push(imagePromise)
+    const processedEvents = filteredEvents.slice(0, 10).map(async event => {
+        const start = new Date(event['utc start'] * 1000)
+        const end = new Date(event['utc end'] * 1000)
+        const month = new Date((event['utc start'] + (now.getTimezoneOffset() + parseOffset('UTC +9')) * 60) * 1000).toLocaleDateString('en-US', {month: 'long'})
+        const imgName = capFirstLetter(event.image).replace(/ /g, '_')
+        const imgHash = md5(imgName)
+        const imgURL = `https://gbf.wiki/images/${imgHash.charAt(0)}/${imgHash.slice(0,2)}/${encodeURI(imgName)}`
 
-        const thisEventData = eventData.match(new RegExp(`${escapeRegExp(title)}.+?${escapeRegExp(eventsTitles[i+1])}|${escapeRegExp(title)}.+`, 's'))![0] // All data for the event currently being parsed
-        const eventEpochs = [...thisEventData.matchAll(/data-(?:start|end|time)="(\d+)"/g)].map(match => parseInt(match[1]))
-        const [eventStart, eventEnd] = [...new Set(eventEpochs)].map(epoch => new Date(epoch * 1000))
-
-        const monthInfo = thisEventData.match(/(?<=>)[^>]+(?:January|February|March|April|May|June|July|August|September|October|November|December)/)?.[0]
-        const eventDuration = eventEpochs.length ? `${getSimpleDate(eventStart)} - ${getSimpleDate(eventEnd)}` : monthInfo
-        
-        events.push({
-            type: type,
-            title: decode(title),
-            image: undefined,
-            start: eventStart,
-            end: eventEnd,
-            duration: eventDuration!,
-            elementAdvantage: getElementAdvantage(thisEventData)?.advantage,
-            elementAdvantageImage: getElementAdvantage(thisEventData)?.image
-        })
+        return {
+            title: event.name,
+            type: event['utc start'] < currentEnd ? 'Current' : 'Upcoming',
+            start: start,
+            end: end,
+            duration: event['time known'] === 'yes' ? `${getSimpleDate(start)} - ${getSimpleDate(end)}` : `In ${month}`,
+            image: await loadImage(imgURL),
+            imageURL: imgURL,
+            elementAdvantage: getElementAdvantage(event.element).advantage,
+            elementAdvantageImg: getElementAdvantage(event.element).image
+        }
     })
 
-    const eventImages = await Promise.all(eventImagePromises)
-    events.forEach((event, i) => event.image = eventImages[i])
+    return await Promise.all(processedEvents)
+}
 
-    return events.length ? events.slice(0, 6) : [{type: 'Upcoming', title: 'No events to display', duration: ''} as event]
+/** Determines the element advantage and the element advantage image from the event data. */
+export function getElementAdvantage(element: string | null) {
+    switch (element) {
+        case 'fire': return {advantage: `Water Advantage`, image: waterAdvantage}
+        case 'water': return {advantage: `Earth Advantage`, image: earthAdvantage}
+        case 'farth': return {advantage: `Wind Advantage`, image: windAdvantage}
+        case 'wind': return {advantage: `Fire Advantage`, image: fireAdvantage}
+        case 'light': return {advantage: `Dark Advantage`, image: darkAdvantage}
+        case 'dark': return {advantage: `Light Advantage`, image: lightAdvantage}
+        default: return {advantage: null, image: null}
+    }
 }
 
 /** Draws event banners and their durations. */
@@ -116,34 +141,19 @@ export function drawEvent(ctx: CanvasRenderingContext2D, event: event, textX: nu
     
     // Draw the event banner, or text if there is no banner image
     if (event.image){
-        let bannerHeight = event.image.height * 11 / 15
+        let bannerHeight = event.image.height * 330 / event.image.width
         ctx.drawImage(event.image, eventX, eventY + (77 - bannerHeight) / 2, 330, bannerHeight)
     } else {
         wrapText({ctx: ctx, font: '25px Default'}, event.title, textX, eventY + 43, 290, 30)
     }
 
-    if (event.elementAdvantageImage){
+    if (event.elementAdvantageImg){
         textX += 18
-        ctx.drawImage(event.elementAdvantageImage, centerTextX(eventDuration, textX) - 35, eventY + 82)
+        ctx.drawImage(event.elementAdvantageImg, centerTextX(eventDuration, textX) - 35, eventY + 82)
     }
 
     ctx.strokeText(eventDuration, textX, eventY + 100)
     ctx.fillText(eventDuration, textX, eventY + 100)
-}
-
-/** Determines the element advantage and the element advantage image from the event data. */
-export function getElementAdvantage(eventData: string) {
-    const bossElement = eventData.match(/(Dark|Light|Water|Fire|Wind|Earth)(?=<\/span>\sBosses)/)?.[0]
-    if (!bossElement) return
-
-    switch (bossElement) {
-        case 'Fire': return {advantage: `Water Advantage`, image: waterAdvantage}
-        case 'Water': return {advantage: `Earth Advantage`, image: earthAdvantage}
-        case 'Earth': return {advantage: `Wind Advantage`, image: windAdvantage}
-        case 'Wind': return {advantage: `Fire Advantage`, image: fireAdvantage}
-        case 'Light': return {advantage: `Dark Advantage`, image: darkAdvantage}
-        case 'Dark': return {advantage: `Light Advantage`, image: lightAdvantage}
-    }
 }
 
 /**
