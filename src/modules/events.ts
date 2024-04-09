@@ -6,6 +6,7 @@ import { capFirstLetter} from './string'
 import { wrapText } from './image'
 import axios from 'axios'
 import md5 from 'md5'
+import { GuildScheduledEventCreateOptions } from 'discord.js'
 
 export interface event {
     title: string
@@ -176,23 +177,33 @@ export function getEventDuration(event: event){
  */
 export async function createScheduledEvents(){
     const subscribedServers = servers.filter(server => server.get('events') === 'TRUE')
+    const events: GuildScheduledEventCreateOptions[] = upcomingEvents.map(event => {
+        if (!event.start || event.start < new Date() || event.duration.startsWith('In')) return {} as GuildScheduledEventCreateOptions
+        
+        let canvas
+        if (event.image){
+            canvas = createCanvas(event.image.width, event.image.width * 320 / 800) // 800x320 is the recommended dimensions by Discord
+            const ctx = canvas.getContext('2d')
+            ctx.drawImage(event.image, 0, (canvas.height - event.image.height) / 2)
+        }
+
+        return {
+            name: event.title,
+            description: event.elementAdvantage ?? undefined,
+            image: canvas?.toBuffer(),
+            scheduledStartTime: event.start,
+            scheduledEndTime: event.end,
+            privacyLevel: 2,                    // Only Guild Members can see the event (this is currently only valid value)
+            entityType: 3,                      // 3 = External event
+            entityMetadata: {location: 'Granblue Fantasy'}
+        }
+    }).filter(event => event.name)
+ 
     subscribedServers.forEach(server => {
         const eventsManager = client.guilds.cache.get(server.get('guildID'))?.scheduledEvents
         if (!eventsManager) return
-        const newEvents = upcomingEvents.filter(({title, start}) => !eventsManager.cache.some(({name, scheduledStartTimestamp}) => title === name && scheduledStartTimestamp === start.getTime()))
+        const newEvents = events.filter(({name: name1, scheduledStartTime: start}) => !eventsManager.cache.some(({name: name2, scheduledStartTimestamp}) => name1 === name2 && scheduledStartTimestamp === new Date(start).getTime()))
 
-        newEvents.forEach(event => {
-            if (!event.start || event.start < new Date() || event.duration.startsWith('In')) return
-            eventsManager?.create({
-                name: event.title,
-                description: event.elementAdvantage ?? undefined,
-                image: event.imageURL,
-                scheduledStartTime: event.start,
-                scheduledEndTime: event.end,
-                privacyLevel: 2,                    // Only Guild Members can see the event (this is currently only valid value)
-                entityType: 3,                      // 3 = External event
-                entityMetadata: {location: 'Granblue Fantasy Skydom'}
-            })
-        })
+        newEvents.forEach(event => eventsManager.create(event))
     })
 }
