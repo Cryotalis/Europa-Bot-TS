@@ -1,6 +1,6 @@
 import { CanvasRenderingContext2D, Image, loadImage } from 'canvas'
 import { data } from '../bot'
-import { blankBlueStar, blankRegularStar, blueStar, privateSummon, regularStar, transcendenceStars } from './assets'
+import { blankBlueStar, blankRegularStar, blueStar, privateSummon, regularStar, transcendenceStars } from '../data/assets'
 
 /**
  * Parses raw HTML and returns an array containing information for each support summon the player has set.

@@ -1,10 +1,10 @@
 import { createCanvas, loadImage } from "canvas"
 import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder } from "discord.js"
 import { browser, fontFallBacks, startPuppeteer } from "../bot"
-import { playerTemplate, openSummon, perpetuityRingIcon } from "./assets"
+import { playerTemplate, openSummon, perpetuityRingIcon } from "../data/assets"
 import { getAllSummonInfo, drawStars } from "./granblue"
 import { wrapText } from "./image"
-import { languageCookie, accessCookie } from "./variables"
+import { languageCookie, accessCookie } from "../data/variables"
 import { decode } from "html-entities"
 
 export async function loadProfile(interaction: ChatInputCommandInteraction, playerID: string) {

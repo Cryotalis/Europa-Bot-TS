@@ -1,7 +1,7 @@
 import { ContextMenuCommandBuilder, EmbedBuilder, MessageContextMenuCommandInteraction } from 'discord.js'
 import { Translate } from '@google-cloud/translate/build/src/v2'
 import { truncateText } from '../modules/string'
-import { languageCodes } from '../modules/variables'
+import { languageCodes } from '../data/variables'
 
 module.exports = {
 	data: new ContextMenuCommandBuilder()

@@ -1,7 +1,7 @@
 import axios from "axios"
 import { App } from "octokit"
 import { dateStringToUnix } from "./time"
-import { accessCookie, languageCookie } from "./variables"
+import { accessCookie, languageCookie } from "../data/variables"
 import { decode } from "urlencode"
 import { homeServerShardID, currentShardID } from "../bot"
 

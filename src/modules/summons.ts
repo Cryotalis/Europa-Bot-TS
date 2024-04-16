@@ -1,9 +1,9 @@
 import { createCanvas } from 'canvas'
 import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
 import { browser, fontFallBacks, startPuppeteer } from '../bot'
-import { summonsTemplate } from './assets'
+import { summonsTemplate } from '../data/assets'
 import { getAllSummonInfo, drawStars } from './granblue'
-import { languageCookie, accessCookie } from './variables'
+import { languageCookie, accessCookie } from '../data/variables'
 
 export async function loadSummons(interaction: ChatInputCommandInteraction, playerID: string){
     const playerEmbed = new EmbedBuilder()

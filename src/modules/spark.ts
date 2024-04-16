@@ -2,7 +2,7 @@ import { createCanvas, loadImage, Image } from "canvas"
 import { AttachmentBuilder, EmbedBuilder, GuildMember, InteractionReplyOptions, User } from "discord.js"
 import { GoogleSpreadsheetRow } from "google-spreadsheet"
 import { fontFallBacks, userData } from "../bot"
-import { sparkBGMask, clearSparkBG, defaultSparkBG, progressBars, developerTitle, VIPTitle, clearMBSparkBG, defaultMBSparkBG } from "./assets"
+import { sparkBGMask, clearSparkBG, defaultSparkBG, progressBars, developerTitle, VIPTitle, clearMBSparkBG, defaultMBSparkBG } from "../data/assets"
 import { formatList } from "./string"
 import { round } from "./number"
 

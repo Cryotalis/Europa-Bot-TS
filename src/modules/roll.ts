@@ -1,7 +1,7 @@
 import { EmbedBuilder } from "discord.js"
 import { data } from "../bot"
 import { findBestCIMatch } from "./string"
-import { weaponEmotes, rarityEmotes } from "./variables"
+import { weaponEmotes, rarityEmotes } from "../data/variables"
 import { item, bannerData } from "./banner"
 
 export function gacha(crystals: number, singles: number, tenparts: number, target?: item){

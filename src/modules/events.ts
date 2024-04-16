@@ -1,4 +1,4 @@
-import { waterAdvantage, earthAdvantage, windAdvantage, fireAdvantage, darkAdvantage, lightAdvantage, eventsBackgroundTop, eventsBackgroundMiddle, eventsBackgroundBottom, upcomingEventsText } from './assets'
+import { waterAdvantage, earthAdvantage, windAdvantage, fireAdvantage, darkAdvantage, lightAdvantage, eventsBackgroundTop, eventsBackgroundMiddle, eventsBackgroundBottom, upcomingEventsText } from '../data/assets'
 import { Canvas, CanvasRenderingContext2D, Image, createCanvas, loadImage } from 'canvas'
 import { dateDiff, getSimpleDate, parseOffset } from './time'
 import { client, fontFallBacks, servers } from '../bot'
