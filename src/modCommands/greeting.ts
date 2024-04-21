@@ -135,7 +135,7 @@ module.exports = {
 			const rolesEmbed = new EmbedBuilder()
 				.setAuthor({
 					name: `AutoRoles were${addedRoles.length === 0 ? ' not ' : ' '}set`,
-					iconURL: interaction.guild?.iconURL({extension: 'png'}) ?? ''
+					iconURL: interaction.guild?.iconURL({extension: 'png'}) ?? undefined
 				})
 				.setColor('Blue')
 
