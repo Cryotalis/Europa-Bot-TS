@@ -20,8 +20,16 @@ module.exports = {
 				.setColor('Blue')
 				.setFooter({text: 'https://gbf.wiki/Main_Page', iconURL: 'https://i.imgur.com/MN6TIHj.png'})
 			
-			currentEvents.forEach(event => eventEmbed.addFields([{name: event.title + (event.elementAdvantage ? ` (${event.elementAdvantage})` : ''), value: `${getEventDuration(event)} (<t:${event.end.valueOf()/1000}:f>)`}]))
-			upcomingEvents.forEach(event => eventEmbed.addFields([{name: event.title + (event.elementAdvantage ? ` (${event.elementAdvantage})` : ''), value: event.duration}]))
+			currentEvents.forEach(event => eventEmbed.addFields([{
+				name: event.title + (event.elementAdvantage ? ` (${event.elementAdvantage})` : ''),
+				value: getEventDuration(event) + (event.end ? `(<t:${event.end.valueOf()/1000}:f>)` : '')
+			}]))
+
+			upcomingEvents.forEach(event => eventEmbed.addFields([{
+				name: event.title + (event.elementAdvantage ? ` (${event.elementAdvantage})` : ''), 
+				value: event.duration
+			}]))
+			
 			interaction.editReply({embeds: [eventEmbed]})
 		} else {
 			const canvas = createCanvas(eventsTemplate.width, eventsTemplate.height)
