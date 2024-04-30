@@ -11,8 +11,8 @@ import { GuildScheduledEventCreateOptions } from 'discord.js'
 export interface event {
     title: string
     type: string
-    start: Date
-    end: Date
+    start: Date | undefined
+    end: Date | undefined
     duration: string
     image: Image | null
     imageURL: string | null
@@ -89,8 +89,8 @@ export async function processEvents(events: rawEvent[]){
     }) // Only take events that end after now - 3 hours and before now + 90 days
 
     const processedEvents = filteredEvents.slice(0, 10).map(async event => {
-        const start = new Date(event['utc start'] * 1000)
-        const end = new Date(event['utc end'] * 1000)
+        const start = event['utc start'] ? new Date(event['utc start'] * 1000) : undefined
+        const end = event['utc end'] ? new Date(event['utc end'] * 1000) : undefined
         const month = new Date((event['utc start'] + (now.getTimezoneOffset() + parseOffset('UTC +9')) * 60) * 1000).toLocaleDateString('en-US', {month: 'long'})
         const imgName = capFirstLetter(event.image).replace(/ /g, '_')
         const imgHash = md5(imgName)
@@ -163,11 +163,13 @@ export function drawEvent(ctx: CanvasRenderingContext2D, event: event, textX: nu
 export function getEventDuration(event: event){
     if (event.type === 'Current'){
         const now = new Date()
-        return now < event.start
-            ? `Starts in ${dateDiff(now, event.start, true)}`
-            : now < event.end
-                ? `Ends in ${dateDiff(now, event.end, true)}`
-                : 'Event has ended.'
+        
+        if (!event.start) return 'Starts in ?'
+        if (now < event.start) return `Starts in ${dateDiff(now, event.start, true)}`
+        
+        if (!event.end) return 'Ends in ?'
+        if (now < event.end) return `Ends in ${dateDiff(now, event.end, true)}`
+        return 'Event has ended.'
     }
     return event.duration
 }
@@ -178,7 +180,7 @@ export function getEventDuration(event: event){
 export async function createScheduledEvents(){
     const subscribedServers = servers.filter(server => server.get('events') === 'TRUE')
     const events: GuildScheduledEventCreateOptions[] = upcomingEvents.map(event => {
-        if (!event.start || event.start < new Date() || event.duration.startsWith('In')) return {} as GuildScheduledEventCreateOptions
+        if (!event.start || !event.end || event.start < new Date() || event.duration.startsWith('In')) return {} as GuildScheduledEventCreateOptions
         
         let canvas
         if (event.image){
@@ -202,7 +204,11 @@ export async function createScheduledEvents(){
     subscribedServers.forEach(server => {
         const eventsManager = client.guilds.cache.get(server.get('guildID'))?.scheduledEvents
         if (!eventsManager) return
-        const newEvents = events.filter(({name: name1, scheduledStartTime: start}) => !eventsManager.cache.some(({name: name2, scheduledStartTimestamp}) => name1 === name2 && scheduledStartTimestamp === new Date(start).getTime()))
+        const newEvents = events.filter(({name: name1, scheduledStartTime}) => {
+            !eventsManager.cache.some(({name: name2, scheduledStartTimestamp}) => {
+                name1 === name2 && scheduledStartTimestamp === new Date(scheduledStartTime).getTime()
+            })
+        })
 
         newEvents.forEach(event => eventsManager.create(event))
     })
