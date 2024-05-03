@@ -1,10 +1,9 @@
-import { ChannelType, Client, Collection, GatewayIntentBits, Guild, GuildMember, REST, Role, Routes, ShardClientUtil, TextChannel } from 'discord.js'
+import { ChannelType, Client, Collection, GatewayIntentBits, Guild, REST, Routes, ShardClientUtil, TextChannel } from 'discord.js'
 import { GoogleSpreadsheet, GoogleSpreadsheetRow } from 'google-spreadsheet'
 import { schedule } from 'node-cron'
 import { inspect } from 'util'
 import fs from 'node:fs'
 import { Browser, launch } from 'puppeteer'
-import { greetingConfig, makeGreetingImage } from './modules/greeting'
 import { JWT } from 'google-auth-library'
 import { loadAssets } from './data/assets'
 import { createScheduledEvents, loadEvents } from './modules/events'
@@ -51,6 +50,7 @@ export async function registerCommands() {
 		.catch(console.error)
 }
 
+export interface categoryRole {id: string, category: string}
 export interface serverData {guildName: string, guildID: string, greeting: string, roles: string, events: string}
 export interface userData {
 	username: string,	userID: string,
@@ -133,7 +133,7 @@ async function startUp(){
 	})
 }
 
-client.on('ready', async () => {
+client.on('ready', () => {
 	console.log(`Shard #${currentShardID} is now online`)
 	client.user?.setActivity('Granblue Fantasy')
 	startUp()
@@ -170,89 +170,9 @@ client.on('interactionCreate', interaction => {
 	}
 })
 
-// Create entry for new guilds for storing settings
-client.on('guildCreate', async guild => {
-	if (!servers) return
-	const server = servers.find(server => server.get('guildID') === guild.id)
-	if (!server){
-		const newServer = await privateDB.sheetsByTitle['Servers'].addRow({
-			guildName: guild.name,
-			guildID: `'${guild.id}`
-		})
-		servers.push(newServer)
-	}
-	const joinMessage = `:man_raising_hand:  Joined server **${guild.name}**`
-	client.shard?.broadcastEval((client: Client, {message}: any): void => {
-		(client.channels.cache.get('577636091834662915') as TextChannel).send(message)
-	}, {shard: homeServerShardID, context: {message: joinMessage}})
-})
-
-// Greeting System
-client.on('guildMemberAdd', async member => {
-	const server = servers.find(server => server.get('guildID') === member.guild.id)
-	if (!server?.get('greeting')) return
-	const clientUser = member.guild?.members.me! as GuildMember
-	const greetingSettings: greetingConfig = JSON.parse(server.get('greeting'))
-	const greetingChannel = member.guild.channels.cache.get(greetingSettings.channelID) as TextChannel
-
-	if (greetingSettings.autoRoles.length > 0 && greetingSettings.useAutoRole){
-		greetingSettings.autoRoles.forEach(roleID => {
-			const role = member.guild?.roles.cache.find((role: Role) => role.id === roleID)
-			if (!role || clientUser.roles.highest.position <= role.position) return
-			member.roles.add(role)
-		})
-		member.roles.add(greetingSettings.autoRoles)
-	}
-	
-	if (!greetingSettings.sendJoinMessage || !greetingChannel) return
-
-	if (!greetingSettings.showJoinImage) {
-		greetingChannel.send(greetingSettings.joinMessage.replace('[member]', String(member)))
-		return
-	}
-
-	greetingChannel.send({content: greetingSettings.joinMessage.replace('[member]', String(member)), files: [await makeGreetingImage(greetingSettings, member.user)]})
-})
-
-client.on('guildMemberRemove', async member => {
-	const server = servers.find(server => server.get('guildID') === member.guild.id)
-	if (!server?.get('greeting')) return
-	const greetingSettings: greetingConfig = JSON.parse(server.get('greeting'))
-	const greetingChannel = member.guild.channels.cache.get(greetingSettings.channelID) as TextChannel
-	
-	if (!greetingSettings.sendLeaveMessage || !greetingChannel) return
-	const ban = await member.guild.bans.fetch(member.user).catch(() => {})
-	if (ban?.user === member.user) return // Don't send a leave message if the user was banned rather than leaving on their own
-	greetingChannel.send(greetingSettings.leaveMessage.replace('[member]', member.user.username))
-})
-
-client.on('guildBanAdd', ban => {
-	const server = servers.find(server => server.get('guildID') === ban.guild.id)
-	if (!server?.get('greeting')) return
-	const greetingSettings: greetingConfig = JSON.parse(server.get('greeting'))
-	const greetingChannel = ban.guild.channels.cache.get(greetingSettings.channelID) as TextChannel
-	
-	if (!greetingSettings.sendBanMessage || !greetingChannel) return
-	greetingChannel.send(greetingSettings.banMessage.replace('[member]', ban.user.username))
-})
-
-// Delete roles from the server role list if they are deleted through Discord
-export interface categoryRole {id: string, category: string}
-client.on('roleDelete', async role => {
-	const server = servers.find(server => server.get('guildID') === role.guild.id)
-	if (!server?.get('roles')) return
-	const serverRoles: categoryRole[] = JSON.parse(server.get('roles'))
-	const serverRole = serverRoles.find(r => r.id === role.id)
-	if (!serverRole) return
-
-	serverRoles.splice(serverRoles.indexOf(serverRole), 1)
-	server.set('roles', JSON.stringify(serverRoles))
-	await server.save()
-})
-
 client.login(process.env.BOT_TOKEN)
 
-// Check every hour, if memory exceeds 400MB, stop accepting commands and kill the shard.
+// Check every hour - if memory exceeds 400MB, force the shard to respawn
 schedule('0 * * * *', () => {
 	if (process.memoryUsage().heapUsed / 1024 / 1024 > 400){
 		client.shard?.broadcastEval(client => process.exit())
