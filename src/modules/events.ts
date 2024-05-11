@@ -11,8 +11,8 @@ import { GuildScheduledEventCreateOptions } from 'discord.js'
 export interface event {
     title: string
     type: string
-    start: Date | undefined
-    end: Date | undefined
+    start: Date | null
+    end: Date | null
     duration: string
     image: Image | null
     imageURL: string | null
@@ -79,22 +79,31 @@ export async function loadEvents(){
     eventsTemplate = canvas
 }
 
-export async function processEvents(events: rawEvent[]){
+/**
+ * Processes events from the GBF wiki. 
+ * - Events that are not ongoing, ended more than 3 hours ago, or end more than 90 days later are filtered out.
+ * - Returns up to 10 events.
+ */
+export async function processEvents(events: rawEvent[]): Promise<event[]>{
     const now = new Date()
     const currentStart = (now.getTime() / 1000) - (3 * 60 * 60)
     const currentEnd = (now.getTime() / 1000) + (36 * 60 * 60)
     const filteredEvents = events.filter(event => {
         if (event['utc end'] === 0) return true
-        else return event['utc end'] > currentStart && event['utc end'] < (now.getTime() / 1000) + (90 * 24 * 60 * 60)
-    }) // Only take events that end after now - 3 hours and before now + 90 days
+        return event['utc end'] > currentStart && event['utc end'] < (now.getTime() / 1000) + (90 * 24 * 60 * 60)
+    })
 
     const processedEvents = filteredEvents.slice(0, 10).map(async event => {
-        const start = event['utc start'] ? new Date(event['utc start'] * 1000) : undefined
-        const end = event['utc end'] ? new Date(event['utc end'] * 1000) : undefined
+        const start = event['utc start'] ? new Date(event['utc start'] * 1000) : null
+        const end = event['utc end'] ? new Date(event['utc end'] * 1000) : null
         const month = new Date((event['utc start'] + (now.getTimezoneOffset() + parseOffset('UTC +9')) * 60) * 1000).toLocaleDateString('en-US', {month: 'long'})
-        const imgName = capFirstLetter(event.image).replace(/ /g, '_')
-        const imgHash = md5(imgName)
-        const imgURL = `https://gbf.wiki/images/${imgHash.charAt(0)}/${imgHash.slice(0,2)}/${encodeURI(imgName)}`
+        let imgName, imgHash, imgURL = null
+
+        if (event.image){
+            imgName = capFirstLetter(event.image ?? '').replace(/ /g, '_')
+            imgHash = md5(imgName)
+            imgURL = `https://gbf.wiki/images/${imgHash.charAt(0)}/${imgHash.slice(0,2)}/${encodeURI(imgName)}`
+        }
 
         return {
             title: event.name,
@@ -102,7 +111,7 @@ export async function processEvents(events: rawEvent[]){
             start: start,
             end: end,
             duration: event['time known'] === 'yes' ? `${getSimpleDate(start)} - ${getSimpleDate(end)}` : `In ${month}`,
-            image: await loadImage(imgURL),
+            image: imgURL ? await loadImage(imgURL) : null,
             imageURL: imgURL,
             elementAdvantage: getElementAdvantage(event.element).advantage,
             elementAdvantageImg: getElementAdvantage(event.element).image
