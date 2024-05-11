@@ -163,7 +163,7 @@ export function dateToString(date: Date, timeZone: string = 'UTC', showTZ: boole
 /**
  * Takes a Date object and returns the simple date (e.g. January 1st, February 2nd, etc)
  */
-export function getSimpleDate(date: Date | undefined){
+export function getSimpleDate(date: Date | null){
     if (!date) return '?'
     const simpleShortDate = date.toString().match(/\w+/g)!.slice(1,3)
     const simpleFullDate = fullDates[simpleShortDate[0]] + ' ' + getOrdinal(simpleShortDate[1])
