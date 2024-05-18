@@ -11,6 +11,7 @@ import { getBannerData } from './modules/banner'
 import { registerFont } from 'canvas'
 import { handleNewGuild, handleNewMember, handleRemovedMember } from './events/guild'
 import { handleDeletedRole } from './events/role'
+import { handleAutocomplete, handleCommand } from './events/interaction'
 
 export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration], rest: {timeout: 60000}})
 export const homeServerShardID = ShardClientUtil.shardIdForGuildId('379501550097399810', client.shard?.count!)
@@ -24,10 +25,10 @@ registerFont('assets/NotoSerifJP.otf', {family: 'Noto Serif JP'})
 registerFont(require('@canvas-fonts/arial'), {family: 'Default'})
 registerFont(require('@canvas-fonts/arial-bold'), {family: 'Default Bold'})
 
-const privateCommandFiles = ['connect.js', 'say.js', 'respawn.js']
-const regCommands = fs.readdirSync('./prod/commands').filter(file => file.endsWith('.js'))
-const modCommands = fs.readdirSync('./prod/modCommands').filter(file => file.endsWith('.js'))
-const commandFiles = regCommands.concat(modCommands)
+export const privateCommandFiles = ['connect.js', 'say.js', 'respawn.js']
+export const regCommands = fs.readdirSync('./prod/commands').filter(file => file.endsWith('.js'))
+export const modCommands = fs.readdirSync('./prod/modCommands').filter(file => file.endsWith('.js'))
+export const commandFiles = regCommands.concat(modCommands)
 
 export async function registerCommands() {
 	const commands = []
@@ -145,31 +146,12 @@ client.on('ready', () => {
 	(client.channels.cache.get('577636091834662915') as TextChannel).send(`:white_check_mark:  **Europa is now online**`)
 })
 
-// Slash Command Handler
 client.on('interactionCreate', interaction => {
-	if ((!interaction.isCommand() && !interaction.isMessageContextMenuCommand()) || !interaction.channel || interaction.channel.type === ChannelType.DM) return
+	if (!interaction.channel || interaction.channel.type === ChannelType.DM) return
+	
+	if (interaction.isAutocomplete()) handleAutocomplete(interaction)
 
-	const isModCommand = modCommands.includes(`${interaction.commandName}.js`)
-    const command: any = client.commands?.get(interaction.commandName)
-	if (!command) {interaction.reply('Failed to load command. Please try again in a few seconds.'); return}
-	if (isModCommand && !(interaction.memberPermissions?.has('ManageMessages') || interaction.user.id === '251458435554607114')){
-		interaction.reply({content: 'You do not have permission to use this command.', ephemeral: true})
-		return
-	} 
-
-	try {
-		command.execute(interaction)
-	} catch (error) {
-		client.shard?.broadcastEval((client: Client, {error}: any) => {
-			(client.channels.cache.get('672715578347094026') as TextChannel).send({files: [{attachment: Buffer.from(error, 'utf-8'), name: 'error.ts'}]})
-		}, {shard: homeServerShardID, context: {error: inspect(error, {depth: null})}})
-		interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true })
-	} finally {
-		const logMessage = `:scroll:  **${interaction.user.username}** (${interaction.user.id}) ran the ${isModCommand ? 'mod ' : ''}command \`${interaction.commandName}\` in **${interaction.guild?.name}** (${interaction.guildId})`
-		client.shard?.broadcastEval((client: Client, {message}: any): void => {
-			(client.channels.cache.get('577636091834662915') as TextChannel).send(message)
-		}, {shard: homeServerShardID, context: {message: logMessage}})
-	}
+	if (interaction.isCommand()) handleCommand(interaction)
 })
 
 client.on('guildCreate', guild => handleNewGuild(guild))
