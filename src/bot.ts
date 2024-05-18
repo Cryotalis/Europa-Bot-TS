@@ -2,7 +2,7 @@ import { ChannelType, Client, Collection, GatewayIntentBits, Guild, REST, Routes
 import { GoogleSpreadsheet, GoogleSpreadsheetRow } from 'google-spreadsheet'
 import { schedule } from 'node-cron'
 import { inspect } from 'util'
-import fs from 'node:fs'
+import { readdirSync } from 'node:fs'
 import { Browser, launch } from 'puppeteer'
 import { JWT } from 'google-auth-library'
 import { loadAssets } from './data/assets'
@@ -30,8 +30,8 @@ registerFont(require('@canvas-fonts/arial'), {family: 'Default'})
 registerFont(require('@canvas-fonts/arial-bold'), {family: 'Default Bold'})
 
 export const privateCommandFiles = ['connect.js', 'say.js', 'respawn.js']
-export const regCommands = fs.readdirSync('./prod/commands').filter(file => file.endsWith('.js'))
-export const modCommands = fs.readdirSync('./prod/modCommands').filter(file => file.endsWith('.js'))
+export const regCommands = readdirSync('./prod/commands').filter(file => file.endsWith('.js'))
+export const modCommands = readdirSync('./prod/modCommands').filter(file => file.endsWith('.js'))
 export const commandFiles = regCommands.concat(modCommands)
 
 export async function registerCommands() {
