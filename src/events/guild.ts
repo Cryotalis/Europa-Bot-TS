@@ -1,5 +1,5 @@
 import { Client, TextChannel, GuildMember, Guild, PartialGuildMember } from "discord.js"
-import { client, servers, privateDB, homeServerShardID } from "../bot"
+import { client, servers, privateDB, homeServerShardID, logChannelID } from "../bot"
 import { greetingConfig, makeGreetingImage } from "../modules/greeting"
 
 /**
@@ -14,9 +14,9 @@ export async function handleNewGuild(guild: Guild) {
 	}
 
 	const joinMessage = `:man_raising_hand:  Joined server **${guild.name}**`
-	client.shard?.broadcastEval((client: Client, {message}: any): void => {
-		(client.channels.cache.get('577636091834662915') as TextChannel).send(message)
-	}, {shard: homeServerShardID, context: {message: joinMessage}})
+	client.shard?.broadcastEval((client: Client, {logChannelID, message}: {logChannelID: string, message: string}) => {
+		(client.channels.cache.get(logChannelID) as TextChannel).send(message)
+	}, {shard: homeServerShardID, context: {logChannelID: logChannelID, message: joinMessage}})
 }
 
 /**

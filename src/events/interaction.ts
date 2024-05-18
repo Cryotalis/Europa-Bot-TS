@@ -2,7 +2,7 @@ import { AutocompleteInteraction, CacheType, ChatInputCommandInteraction, Client
 import { findBestCIMatch } from "../modules/string"
 import { raids } from "../data/raids"
 import { inspect } from "util"
-import { client, homeServerShardID, modCommands } from "../bot"
+import { client, errorChannelID, homeServerShardID, logChannelID, modCommands } from "../bot"
 
 /*
  * Handles Autocomplete interactions
@@ -32,21 +32,20 @@ export function handleCommand(interaction: ChatInputCommandInteraction<CacheType
     const command: any = client.commands?.get(interaction.commandName)
 	if (!command) {interaction.reply('Failed to load command. Please try again in a few seconds.'); return}
 	if (isModCommand && !(interaction.memberPermissions?.has('ManageMessages') || interaction.user.id === '251458435554607114')){
-		interaction.reply({content: 'You do not have permission to use this command.', ephemeral: true})
-		return
-	} 
+		return interaction.reply({content: 'You do not have permission to use this command.', ephemeral: true})
+	}
 
 	try {
 		command.execute(interaction)
 	} catch (error) {
-		client.shard?.broadcastEval((client: Client, {error}: any) => {
-			(client.channels.cache.get('672715578347094026') as TextChannel).send({files: [{attachment: Buffer.from(error, 'utf-8'), name: 'error.ts'}]})
-		}, {shard: homeServerShardID, context: {error: inspect(error, {depth: null})}})
+		client.shard?.broadcastEval((client: Client, {errorChannelID, error}: {errorChannelID: string, error: string}) => {
+			(client.channels.cache.get(errorChannelID) as TextChannel).send({files: [{attachment: Buffer.from(error, 'utf-8'), name: 'error.ts'}]})
+		}, {shard: homeServerShardID, context: {errorChannelID: errorChannelID, error: inspect(error, {depth: null})}})
 		interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true })
 	} finally {
 		const logMessage = `:scroll:  **${interaction.user.username}** (${interaction.user.id}) ran the ${isModCommand ? 'mod ' : ''}command \`${interaction.commandName}\` in **${interaction.guild?.name}** (${interaction.guildId})`
-		client.shard?.broadcastEval((client: Client, {message}: any): void => {
-			(client.channels.cache.get('577636091834662915') as TextChannel).send(message)
-		}, {shard: homeServerShardID, context: {message: logMessage}})
+		client.shard?.broadcastEval((client: Client, {logChannelID, message}: {logChannelID: string, message: string}) => {
+			(client.channels.cache.get(logChannelID) as TextChannel).send(message)
+		}, {shard: homeServerShardID, context: {logChannelID: logChannelID, message: logMessage}})
 	}
 }

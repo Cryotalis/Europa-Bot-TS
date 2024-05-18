@@ -14,8 +14,12 @@ import { handleDeletedRole } from './events/role'
 import { handleAutocomplete, handleCommand } from './events/interaction'
 
 export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration], rest: {timeout: 60000}})
-export const homeServerShardID = ShardClientUtil.shardIdForGuildId('379501550097399810', client.shard?.count!)
+export const botID = '585514230967566338'
+export const homeServerID = '379501550097399810'
+export const homeServerShardID = ShardClientUtil.shardIdForGuildId(homeServerID, client.shard?.count!)
 export const currentShardID = client.shard?.ids[0]
+export const logChannelID = '577636091834662915'
+export const errorChannelID = '672715578347094026'
 
 export const fontFallBacks = 'Noto Serif SC Noto Serif TC Noto Serif JP Code2000'
 registerFont('assets/Code2000.TTF', {family: 'Code2000'})
@@ -45,11 +49,11 @@ export async function registerCommands() {
 	}
 
 	const rest = new REST({ version: '9' }).setToken(process.env.BOT_TOKEN!)
-	rest.put(Routes.applicationCommands('585514230967566338'), { body: commands })
+	rest.put(Routes.applicationCommands(botID), { body: commands })
 		.then(() => console.log(`Successfully registered application commands globally for Shard #${currentShardID}`))
 		.catch(console.error)
 
-	rest.put(Routes.applicationGuildCommands('585514230967566338', '379501550097399810'), { body: privateCommands })
+	rest.put(Routes.applicationGuildCommands(botID, homeServerID), { body: privateCommands })
 		.catch(console.error)
 }
 
@@ -114,7 +118,7 @@ async function updateCounter() {
 	if (currentShardID !== homeServerShardID) return
 	const serverCounts = await client.shard?.fetchClientValues('guilds.cache.size')
 	const serverCount = serverCounts?.reduce((a: any, b: any) => a + b, 0)
-	const homeServer = client.guilds.cache.get('379501550097399810') as Guild
+	const homeServer = client.guilds.cache.get(homeServerID) as Guild
 	;(homeServer.channels.cache.get('657766651441315840') as TextChannel).edit({name: `Server Count: ${serverCount}`})
 	;(homeServer.channels.cache.get('666696864716029953') as TextChannel).edit({name: `Member Count: ${homeServer.memberCount}`})
 }
@@ -143,7 +147,7 @@ client.on('ready', () => {
 	
 	if (currentShardID !== homeServerShardID) return
 	
-	(client.channels.cache.get('577636091834662915') as TextChannel).send(`:white_check_mark:  **Europa is now online**`)
+	(client.channels.cache.get(logChannelID) as TextChannel).send(`:white_check_mark:  **Europa is now online**`)
 })
 
 client.on('interactionCreate', interaction => {
@@ -170,7 +174,7 @@ schedule('0 * * * *', () => {
 })
 
 process.on('uncaughtException', error => {
-	client.shard?.broadcastEval((client: Client, {error}: any) => {
-		(client.channels.cache.get('672715578347094026') as TextChannel)?.send({files: [{attachment: Buffer.from(error, 'utf-8'), name: 'error.ts'}]})
-	}, {shard: homeServerShardID, context: {error: inspect(error, {depth: null})}})
+	client.shard?.broadcastEval((client: Client, {errorChannelID, error}: {errorChannelID: string, error: string}) => {
+		(client.channels.cache.get(errorChannelID) as TextChannel).send({files: [{attachment: Buffer.from(error, 'utf-8'), name: 'error.ts'}]})
+	}, {shard: homeServerShardID, context: {errorChannelID: errorChannelID, error: inspect(error, {depth: null})}})
 })
