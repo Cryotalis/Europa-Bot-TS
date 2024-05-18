@@ -9,6 +9,8 @@ import { loadAssets } from './data/assets'
 import { createScheduledEvents, loadEvents } from './modules/events'
 import { getBannerData } from './modules/banner'
 import { registerFont } from 'canvas'
+import { handleNewGuild, handleNewMember, handleRemovedMember } from './events/guild'
+import { handleDeletedRole } from './events/role'
 
 export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration], rest: {timeout: 60000}})
 export const homeServerShardID = ShardClientUtil.shardIdForGuildId('379501550097399810', client.shard?.count!)
@@ -169,6 +171,12 @@ client.on('interactionCreate', interaction => {
 		}, {shard: homeServerShardID, context: {message: logMessage}})
 	}
 })
+
+client.on('guildCreate', guild => handleNewGuild(guild))
+client.on('guildMemberAdd', member => handleNewMember(member))
+client.on('guildMemberRemove', member => handleRemovedMember(member))
+
+client.on('roleDelete', role => handleDeletedRole(role))
 
 client.login(process.env.BOT_TOKEN)
 

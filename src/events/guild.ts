@@ -1,9 +1,11 @@
-import { Client, TextChannel, GuildMember } from "discord.js"
+import { Client, TextChannel, GuildMember, Guild, PartialGuildMember } from "discord.js"
 import { client, servers, privateDB, homeServerShardID } from "../bot"
 import { greetingConfig, makeGreetingImage } from "../modules/greeting"
 
-// Create an entry in the database when joining a guild for the first time
-client.on('guildCreate', async guild => {
+/**
+ * Adds new servers to the database and logs the server in the log channel
+ */
+export async function handleNewGuild(guild: Guild) {
 	if (!servers) return
 	const server = servers.find(server => server.get('guildID') === guild.id)
 	if (!server){
@@ -15,22 +17,24 @@ client.on('guildCreate', async guild => {
 	client.shard?.broadcastEval((client: Client, {message}: any): void => {
 		(client.channels.cache.get('577636091834662915') as TextChannel).send(message)
 	}, {shard: homeServerShardID, context: {message: joinMessage}})
-})
+}
 
-// Greeting System - Join Messages
-client.on('guildMemberAdd', async member => {
+/**
+ * Handles auto-roles and sends a join message (if enabled) when a member joins the server
+ */
+export async function handleNewMember(member: GuildMember) {
 	const server = servers.find(server => server.get('guildID') === member.guild.id)
 	if (!server?.get('greeting')) return
 
-	const clientUser = member.guild?.members.me! as GuildMember
+	const clientUser = member.guild.members.me! as GuildMember
 	const greetingSettings: greetingConfig = JSON.parse(server.get('greeting'))
-    const {channelID, autoRoles, useAutoRole, sendJoinMessage, joinMessage, showJoinImage} = greetingSettings
+    const {channelID, useAutoRole, autoRoles, sendJoinMessage, joinMessage, showJoinImage} = greetingSettings
 	const greetingChannel = member.guild.channels.cache.get(channelID) as TextChannel
 
-	if (autoRoles.length > 0 && useAutoRole){
+	if (useAutoRole && autoRoles.length > 0){
 		autoRoles.forEach(roleID => {
-			const role = member.guild?.roles.cache.find(role => role.id === roleID)
-            const roleIsAssignable = !!(role && clientUser.roles.highest.position > role.position)
+			const role = member.guild.roles.cache.find(role => role.id === roleID)
+            const roleIsAssignable = role && clientUser.roles.highest.position > role.position
 			if (roleIsAssignable) member.roles.add(role)
 		})
 	}
@@ -41,10 +45,12 @@ client.on('guildMemberAdd', async member => {
         content: joinMessage.replace('[member]', String(member)),
         files: showJoinImage ? [await makeGreetingImage(greetingSettings, member.user)] : []
     })
-})
+}
 
-// Greeting System - Leave & Ban Messages
-client.on('guildMemberRemove', async member => {
+/**
+ * Sends a leave or ban message when a member leaves the server
+ */
+export async function handleRemovedMember(member: GuildMember | PartialGuildMember) {
 	const server = servers.find(server => server.get('guildID') === member.guild.id)
 	if (!server?.get('greeting')) return
 
@@ -60,4 +66,4 @@ client.on('guildMemberRemove', async member => {
     } else {
         if (sendLeaveMessage) greetingChannel.send(leaveMessage.replace('[member]', member.user.username))
     }
-})
+}

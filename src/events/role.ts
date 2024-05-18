@@ -1,7 +1,10 @@
-import { categoryRole, client, servers } from "../bot"
+import { Role } from "discord.js"
+import { categoryRole, servers } from "../bot"
 
-// Delete roles from the server role list if they are deleted through Discord
-client.on('roleDelete', async role => {
+/**
+ * Delete roles from the server role list if they are deleted through Discord
+ */
+export async function handleDeletedRole(role: Role) {
 	const server = servers.find(server => server.get('guildID') === role.guild.id)
 	if (!server?.get('roles')) return
 	
@@ -12,4 +15,4 @@ client.on('roleDelete', async role => {
 	serverRoles.splice(serverRoles.indexOf(deletedRole), 1)
 	server.set('roles', JSON.stringify(serverRoles))
 	server.save()
-})
+}
