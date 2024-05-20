@@ -107,7 +107,7 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
     ctx.strokeText(`${starCharName}`, 580, 390)
     ctx.fillText(`${starCharName}`, 580, 390)
 
-    wrapText({ctx: ctx, font: '18px Default', textAlign: 'left'}, `${starCharText}`, 525, 435, 240, 15)
+    wrapText({ctx: ctx, font: '18px Default', textAlign: 'left'}, `${starCharText}`, 525, 427, 240, 15)
 
     if (starCharRinged) ctx.drawImage(perpetuityRingIcon, 460, 409, 22, 22)
 
