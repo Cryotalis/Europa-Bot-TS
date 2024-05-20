@@ -84,7 +84,7 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
     const starCharURL = String(bodyHTML.match(/(?<=img-pushed-npc"\ssrc=").+?(?=")/))
     let starCharName = String(bodyHTML.match(/(?<=prt-current-npc-name">)\s+?.+?\s+?(?=<)/)).trim()
     let emLvl = String(bodyHTML.match(/(?<=txt-npc-rank">)\d+(?=<)/))
-    let starCharText = decode(String(bodyHTML.match(/(?<=prt-pushed-info">).+?(?=<)/)))
+    let starCharText = decode(String(bodyHTML.match(/(?<=prt-pushed-info">).+?(?=<)/s)))
     let starCharImage
     if (starCharURL.includes('empty.jpg')){starCharImage = openSummon; starCharName = 'Not Set'; emLvl = 'N/A'}
     else if (starCharPrivate){starCharName = 'Private'; emLvl = 'N/A'; starCharText = 'Private' }
