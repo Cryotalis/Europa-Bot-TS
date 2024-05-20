@@ -18,7 +18,7 @@ module.exports = {
 	async execute(interaction: ChatInputCommandInteraction) {
 		const raidCode = interaction.options.getString('code')!.substring(0, 10)
 		let raidRole = interaction.options.getRole('role')
-		let raidName = interaction.options.getString('name')
+		let raidName = interaction.options.getString('name')?.replace('\t', '') ?? null
 		const message = interaction.options.getString('message')
 		const time = interaction.options.getInteger('time')
 		const hp = interaction.options.getInteger('hp')?.toLocaleString()
