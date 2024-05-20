@@ -24,14 +24,29 @@ module.exports = {
 				.setName('rename')
 				.setDescription('Rename a role category')
 				.addStringOption(option => option.setName('category').setDescription('The category to be renamed').setRequired(true))
-				.addStringOption(option => option.setName('name').setDescription('The new name for the category').setRequired(true))	
+				.addStringOption(option => option.setName('name').setDescription('The new name for the category').setRequired(true))
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('register')
+				.setDescription('Register a raid role with a raid name')
+				.addRoleOption(option => option.setName('role').setDescription('The raid role to register').setRequired(true))
+				.addStringOption(option => option.setName('raid').setDescription('The raid to register the raid role with').setAutocomplete(true).setRequired(true))
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('unregister')
+				.setDescription('Unregister a raid role')
+				.addRoleOption(option => option.setName('role').setDescription('The raid role to unregister').setRequired(true))
 		)
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
 		const rolesInput = interaction.options.getString('roles')?.match(/[\w\s]+/g)?.filter(r => /\w/.test(r))
-		const newName = interaction.options.getString('name')!
-		let category = interaction.options.getString('category')
-		if (!rolesInput?.length && !newName) return interaction.reply('The roles you provided were invalid.')
+		const category = interaction.options.getString('category')
+		const newCategory = interaction.options.getString('name')!
+
+		const raidRole = interaction.options.getRole('role')!
+		const raidName = interaction.options.getString('raid')!
 
 		const clientUser = interaction.guild?.members.me! as GuildMember
 		const server = servers.find(server => server.get('guildID') === interaction.guildId)
@@ -42,66 +57,112 @@ module.exports = {
 		const addedRoles: (Role|string)[] = [], removedRoles: (Role|string)[] = [], invalidRoles: (Role|string)[] = []
 
 		const command = interaction.options.getSubcommand()
-		if (command === 'add'){
-			if (serverRolesConfig.filter(role => role.category === category).length >= 45){
-				return interaction.reply('You cannot add any more roles to this category!')
+		switch (command) {
+			case 'add':
+				if (!rolesInput?.length) return interaction.reply('The roles you provided were invalid.')
+				if (serverRolesConfig.filter(role => role.category === category).length >= 45){
+					return interaction.reply('You cannot add any more roles to this category!')
+				}
+
+				rolesInput!.forEach(roleInput => {
+					const role = /^\d+$/.test(roleInput)
+						? serverRoles?.find((role: Role) => role.id === roleInput)
+						: serverRoles?.find((role: Role) => role.name === findBestCIMatch(roleInput, serverRoles.map((role: Role) => role.name)).bestMatch.target)
+					const serverRole = serverRolesConfig.find(serverRole => serverRole.id === role?.id)
+					
+					if (!role || clientUser.roles.highest.position <= role.position) {
+						invalidRoles.push(role ?? roleInput)
+					} else if (serverRole) {
+						serverRolesConfig.splice(serverRolesConfig.indexOf(serverRole), 1, {id: role.id, category: category ?? 'General'})
+						addedRoles.push(role)
+					} else {
+						serverRolesConfig.push({id: role.id, category: category ?? 'General'})
+						addedRoles.push(role)
+					}
+				})
+				break
+			case 'remove':
+				if (!rolesInput?.length) return interaction.reply('The roles you provided were invalid.')
+				
+				rolesInput!.forEach(roleInput => {
+					const role = /^\d+$/.test(roleInput)
+						? serverRoles?.find((role: Role) => role.id === roleInput)
+						: serverRoles?.find((role: Role) => role.name === findBestCIMatch(roleInput, serverRoles.map((role: Role) => role.name)).bestMatch.target)
+					const serverRole = serverRolesConfig.find(serverRole => serverRole.id === role?.id)
+					
+					if (!role || !serverRole) {
+						invalidRoles.push(roleInput)
+					} else {
+						const newServerRole = serverRole
+						delete newServerRole.category
+						serverRolesConfig.splice(serverRolesConfig.indexOf(serverRole), 1, newServerRole)
+						removedRoles.push(role)
+					}
+				})
+				break
+			case 'rename':
+				if (!serverRolesConfig.some(role => role.category === category)) return interaction.reply(`I could not find a category named \"${category}\"!`)
+				serverRolesConfig.filter(role => role.category === category).forEach(role => role.category = newCategory)
+				break
+			case 'register': {
+				const serverRole = serverRolesConfig.find(role => role.id === raidRole.id)
+
+				if (serverRole) {
+					serverRolesConfig.splice(serverRolesConfig.indexOf(serverRole), 1, {...serverRole, raid: raidName})
+				} else {
+					serverRolesConfig.push({id: raidRole.id, raid: raidName})
+				}
+				break
 			}
-			rolesInput!.forEach(roleInput => {
-				if (!category) category = 'General'
-				const role = /^\d+$/.test(roleInput)
-					? serverRoles?.find((role: Role) => role.id === roleInput)
-					: serverRoles?.find((role: Role) => role.name === findBestCIMatch(roleInput, serverRoles.map((role: Role) => role.name)).bestMatch.target)
-				const serverRole = serverRolesConfig.find(serverRole => serverRole.id === role?.id)
-				
-				if (!role || clientUser.roles.highest.position <= role.position) {
-					invalidRoles.push(role ?? roleInput)
-				} else if (serverRole) {
-					serverRolesConfig.splice(serverRolesConfig.indexOf(serverRole), 1, {id: role.id, category: category})
-					addedRoles.push(role)
+			case 'unregister': {
+				const serverRole = serverRolesConfig.find(role => role.id === raidRole.id && role.raid)
+
+				if (serverRole) {
+					const newServerRole = serverRole
+					delete newServerRole.raid
+					serverRolesConfig.splice(serverRolesConfig.indexOf(serverRole), 1, newServerRole)
 				} else {
-					serverRolesConfig.push({id: role.id, category: category})
-					addedRoles.push(role)
+					return interaction.reply('That role is not registered to a raid!')
 				}
-			})
-		} else if (command === 'remove') {
-			rolesInput!.forEach(roleInput => {
-				const role = /^\d+$/.test(roleInput)
-					? serverRoles?.find((role: Role) => role.id === roleInput)
-					: serverRoles?.find((role: Role) => role.name === findBestCIMatch(roleInput, serverRoles.map((role: Role) => role.name)).bestMatch.target)
-				const serverRole = serverRolesConfig.find(serverRole => serverRole.id === role?.id)
-				
-				if (!role || !serverRole) {
-					invalidRoles.push(roleInput)
-				} else {
-					category = serverRole.category
-					serverRolesConfig.splice(serverRolesConfig.indexOf(serverRole), 1)
-					removedRoles.push(role)
-				}
-			})
-		} else {
-			if (!serverRolesConfig.some(role => role.category === category)) return interaction.reply('I could not find a category with that name!')
-			serverRolesConfig.forEach(role => {
-				if (role.category === category) {
-					addedRoles.push(`<@&${role.id}>`)
-					removedRoles.push(`<@&${role.id}>`)
-					role.category = newName
-				}
-			})
+			}
 		}
 
-		server.set('roles', JSON.stringify(serverRolesConfig))
+		const validRoles = serverRolesConfig.filter(role => role.raid || role.category)
+		server.set('roles', JSON.stringify(validRoles))
 		await server.save()
 
+		const updated = addedRoles.concat(removedRoles).length !== 0 || command === 'rename'
 		const rolesEmbed = new EmbedBuilder()
 			.setAuthor({
-				name: `Server role list for ${interaction.guild?.name} was${addedRoles.concat(removedRoles).length === 0 ? ' not ' : ' '}updated`,
+				name: `Server role list for ${interaction.guild?.name} was ${updated ? 'updated' : 'not updated'}`,
 				iconURL: interaction.guild?.iconURL({extension: 'png'}) ?? undefined
 			})
 			.setColor('Blue')
 
-		if (removedRoles.length > 0) rolesEmbed.addFields([{name: `Roles removed from category '${category}':`, value: `${removedRoles.join(' ')}`}])
-		if (addedRoles.length > 0) rolesEmbed.addFields([{name: `Roles added to category '${newName ?? category}':`, value: `${addedRoles.join(' ')}`}])
+		if (addedRoles.length > 0) 	 rolesEmbed.addFields([{name: `Roles added to category '${category}':`, value: `${addedRoles.join(' ')}`}])
+		if (removedRoles.length > 0) rolesEmbed.addFields([{name: `Roles removed:`, value: `${removedRoles.join(' ')}`}])
 		if (invalidRoles.length > 0) rolesEmbed.addFields([{name: 'Invalid roles:', value: `${invalidRoles.join(' ')}`}])
+		if (command === 'rename') 	 rolesEmbed.setDescription(`**Successfully renamed category \`${category}\` to \`${newCategory}\`**`)
+		
+		if (command === 'register') {
+			rolesEmbed
+				.setAuthor({
+					name: 'Raid role registered',
+					iconURL: interaction.guild?.iconURL({extension: 'png'}) ?? undefined
+				})
+				.addFields([
+					{name: 'Role', value: String(raidRole), inline: true},
+					{name: 'Raid', value: raidName, inline: true}
+				])
+		}
+		if (command === 'unregister') {
+			rolesEmbed
+				.setAuthor({
+					name: 'Raid role unregistered',
+					iconURL: interaction.guild?.iconURL({extension: 'png'}) ?? undefined
+				})
+				.setDescription(`Raid role ${raidRole} has been unregistered`)
+		}
 
 		return interaction.reply({embeds: [rolesEmbed]})
 	}
