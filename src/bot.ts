@@ -57,13 +57,18 @@ export async function registerCommands() {
 		.catch(console.error)
 }
 
-export interface categoryRole {id: string, category: string}
+/**
+ * - If category is defined, the role can be assigned by members.
+ * - If raid is defined, the role is tied to a raid for use with /raidcode.
+ * - At least one of category or raid should always be defined.
+ */
+export interface categoryRole {id: string, category?: string, raid?: string}
 export interface serverData {guildName: string, guildID: string, greeting: string, roles: string, events: string}
 export interface userData {
 	username: string,	userID: string,
 	crystals: string,	mobaCoin: string,
-	tickets: string,    tenParts: string, 	
-	rolls: string, 		background: string,	
+	tickets: string,    tenParts: string,
+	rolls: string, 		background: string,
 	sparkTitle: string
 }
 export let publicDB: GoogleSpreadsheet
