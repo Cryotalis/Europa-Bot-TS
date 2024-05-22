@@ -30,7 +30,7 @@ module.exports = {
 		if (raidName === 'Lvl 120 Huanglong') raidName = 'Lvl 120 Huanglong & Qilin'
 
 		const server = servers.find(server => server.get('guildID') === interaction.guildId)
-		const roles: categoryRole[] = JSON.parse(server?.get('roles') ?? [])
+		const roles: categoryRole[] = JSON.parse(server?.get('roles') ?? "[]")
 		const autoRaidRole = roles.find(role => role.raid === raidName)
 		if (!raidRole && autoRaidRole) raidRole = await interaction.guild?.roles.fetch(autoRaidRole.id) ?? null
 
