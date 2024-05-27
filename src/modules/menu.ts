@@ -89,5 +89,5 @@ export async function showMenu(interaction: ChatInputCommandInteraction, userInp
     const result = await choiceCollector?.next.catch(() => {interaction.editReply({content: 'Select menu closed.', embeds: [], components: []})})
     buttonCollector?.stop()
 
-    return result?.values[0] ? pageNum * 10 + parseInt(result?.values[0].match(/.+?/)![0]) - 1 : null
+    return result?.values[0] ? numberedItems.indexOf(result.values[0]) : null
 }
