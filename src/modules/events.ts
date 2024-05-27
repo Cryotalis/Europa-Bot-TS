@@ -7,6 +7,7 @@ import { wrapText } from './image'
 import axios from 'axios'
 import md5 from 'md5'
 import { GuildScheduledEventCreateOptions } from 'discord.js'
+import { decode } from 'html-entities'
 
 export interface event {
     title: string
@@ -100,7 +101,7 @@ export async function processEvents(events: rawEvent[]): Promise<event[]>{
         let imgName, imgHash, imgURL = null
 
         if (event.image){
-            imgName = capFirstLetter(event.image ?? '').replace(/ /g, '_')
+            imgName = decode(capFirstLetter(event.image).replace(/ /g, '_'))
             imgHash = md5(imgName)
             imgURL = `https://gbf.wiki/images/${imgHash.charAt(0)}/${imgHash.slice(0,2)}/${encodeURI(imgName)}`
         }
