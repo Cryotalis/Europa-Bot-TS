@@ -9,7 +9,7 @@ module.exports = {
 		.addBooleanOption(option => option.setName('embed').setDescription('Use the embedded message version of this command instead?'))
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
-		if (!currentEvents || !upcomingEvents || !eventsTemplate) return interaction.reply('Events information is currently unavailable. Please try again in a few seconds.')
+		if (!currentEvents || !upcomingEvents || !eventsTemplate) return interaction.reply('Events information is currently unavailable. Please try again later.')
 		await interaction.deferReply()
 
 		if (interaction.options.getBoolean('embed')){ // If requested by the user, show the embedded message output instead
