@@ -31,8 +31,8 @@ export const raids = [
 
     {"name": "Tiamat Aura Omega",        "value": "Lvl 200 Tiamat Aura Omega"},
     {"name": "Colossus Ira Omega",       "value": "Lvl 200 Colossus Ira Omega"},
-    // {"name": "Leviathan ??? Omega",      "value": "Lvl 200 Leviathan ??? Omega"},
-    // {"name": "Yggdrasil ??? Omega",      "value": "Lvl 200 Yggdrasil ??? Omega"},
+    {"name": "Leviathan Mare Omega",     "value": "Lvl 200 Leviathan Mare Omega"},
+    {"name": "Yggdrasil Arbos Omega",    "value": "Lvl 200 Yggdrasil Arbos Omega"},
     {"name": "Luminiera Credo Omega",    "value": "Lvl 200 Luminiera Credo Omega"},
     {"name": "Celeste Ater Omega",       "value": "Lvl 200 Celeste Ater Omega"},
     
