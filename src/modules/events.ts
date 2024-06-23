@@ -6,11 +6,12 @@ import { capFirstLetter} from './string'
 import { wrapText } from './image'
 import axios from 'axios'
 import md5 from 'md5'
-import { GuildScheduledEventCreateOptions } from 'discord.js'
+import { GuildScheduledEvent, GuildScheduledEventCreateOptions } from 'discord.js'
 import { decode } from 'html-entities'
 
 export interface event {
     title: string
+    id: string
     type: string
     start: Date | null
     end: Date | null
@@ -22,6 +23,7 @@ export interface event {
 }
 export interface rawEvent {
     name: string
+    _ID: number
     'utc start': number
     'utc end': number
     element: string | null
@@ -34,7 +36,8 @@ export let eventsTemplate: Canvas | undefined
 
 const eventParams = {
     tables: 'event_history',
-    fields: 'event_history.name, event_history.utc_start, event_history.utc_end, event_history.element, event_history.image, event_history.time_known',
+    fields: 'event_history.name, event_history.utc_start, event_history.utc_end, event_history.element,' +
+            'event_history.image, event_history.time_known, event_history._ID',
     'order by': 'event_history.utc_start DESC',
     limit: 20,
     format: 'json'
@@ -108,6 +111,7 @@ export async function processEvents(events: rawEvent[]): Promise<event[]>{
 
         return {
             title: event.name,
+            id: String(event._ID),
             type: event['utc start'] < currentEnd ? 'Current' : 'Upcoming',
             start: start,
             end: end,
@@ -189,9 +193,13 @@ export function getEventDuration(event: event){
  */
 export async function createScheduledEvents(){
     const subscribedServers = servers.filter(server => server.get('events') === 'TRUE')
-    const events: GuildScheduledEventCreateOptions[] = upcomingEvents.map(event => {
-        if (!event.start || !event.end || event.start < new Date() || event.duration.startsWith('In')) return {} as GuildScheduledEventCreateOptions
+    const events = currentEvents.concat(upcomingEvents)
+    const threeMinsLater = new Date(new Date().valueOf() + 3 * 60000)
+
+    const scheduledEvents: GuildScheduledEventCreateOptions[] = events.map(event => {
+        if (!event.start || !event.end || event.duration.startsWith('In')) return {} as GuildScheduledEventCreateOptions
         
+        // Resize the image to better fit Discord's event image frame
         let canvas
         if (event.image){
             canvas = createCanvas(event.image.width, event.image.width * 320 / 800) // 800x320 is the recommended dimensions by Discord
@@ -201,12 +209,12 @@ export async function createScheduledEvents(){
 
         return {
             name: event.title,
-            description: event.elementAdvantage ?? undefined,
+            description: [event.elementAdvantage, `Event #${event.id}`].filter(e => e).join('\n\n'),
             image: canvas?.toBuffer(),
-            scheduledStartTime: event.start,
+            scheduledStartTime: event.start < new Date() ? threeMinsLater : event.start, // If the in-game event already started, set the discord event to start in 3 minutes
             scheduledEndTime: event.end,
-            privacyLevel: 2,                    // Only Guild Members can see the event (this is currently only valid value)
-            entityType: 3,                      // 3 = External event
+            privacyLevel: 2, // Only Guild Members can see the event (this is currently the only valid value)
+            entityType: 3, // 3 = External event
             entityMetadata: {location: 'Granblue Fantasy'}
         }
     }).filter(event => event.name)
@@ -214,12 +222,25 @@ export async function createScheduledEvents(){
     subscribedServers.forEach(server => {
         const eventsManager = client.guilds.cache.get(server.get('guildID'))?.scheduledEvents
         if (!eventsManager) return
-        const newEvents = events.filter(({name: name1, scheduledStartTime}) => {
-            !eventsManager.cache.some(({name: name2, scheduledStartTimestamp}) => {
-                name1 === name2 && scheduledStartTimestamp === new Date(scheduledStartTime).getTime()
-            })
-        })
 
-        newEvents.forEach(event => eventsManager.create(event))
+        scheduledEvents.forEach(event => {
+            const eventID = String(event.description!.match(/\d+/))
+            const existingEvent = eventsManager.cache.find(({description}) => description!.includes(eventID))
+            function getEventString(event: GuildScheduledEventCreateOptions | GuildScheduledEvent) {
+                return event.name + event.description + event.image
+            }
+
+            if (existingEvent) {
+                if (getEventString(existingEvent) === getEventString(event)) return
+                
+                existingEvent.edit({
+                    name: event.name,
+                    description: event.description,
+                    image: event.image,
+                })
+            } else {
+                eventsManager.create(event)
+            }
+        })
     })
 }
