@@ -1,8 +1,6 @@
 import axios from "axios"
-import { App } from "octokit"
 import { dateStringToUnix } from "./time"
 import { accessCookie, languageCookie } from "../data/variables"
-import { decode } from "urlencode"
 import { homeServerShardID, currentShardID } from "../bot"
 
 export interface rawItem {
@@ -166,10 +164,13 @@ export async function getBannerData(){
 	const bannerMonth = bannerStart.toLocaleString('default', {month: 'long', timeZone: 'JST'})
 	const bannerYear = bannerStart.toLocaleString('default', {year: 'numeric', timeZone: 'JST'})
 	
-	const app = new App({
-		appId: process.env.GITHUB_APP_ID!,
-		privateKey: process.env.GITHUB_PRIVATE_KEY!,
+	const app = await import('octokit').then(({App}) => {
+		return new App({
+			appId: process.env.GITHUB_APP_ID!,
+			privateKey: process.env.GITHUB_PRIVATE_KEY!,
+		})
 	})
+
 	const octokit = await app.getInstallationOctokit(parseInt(process.env.GITHUB_INSTALLATION_ID!))
 
 	const bannerDataPath = `/repos/Cryotalis/GBF-Banner-Data/contents/${bannerYear}/${bannerMonth}/${banner.id}.json`
