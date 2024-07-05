@@ -225,7 +225,9 @@ export async function createScheduledEvents(){
 
         scheduledEvents.forEach(event => {
             const eventID = String(event.description!.match(/(?<=Event #)\d+/))
-            const existingEvent = eventsManager.cache.find(({description}) => description!.includes(eventID))
+            const existingEvent = eventsManager.cache.find(({name, description}) => {
+                return name === event.name || description!.includes(eventID)
+            })
             function getEventString(event: GuildScheduledEventCreateOptions | GuildScheduledEvent) {
                 return event.name + event.description + event.image
             }
