@@ -192,7 +192,7 @@ export function getEventDuration(event: event){
  * Creates scheduled events according to the in-game events for each subscribed server
  */
 export async function createScheduledEvents(){
-    const subscribedServers = servers.filter(server => server.get('events') === 'TRUE')
+    const subscribedServers = servers.filter(server => server.get('events') && !/None/.test(server.get('events')))
     const events = currentEvents.concat(upcomingEvents)
     const threeMinsLater = new Date(new Date().valueOf() + 3 * 60000)
 
