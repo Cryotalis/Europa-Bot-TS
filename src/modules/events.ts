@@ -6,7 +6,7 @@ import { capFirstLetter} from './string'
 import { wrapText } from './image'
 import axios from 'axios'
 import md5 from 'md5'
-import { GuildScheduledEvent, GuildScheduledEventCreateOptions } from 'discord.js'
+import { GuildScheduledEventCreateOptions } from 'discord.js'
 import { decode } from 'html-entities'
 
 export interface event {
@@ -16,6 +16,7 @@ export interface event {
     start: Date | null
     end: Date | null
     duration: string
+    wikiURL: string | null
     image: Image | null
     imageURL: string | null
     elementAdvantage: string | null
@@ -24,11 +25,12 @@ export interface event {
 export interface rawEvent {
     name: string
     _ID: number
+    'time known': string
     'utc start': number
     'utc end': number
+    'wiki page': string | null
+    image: string | null
     element: string | null
-    image: string
-    'time known': string
 }
 export let currentEvents: event[] = []
 export let upcomingEvents: event[] = []
@@ -36,8 +38,8 @@ export let eventsTemplate: Canvas | undefined
 
 const eventParams = {
     tables: 'event_history',
-    fields: 'event_history.name, event_history.utc_start, event_history.utc_end, event_history.element,' +
-            'event_history.image, event_history.time_known, event_history._ID',
+    fields: 'event_history.name, event_history._ID, event_history.time_known, event_history.utc_start,' + 
+            'event_history.utc_end, event_history.wiki_page, event_history.image, event_history.element',
     'order by': 'event_history.utc_start DESC',
     limit: 20,
     format: 'json'
@@ -116,6 +118,7 @@ export async function processEvents(events: rawEvent[]): Promise<event[]>{
             start: start,
             end: end,
             duration: event['time known'] === 'yes' ? `${getSimpleDate(start)} - ${getSimpleDate(end)}` : `In ${month}`,
+            wikiURL: event['wiki page'],
             image: imgURL ? await loadImage(imgURL) : null,
             imageURL: imgURL,
             elementAdvantage: getElementAdvantage(event.element).advantage,
