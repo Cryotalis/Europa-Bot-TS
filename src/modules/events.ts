@@ -212,13 +212,20 @@ export async function createScheduledEvents(){
 
         return {
             name: event.title,
-            description: [event.elementAdvantage, `Event #${event.id}`].filter(e => e).join('\n\n'),
+            description: `\`Starts:\` <t:${event.start.getTime() / 1000}:f>` +
+                         `\n\` Ends: \` <t:${event.end.getTime() / 1000}:f>` + 
+                         '\n\n' +
+                         [
+                             `Event #${event.id}`,
+                             event.wikiURL && `[Event Page](${event.wikiURL})`,
+                             event.imageURL && `[Banner Image Link](${event.imageURL})`
+                         ].filter(e => e).join(' | '),
             image: canvas?.toBuffer(),
             scheduledStartTime: event.start < new Date() ? threeMinsLater : event.start, // If the in-game event already started, set the discord event to start in 3 minutes
             scheduledEndTime: event.end,
             privacyLevel: 2, // Only Guild Members can see the event (this is currently the only valid value)
             entityType: 3, // 3 = External event
-            entityMetadata: {location: 'Granblue Fantasy'}
+            entityMetadata: {location: event.elementAdvantage ?? 'No Element Advantage'}
         }
     }).filter(event => event.name)
  
