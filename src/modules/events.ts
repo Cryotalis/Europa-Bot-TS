@@ -238,12 +238,9 @@ export async function createScheduledEvents(){
             const existingEvent = eventsManager.cache.find(({name, description}) => {
                 return name === event.name || description!.includes(eventID)
             })
-            function getEventString(event: GuildScheduledEventCreateOptions | GuildScheduledEvent) {
-                return event.name + event.description + event.image
-            }
 
             if (existingEvent) {
-                if (getEventString(existingEvent) === getEventString(event)) return
+                if (existingEvent.name === event.name && existingEvent.description === event.description) return
                 
                 existingEvent.edit({
                     name: event.name,
