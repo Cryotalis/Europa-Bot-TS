@@ -246,6 +246,7 @@ export async function createScheduledEvents(){
                     name: event.name,
                     description: event.description,
                     image: event.image,
+                    entityMetadata: event.entityMetadata
                 })
             } else {
                 eventsManager.create(event)
