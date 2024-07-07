@@ -118,7 +118,7 @@ export async function processEvents(events: rawEvent[]): Promise<event[]>{
             start: start,
             end: end,
             duration: event['time known'] === 'yes' ? `${getSimpleDate(start)} - ${getSimpleDate(end)}` : `In ${month}`,
-            wikiURL: event['wiki page'],
+            wikiURL: event['wiki page'] && `https://gbf.wiki/${event['wiki page'].replace(/ /g, '_')}`,
             image: imgURL ? await loadImage(imgURL) : null,
             imageURL: imgURL,
             elementAdvantage: getElementAdvantage(event.element).advantage,
