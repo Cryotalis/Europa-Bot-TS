@@ -59,7 +59,7 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
     const canvas = createCanvas(810, 520)
     const ctx = canvas.getContext('2d')
 
-    const playerProfile = await loadImage(screenshot)
+    const playerProfile = await loadImage(Buffer.from(screenshot))
     ctx.drawImage(playerProfile, 0, 0)
     ctx.drawImage(playerTemplate, 350, 0)
     

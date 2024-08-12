@@ -31,7 +31,7 @@ export async function loadCrew(interaction: ChatInputCommandInteraction, crew: c
     const screenshot = await page.screenshot({ encoding: 'binary', clip: { x: 0, y: 0, width: 363, height: 400 } }) //Take the screenshot
     await page.close()
 
-    const attachment = new AttachmentBuilder(screenshot, {name: `Crew_${crew.id}.png`})
+    const attachment = new AttachmentBuilder(Buffer.from(screenshot), {name: `Crew_${crew.id}.png`})
 
     crewEmbed
         .setTitle(`${crew.data[0].name}`)
