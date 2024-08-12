@@ -23,28 +23,28 @@
   "dependencies": {
     "@canvas-fonts/arial": "^1.0.4",
     "@canvas-fonts/arial-bold": "^1.0.4",
-    "@google-cloud/translate": "^8.3.0",
-    "axios": "^1.7.2",
+    "@google-cloud/translate": "^8.4.0",
+    "axios": "^1.7.3",
     "canvas": "^2.11.2",
     "discord.js": "^14.15.3",
     "dotenv": "^16.4.5",
-    "google-auth-library": "^9.11.0",
+    "google-auth-library": "^9.13.0",
     "google-spreadsheet": "^4.1.2",
     "html-entities": "^2.5.2",
     "md5": "^2.3.0",
     "node-cron": "^3.0.3",
     "octokit": "^4.0.2",
-    "puppeteer": "^22.12.1",
+    "puppeteer": "^23.0.2",
     "string-similarity": "^4.0.4",
     "urlencode": "^2.0.0",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@types/md5": "^2.3.5",
-    "@types/node": "^20.14.9",
+    "@types/node": "^22.2.0",
     "@types/node-cron": "^3.0.11",
     "@types/string-similarity": "^4.0.2",
     "@types/urlencode": "^1.1.4",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.4"
   }
 }
