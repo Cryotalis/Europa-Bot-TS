@@ -246,6 +246,8 @@ export async function createScheduledEvents(){
                     name: event.name,
                     description: event.description,
                     image: event.image,
+                    scheduledStartTime: event.scheduledStartTime,
+                    scheduledEndTime: event.scheduledEndTime,
                     entityMetadata: event.entityMetadata
                 })
             } else {
