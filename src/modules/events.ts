@@ -6,7 +6,7 @@ import { capFirstLetter} from './string'
 import { wrapText } from './image'
 import axios from 'axios'
 import md5 from 'md5'
-import { GuildScheduledEventCreateOptions } from 'discord.js'
+import { GuildScheduledEventCreateOptions, GuildScheduledEventStatus } from 'discord.js'
 import { decode } from 'html-entities'
 
 export interface event {
@@ -239,24 +239,31 @@ export async function createScheduledEvents(){
                 return name === event.name || description!.includes(eventID)
             })
 
-            if (existingEvent) {
-                if (
-                    existingEvent.name !== event.name || existingEvent.description !== event.description ||
+            if (!existingEvent) return eventsManager.create(event)
+
+            if (
+                existingEvent.name !== event.name ||
+                existingEvent.description !== event.description ||
+                existingEvent.entityMetadata !== event.entityMetadata
+            ) {
+                existingEvent.edit({
+                    name: event.name,
+                    description: event.description,
+                    image: event.image,
+                    entityMetadata: event.entityMetadata
+                })
+            }
+
+            if (
+                existingEvent.status === GuildScheduledEventStatus.Scheduled && (
                     existingEvent.scheduledStartTimestamp !== new Date(event.scheduledStartTime).getTime() ||
-                    existingEvent.scheduledEndTimestamp !== new Date(event.scheduledEndTime!).getTime() ||
-                    existingEvent.entityMetadata !== event.entityMetadata
-                ) {
-                    existingEvent.edit({
-                        name: event.name,
-                        description: event.description,
-                        image: event.image,
-                        scheduledStartTime: event.scheduledStartTime,
-                        scheduledEndTime: event.scheduledEndTime,
-                        entityMetadata: event.entityMetadata
-                    })
-                }
-            } else {
-                eventsManager.create(event)
+                    existingEvent.scheduledEndTimestamp !== new Date(event.scheduledEndTime!).getTime()
+                )
+            ){
+                existingEvent.edit({
+                    scheduledStartTime: event.scheduledStartTime,
+                    scheduledEndTime: event.scheduledEndTime,
+                })
             }
         })
     })
