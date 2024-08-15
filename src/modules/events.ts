@@ -240,16 +240,21 @@ export async function createScheduledEvents(){
             })
 
             if (existingEvent) {
-                if (existingEvent.name === event.name && existingEvent.description === event.description) return
-                
-                existingEvent.edit({
-                    name: event.name,
-                    description: event.description,
-                    image: event.image,
-                    scheduledStartTime: event.scheduledStartTime,
-                    scheduledEndTime: event.scheduledEndTime,
-                    entityMetadata: event.entityMetadata
-                })
+                if (
+                    existingEvent.name !== event.name || existingEvent.description !== event.description ||
+                    existingEvent.scheduledStartTimestamp !== new Date(event.scheduledStartTime).getTime() ||
+                    existingEvent.scheduledEndTimestamp !== new Date(event.scheduledEndTime!).getTime() ||
+                    existingEvent.entityMetadata !== event.entityMetadata
+                ) {
+                    existingEvent.edit({
+                        name: event.name,
+                        description: event.description,
+                        image: event.image,
+                        scheduledStartTime: event.scheduledStartTime,
+                        scheduledEndTime: event.scheduledEndTime,
+                        entityMetadata: event.entityMetadata
+                    })
+                }
             } else {
                 eventsManager.create(event)
             }
