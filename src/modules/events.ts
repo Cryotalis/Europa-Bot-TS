@@ -49,7 +49,7 @@ const eventParams = {
  * Loads event information and event template. The template includes upcoming events and leaves a blank space for current events.
  */
 export async function loadEvents(){
-    const {data: rawEvents} = await axios.get('https://gbf.wiki/index.php?title=Special:CargoExport', {headers: {'User-Agent': 'Europa Bot'}, params: eventParams}).catch(() => ({data: null}))
+    const {data: rawEvents} = await axios.get('https://gbf.wiki/index.php?title=Special:CargoExport', {headers: {'User-Agent': 'Europa Bot'}, params: eventParams})
     if (!rawEvents) return
 
     const events = (await processEvents(rawEvents)).reverse()
@@ -233,7 +233,12 @@ export async function createScheduledEvents(){
         const eventsManager = client.guilds.cache.get(server.get('guildID'))?.scheduledEvents
         if (!eventsManager) return
 
-        scheduledEvents.forEach(event => {
+        const relayEvents: string[] = JSON.parse(server.get('events'))
+        const filteredEvents = relayEvents.includes('All')
+            ? scheduledEvents
+            : scheduledEvents.filter(({name}) => relayEvents.some(eventPhrase => name.includes(eventPhrase)))
+
+        filteredEvents.forEach(event => {
             const eventID = String(event.description!.match(/(?<=Event #)\d+/))
             const existingEvent = eventsManager.cache.find(({name, description}) => {
                 return name === event.name || description!.includes(eventID)
