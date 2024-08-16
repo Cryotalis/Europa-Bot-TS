@@ -21,8 +21,6 @@
   },
   "homepage": "https://github.com/Cryotalis/Europa-Bot-TS#readme",
   "dependencies": {
-    "@canvas-fonts/arial": "^1.0.4",
-    "@canvas-fonts/arial-bold": "^1.0.4",
     "@google-cloud/translate": "^8.4.0",
     "axios": "^1.7.3",
     "canvas": "^2.11.2",
