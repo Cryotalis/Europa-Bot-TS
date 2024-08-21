@@ -1,8 +1,8 @@
 import { EmbedBuilder } from "discord.js"
-import { data } from "../bot"
-import { findBestCIMatch } from "./string"
-import { weaponEmotes, rarityEmotes } from "../data/variables"
-import { item, bannerData } from "./banner"
+import { data } from "../bot.js"
+import { findBestCIMatch } from "./string.js"
+import { weaponEmotes, rarityEmotes } from "../data/variables.js"
+import { item, bannerData } from "./banner.js"
 
 export function gacha(crystals: number, singles: number, tenparts: number, target?: item){
     if (target) tenparts = Infinity

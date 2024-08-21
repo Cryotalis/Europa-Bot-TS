@@ -1,9 +1,9 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
-import { data, users } from '../bot'
-import { createGachaEmbed, findTarget, gacha } from '../modules/roll'
-import { item } from '../modules/banner'
+import { data, users } from '../bot.js'
+import { createGachaEmbed, findTarget, gacha } from '../modules/roll.js'
+import { item } from '../modules/banner.js'
 
-module.exports = {
+export const command = {
 	data: new SlashCommandBuilder()
 		.setName('roll')
 		.setDescription('Draw from the current banner')

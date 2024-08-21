@@ -5,13 +5,13 @@ import { inspect } from 'util'
 import { readdirSync } from 'node:fs'
 import { Browser, launch } from 'puppeteer'
 import { JWT } from 'google-auth-library'
-import { loadAssets } from './data/assets'
-import { createScheduledEvents, loadEvents } from './modules/events'
-import { getBannerData } from './modules/banner'
+import { loadAssets } from './data/assets.js'
+import { createScheduledEvents, loadEvents } from './modules/events.js'
+import { getBannerData } from './modules/banner.js'
 import { registerFont } from 'canvas'
-import { handleNewGuild, handleNewMember, handleRemovedMember } from './events/guild'
-import { handleDeletedRole } from './events/role'
-import { handleAutocomplete, handleCommand } from './events/interaction'
+import { handleNewGuild, handleNewMember, handleRemovedMember } from './events/guild.js'
+import { handleDeletedRole } from './events/role.js'
+import { handleAutocomplete, handleCommand } from './events/interaction.js'
 
 export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration], rest: {timeout: 60000}})
 export const botID = '585514230967566338'
@@ -40,11 +40,15 @@ export async function registerCommands() {
 	client.commands = new Collection()
 
 	for (const file of commandFiles) {
-		const command = regCommands.includes(file) ? require(`./commands/${file}`) : require(`./modCommands/${file}`)
-		if (privateCommandFiles.includes(file)) privateCommands.push(command.data.toJSON())
-		else {
+		const { command } = regCommands.includes(file) 
+			? await import(`./commands/${file}`) 
+			: await import(`./modCommands/${file}`)
+
+		if (privateCommandFiles.includes(file)) 
+			privateCommands.push(command.data.toJSON())
+		else 
 			commands.push(command.data.toJSON())
-		}
+
 		client.commands.set(command.data.name, command)
 	}
 
@@ -150,9 +154,9 @@ client.on('ready', () => {
 	client.user?.setActivity('Granblue Fantasy')
 	startUp()
 	
-	if (currentShardID !== homeServerShardID) return
-	
-	(client.channels.cache.get(logChannelID) as TextChannel).send(`:white_check_mark:  **Europa is now online**`)
+	if (currentShardID === homeServerShardID) {
+		(client.channels.cache.get(logChannelID) as TextChannel).send(`:white_check_mark:  **Europa is now online**`)
+	}
 })
 
 client.on('interactionCreate', interaction => {

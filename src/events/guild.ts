@@ -1,6 +1,6 @@
 import { Client, TextChannel, GuildMember, Guild, PartialGuildMember } from "discord.js"
-import { client, servers, privateDB, homeServerShardID, logChannelID } from "../bot"
-import { greetingConfig, makeGreetingImage } from "../modules/greeting"
+import { client, servers, privateDB, homeServerShardID, logChannelID } from "../bot.js"
+import { greetingConfig, makeGreetingImage } from "../modules/greeting.js"
 
 /**
  * Adds new servers to the database and logs the server in the log channel

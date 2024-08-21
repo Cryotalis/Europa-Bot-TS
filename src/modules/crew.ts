@@ -1,7 +1,7 @@
 import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder } from "discord.js"
-import { browser, startPuppeteer } from "../bot"
-import { formatList } from "./string"
-import { languageCookie, accessCookie } from "../data/variables"
+import { browser, startPuppeteer } from "../bot.js"
+import { formatList } from "./string.js"
+import { languageCookie, accessCookie } from "../data/variables.js"
 
 export interface crew {data: {is_seed: number | string, points: number | string, gw_num: number | string, rank: number | string, name: string}[], id: number}
 export async function loadCrew(interaction: ChatInputCommandInteraction, crew: crew){

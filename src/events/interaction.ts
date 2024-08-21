@@ -1,8 +1,8 @@
 import { AutocompleteInteraction, CacheType, ChatInputCommandInteraction, Client, MessageContextMenuCommandInteraction, TextChannel, UserContextMenuCommandInteraction } from "discord.js"
-import { findBestCIMatch } from "../modules/string"
-import { raids } from "../data/raids"
 import { inspect } from "util"
-import { client, errorChannelID, homeServerShardID, logChannelID, modCommands } from "../bot"
+import { raids } from "../data/raids.js"
+import { findBestCIMatch } from "../modules/string.js"
+import { client, errorChannelID, homeServerShardID, logChannelID, modCommands } from "../bot.js"
 
 /**
  * Handles Autocomplete interactions

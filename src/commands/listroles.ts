@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { servers, categoryRole } from '../bot'
+import { servers, categoryRole } from '../bot.js'
 
-module.exports = {
+export const command = {
 	data: new SlashCommandBuilder()
 		.setName('listroles')
 		.setDescription('Show the list of available roles for this server')

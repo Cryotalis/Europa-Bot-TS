@@ -2,6 +2,7 @@
   "name": "europa-bot-ts",
   "version": "1.0.0",
   "description": "General Purpose Granblue Fantasy Discord Bot, written in TypeScript using Discord.js",
+  "type": "module",
   "main": "./prod/index.js",
   "scripts": {
     "build": "tsc",

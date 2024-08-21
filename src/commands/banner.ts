@@ -1,9 +1,9 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { dateStringToUnix } from '../modules/time'
-import { weaponEmotes, rarityEmotes } from '../data/variables'
-import { bannerData } from '../modules/banner'
+import { dateStringToUnix } from '../modules/time.js'
+import { weaponEmotes, rarityEmotes } from '../data/variables.js'
+import { bannerData } from '../modules/banner.js'
 
-module.exports = {
+export const command = {
 	data: new SlashCommandBuilder()
 		.setName('banner')
 		.setDescription('Show the featured characters and rate ups on the current banner')

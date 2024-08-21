@@ -1,5 +1,5 @@
 import { Role } from "discord.js"
-import { categoryRole, servers } from "../bot"
+import { categoryRole, servers } from "../bot.js"
 
 /**
  * Delete roles from the server role list if they are deleted through Discord

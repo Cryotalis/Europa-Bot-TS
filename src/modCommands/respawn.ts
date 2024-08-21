@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
-import { client } from '../bot'
+import { client } from '../bot.js'
 
-module.exports = {
+export const command = {
 	data: new SlashCommandBuilder()
 		.setName('respawn')
 		.setDescription('Force a Europa shard to respawn (Developer Only)')

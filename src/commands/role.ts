@@ -1,8 +1,8 @@
 import { ChatInputCommandInteraction, EmbedBuilder, GuildMember, Role, SlashCommandBuilder } from 'discord.js'
-import { categoryRole, servers } from '../bot'
-import { findBestCIMatch } from '../modules/string'
+import { categoryRole, servers } from '../bot.js'
+import { findBestCIMatch } from '../modules/string.js'
 
-module.exports = {
+export const command = {
 	data: new SlashCommandBuilder()
 		.setName('role')
 		.setDescription('Manage your roles')

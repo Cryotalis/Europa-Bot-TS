@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 
-module.exports = {
+export const command = {
 	data: new SlashCommandBuilder()
 		.setName('ping')
 		.setDescription("Show Europa's response time")

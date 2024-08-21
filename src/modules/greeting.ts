@@ -1,7 +1,7 @@
 import { AttachmentBuilder, User } from 'discord.js'
 import { createCanvas, loadImage } from 'canvas'
-import { skydomWallpaper } from '../data/assets';
-import { fontFallBacks } from '../bot';
+import { skydomWallpaper } from '../data/assets.js'
+import { fontFallBacks } from '../bot.js'
 
 export type toggleableGreetingSetting = 'sendJoinMessage' | 'sendLeaveMessage' | 'sendBanMessage' | 'showJoinImage' | 'useAutoRole';
 

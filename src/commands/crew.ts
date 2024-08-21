@@ -1,10 +1,10 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import { compareTwoStrings } from 'string-similarity'
-import { showMenu } from '../modules/menu'
-import { crew, loadCrew } from '../modules/crew'
 import axios from 'axios'
+import { showMenu } from '../modules/menu.js'
+import { crew, loadCrew } from '../modules/crew.js'
 
-module.exports = {
+export const command = {
 	data: new SlashCommandBuilder()
 		.setName('crew')
 		.setDescription('Search for a crew and display the crew page')

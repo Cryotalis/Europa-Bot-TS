@@ -1,8 +1,8 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
-import { findLastWord } from '../modules/string'
-import { dateToString, findTimeZone, dateStringToUnix } from '../modules/time'
+import { findLastWord } from '../modules/string.js'
+import { dateToString, findTimeZone, dateStringToUnix } from '../modules/time.js'
 
-module.exports = {
+export const command = {
 	data: new SlashCommandBuilder()
 		.setName('time')
 		.setDescription('Show the current time in Japan')

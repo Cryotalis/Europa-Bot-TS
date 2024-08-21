@@ -1,12 +1,12 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { data, jsessionID } from '../bot'
 import { compareTwoStrings } from 'string-similarity'
-import { showMenu } from '../modules/menu'
-import axios from 'axios'
 import urlencode from 'urlencode'
-import { loadProfile } from '../modules/player'
+import axios from 'axios'
+import { data, jsessionID } from '../bot.js'
+import { showMenu } from '../modules/menu.js'
+import { loadProfile } from '../modules/player.js'
 
-module.exports = {
+export const command = {
 	data: new SlashCommandBuilder()
 		.setName('player')
 		.setDescription('Search for a player and display their player profile page')

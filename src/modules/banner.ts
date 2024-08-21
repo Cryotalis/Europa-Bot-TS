@@ -1,7 +1,8 @@
 import axios from "axios"
-import { dateStringToUnix } from "./time"
-import { accessCookie, languageCookie } from "../data/variables"
-import { homeServerShardID, currentShardID } from "../bot"
+import { dateStringToUnix } from "./time.js"
+import { accessCookie, languageCookie } from "../data/variables.js"
+import { homeServerShardID, currentShardID } from "../bot.js"
+import { App } from "octokit"
 
 export interface rawItem {
 	name: string,
@@ -164,12 +165,10 @@ export async function getBannerData(){
 	const bannerMonth = bannerStart.toLocaleString('default', {month: 'long', timeZone: 'JST'})
 	const bannerYear = bannerStart.toLocaleString('default', {year: 'numeric', timeZone: 'JST'})
 	
-	const app = await import('octokit').then(({App}) => {
-		return new App({
+	const app = new App({
 			appId: process.env.GITHUB_APP_ID!,
 			privateKey: process.env.GITHUB_PRIVATE_KEY!,
 		})
-	})
 
 	const octokit = await app.getInstallationOctokit(parseInt(process.env.GITHUB_INSTALLATION_ID!))
 

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { CanvasRenderingContext2D, loadImage } from 'canvas'
+import { CanvasGradient, CanvasPattern, CanvasRenderingContext2D, CanvasTextAlign, loadImage } from 'canvas'
 import { Attachment } from 'discord.js'
 
 /**

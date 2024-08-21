@@ -1,6 +1,6 @@
 import { Image, loadImage } from 'canvas'
-import { currentShardID } from '../bot'
 import { readdirSync } from 'fs'
+import { currentShardID } from '../bot.js'
 
 export let playerTemplate: Image
 export let summonsTemplate: Image

@@ -1,5 +1,5 @@
-import { getOrdinal } from './number'
-import { timeZoneOffsets } from '../data/variables'
+import { getOrdinal } from './number.js'
+import { timeZoneOffsets } from '../data/variables.js'
 
 const TZdefault = timeZoneOffsets.find(TZ => TZ.name === 'JST')! // The default timezone to use for time functions
 const fullDates: {[key: string]: string} = {

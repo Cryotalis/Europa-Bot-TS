@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
-import { connectToDB, registerCommands } from '../bot'
+import { connectToDB, registerCommands } from '../bot.js'
 
-module.exports = {
+export const command = {
 	data: new SlashCommandBuilder()
 		.setName('connect')
 		.setDescription("Refresh Europa's connection to the database (Developer Only)")

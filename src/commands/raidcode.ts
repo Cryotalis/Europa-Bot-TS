@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { categoryRole, servers } from '../bot'
+import { categoryRole, servers } from '../bot.js'
 
-module.exports = {
+export const command = {
 	data: new SlashCommandBuilder()
 		.setName('raidcode')
 		.setDescription('Share a raid code (use with bookmarklet for best results)')

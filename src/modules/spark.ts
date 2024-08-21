@@ -1,10 +1,10 @@
 import { createCanvas, loadImage, Image } from "canvas"
 import { AttachmentBuilder, EmbedBuilder, GuildMember, InteractionReplyOptions, User } from "discord.js"
 import { GoogleSpreadsheetRow } from "google-spreadsheet"
-import { fontFallBacks, userData } from "../bot"
-import { sparkBGMask, clearSparkBG, defaultSparkBG, progressBars, developerTitle, VIPTitle, clearMBSparkBG, defaultMBSparkBG } from "../data/assets"
-import { formatList } from "./string"
-import { round } from "./number"
+import { fontFallBacks, userData } from "../bot.js"
+import { sparkBGMask, clearSparkBG, defaultSparkBG, progressBars, developerTitle, VIPTitle, clearMBSparkBG, defaultMBSparkBG } from "../data/assets.js"
+import { formatList } from "./string.js"
+import { round } from "./number.js"
 
 export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUser: User): Promise<InteractionReplyOptions>{
     const canvas = createCanvas(500, 300)

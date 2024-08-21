@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { formatList } from '../modules/string'
+import { formatList } from '../modules/string.js'
 
-module.exports = {
+export const command = {
 	data: new SlashCommandBuilder()
 		.setName('choose')
 		.setDescription('Ask Europa to choose between 2 or more things')

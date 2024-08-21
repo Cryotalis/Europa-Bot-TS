@@ -1,9 +1,9 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { Translate } from '@google-cloud/translate/build/src/v2'
-import { findBestCIMatch, truncateText } from '../modules/string'
-import { languageCodes } from '../data/variables'
+import { Translate } from '@google-cloud/translate/build/src/v2/index.js'
+import { findBestCIMatch, truncateText } from '../modules/string.js'
+import { languageCodes } from '../data/variables.js'
 
-module.exports = {
+export const command = {
 	data: new SlashCommandBuilder()
 		.setName('translate')
 		.setDescription('Translates text to another language. (Translates to your set language by default)')

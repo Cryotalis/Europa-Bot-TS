@@ -1,10 +1,10 @@
 import { ChatInputCommandInteraction, EmbedBuilder, GuildBasedChannel, GuildMember, Role, SlashCommandBuilder } from 'discord.js'
-import { servers } from '../bot'
-import { getImageLink } from '../modules/image'
-import { findBestCIMatch, titleize } from '../modules/string'
-import { greetingConfig, makeGreetingImage, toggleableGreetingSetting } from '../modules/greeting'
+import { servers } from '../bot.js'
+import { getImageLink } from '../modules/image.js'
+import { findBestCIMatch, titleize } from '../modules/string.js'
+import { greetingConfig, makeGreetingImage, toggleableGreetingSetting } from '../modules/greeting.js'
 
-module.exports = {
+export const command = {
 	data: new SlashCommandBuilder()
 		.setName('greeting')
 		.setDescription('Manage settings for the greeting system')

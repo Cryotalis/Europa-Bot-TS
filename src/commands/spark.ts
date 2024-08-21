@@ -1,10 +1,10 @@
 import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js'
-import { privateDB, userData, users } from '../bot'
-import { getImageLink } from '../modules/image'
-import { calcDraws, getEmbedProfile, getProfile, manageSpark } from '../modules/spark'
-import { round } from '../modules/number'
+import { privateDB, userData, users } from '../bot.js'
+import { getImageLink } from '../modules/image.js'
+import { calcDraws, getEmbedProfile, getProfile, manageSpark } from '../modules/spark.js'
+import { round } from '../modules/number.js'
 
-module.exports = {
+export const command = {
 	data: new SlashCommandBuilder()
 		.setName('spark')
 		.setDescription('Manage or view your spark profile')

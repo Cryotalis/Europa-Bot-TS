@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { capFirstLetter } from '../modules/string'
+import { capFirstLetter } from '../modules/string.js'
 
-module.exports = {
+export const command = {
 	data: new SlashCommandBuilder()
 		.setName('ask')
 		.setDescription('Ask Europa a yes or no question')
