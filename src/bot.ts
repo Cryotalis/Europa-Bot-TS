@@ -125,20 +125,26 @@ export async function startPuppeteer(){
 
 async function updateCounter() {
 	if (currentShardID !== homeServerShardID) return
+
 	const serverCounts = await client.shard?.fetchClientValues('guilds.cache.size')
 	const serverCount = serverCounts?.reduce((a: any, b: any) => a + b, 0)
-	const homeServer = client.guilds.cache.get(homeServerID) as Guild
-	;(homeServer.channels.cache.get('657766651441315840') as TextChannel).edit({name: `Server Count: ${serverCount}`})
-	;(homeServer.channels.cache.get('666696864716029953') as TextChannel).edit({name: `Member Count: ${homeServer.memberCount}`})
+	const homeServer = client.guilds.cache.get(homeServerID)
+	const serverCountChannel = homeServer?.channels.cache.get('657766651441315840')
+
+	serverCountChannel?.edit({name: `Server Count: ${serverCount}`})
 }
 
-async function startUp(){
+client.on('ready', async () => {
+	console.log(`Shard #${currentShardID} is now online`)
+	client.user?.setActivity('Granblue Fantasy')
+
+	// Run startup functions
 	startPuppeteer()
 	getBannerData()
 	await connectToDB()
 	registerCommands()
 	await loadAssets()
-	loadEvents()
+	setTimeout(() => loadEvents(), 2 * 60000) // For some reason, the gbf.wiki events CargoExport forbids access if I don't wait for 2 minutes or so...
 
 	schedule('0 * * * *', async () => {
 		getBannerData()
@@ -147,12 +153,6 @@ async function startUp(){
 		await loadEvents()
 		createScheduledEvents()
 	})
-}
-
-client.on('ready', () => {
-	console.log(`Shard #${currentShardID} is now online`)
-	client.user?.setActivity('Granblue Fantasy')
-	startUp()
 	
 	if (currentShardID === homeServerShardID) {
 		(client.channels.cache.get(logChannelID) as TextChannel).send(`:white_check_mark:  **Europa is now online**`)
