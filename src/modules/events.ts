@@ -36,21 +36,25 @@ export let currentEvents: event[] = []
 export let upcomingEvents: event[] = []
 export let eventsTemplate: Canvas | undefined
 
-const eventParams = {
-    tables: 'event_history',
-    fields: 'event_history.name, event_history._ID, event_history.time_known, event_history.utc_start,' + 
-            'event_history.utc_end, event_history.wiki_page, event_history.image, event_history.element',
-    'order by': 'event_history.utc_start DESC',
-    limit: 20,
-    format: 'json'
-}
-
 /**
  * Loads event information and event template. The template includes upcoming events and leaves a blank space for current events.
  */
 export async function loadEvents(){
-    const {data: rawEvents} = await axios.get('https://gbf.wiki/index.php?title=Special:CargoExport', {headers: {'User-Agent': 'Europa Bot'}, params: eventParams})
-    if (!rawEvents) return
+    const {data: rawEvents} = await axios.get(
+        'https://gbf.wiki/index.php?title=Special:CargoExport',
+        {
+            headers: {'User-Agent': 'Europa Bot'},
+            params: {
+                tables: 'event_history',
+                fields: 'event_history.name, event_history._ID, event_history.time_known, event_history.utc_start,' + 
+                        'event_history.utc_end, event_history.wiki_page, event_history.image, event_history.element',
+                'order by': 'event_history.utc_start DESC',
+                limit: 20,
+                format: 'json'
+            }
+        }
+    ).catch(() => ({data: null}))
+    if (!rawEvents) return setTimeout(() => loadEvents(), 60000)
 
     const events = (await processEvents(rawEvents)).reverse()
     currentEvents = events.filter(event => event.type === 'Current')

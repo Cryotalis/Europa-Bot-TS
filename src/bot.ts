@@ -144,7 +144,7 @@ client.on('ready', async () => {
 	await connectToDB()
 	registerCommands()
 	await loadAssets()
-	setTimeout(() => loadEvents(), 2 * 60000) // For some reason, the gbf.wiki events CargoExport forbids access if I don't wait for 2 minutes or so...
+	loadEvents()
 
 	schedule('0 * * * *', async () => {
 		getBannerData()
