@@ -22,12 +22,12 @@ export const logChannelID = '577636091834662915'
 export const errorChannelID = '672715578347094026'
 
 export const fontFallBacks = 'Noto Serif SC Noto Serif TC Noto Serif JP Code2000'
-registerFont('assets/Code2000.TTF', {family: 'Code2000'})
+registerFont('assets/Arial.ttf', {family: 'Default'})
+registerFont('assets/Arial Bold.ttf', {family: 'Default Bold'})
 registerFont('assets/NotoSerifSC.otf', {family: 'Noto Serif SC'})
 registerFont('assets/NotoSerifTC.otf', {family: 'Noto Serif TC'})
 registerFont('assets/NotoSerifJP.otf', {family: 'Noto Serif JP'})
-registerFont(require('@canvas-fonts/arial'), {family: 'Default'})
-registerFont(require('@canvas-fonts/arial-bold'), {family: 'Default Bold'})
+registerFont('assets/Code2000.ttf', {family: 'Code2000'})
 
 export const privateCommandFiles = ['connect.js', 'say.js', 'respawn.js']
 export const regCommands = readdirSync('./prod/commands').filter(file => file.endsWith('.js'))
