@@ -84,6 +84,4 @@ export async function loadAssets(){
         assets['Progress Bar 6'],
     ]
     skydomWallpaper = assets['Skydom Wallpaper']
-    
-    console.log(`Assets loaded for Shard #${currentShardID}`)
 }
