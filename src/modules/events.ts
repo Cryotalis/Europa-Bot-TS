@@ -261,7 +261,7 @@ export async function createScheduledEvents(){
                 existingEvent.scheduledEndTimestamp !== new Date(event.scheduledEndTime!).getTime()
             )
 
-            if (eventInfoChanged) {
+            if (existingEvent.scheduledEndAt! > new Date() && eventInfoChanged) {
                 existingEvent.edit({
                     name: event.name,
                     description: event.description,
@@ -270,7 +270,7 @@ export async function createScheduledEvents(){
                 })
             }
 
-            if (existingEvent.status === GuildScheduledEventStatus.Scheduled && eventTimeChanged) {
+            if (existingEvent.scheduledStartAt! > new Date() && eventTimeChanged) {
                 existingEvent.edit({
                     scheduledStartTime: event.scheduledStartTime,
                     scheduledEndTime: event.scheduledEndTime,
