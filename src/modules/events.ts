@@ -250,11 +250,18 @@ export async function createScheduledEvents(){
 
             if (!existingEvent) return eventsManager.create(event)
 
-            if (
+            const eventInfoChanged = Boolean(
                 existingEvent.name !== event.name ||
                 existingEvent.description !== event.description ||
                 existingEvent.entityMetadata !== event.entityMetadata
-            ) {
+            )
+
+            const eventTimeChanged = Boolean(
+                existingEvent.scheduledStartTimestamp !== new Date(event.scheduledStartTime).getTime() ||
+                existingEvent.scheduledEndTimestamp !== new Date(event.scheduledEndTime!).getTime()
+            )
+
+            if (eventInfoChanged) {
                 existingEvent.edit({
                     name: event.name,
                     description: event.description,
@@ -263,12 +270,7 @@ export async function createScheduledEvents(){
                 })
             }
 
-            if (
-                existingEvent.status === GuildScheduledEventStatus.Scheduled && (
-                    existingEvent.scheduledStartTimestamp !== new Date(event.scheduledStartTime).getTime() ||
-                    existingEvent.scheduledEndTimestamp !== new Date(event.scheduledEndTime!).getTime()
-                )
-            ){
+            if (existingEvent.status === GuildScheduledEventStatus.Scheduled && eventTimeChanged) {
                 existingEvent.edit({
                     scheduledStartTime: event.scheduledStartTime,
                     scheduledEndTime: event.scheduledEndTime,
