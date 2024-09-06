@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { categoryRole, servers } from '../bot.js'
+import { servers } from '../bot.js'
+import { categoryRole } from '../data/variables.js'
 
 export const command = {
 	data: new SlashCommandBuilder()

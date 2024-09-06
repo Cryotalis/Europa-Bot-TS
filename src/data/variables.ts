@@ -3,6 +3,13 @@ export const accessCookie = {name: 'wing', value: process.env.GBF_WING!, domain:
 
 export interface relayEvent {name: string, roleID: number, channelID: number, time: number}
 
+/**
+ * - If category is defined, the role can be assigned by members.
+ * - If raid is defined, the role is tied to a raid for use with /raidcode.
+ * - At least one of category or raid should always be defined.
+ */
+export interface categoryRole {id: string, category?: string, raid?: string}
+
 export const rarityEmotes: {[key: string]: string} = {
     'SS Rare': '<:SSR:755671138624864266> ',
     'S Rare': '<:SR:755671130882179113> ',

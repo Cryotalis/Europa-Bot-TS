@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder, GuildMember, Role, SlashCommandBuilder } from 'discord.js'
-import { categoryRole, servers } from '../bot.js'
+import { servers } from '../bot.js'
 import { findBestCIMatch } from '../modules/string.js'
+import { categoryRole } from '../data/variables.js'
 
 export const command = {
 	data: new SlashCommandBuilder()
