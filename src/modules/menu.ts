@@ -64,13 +64,13 @@ export async function showMenu(interaction: ChatInputCommandInteraction, userInp
     setPage(0)
 
     const interactionReplyID = (await interaction.fetchReply()).id
-    const choiceCollector = interaction.channel?.createMessageComponentCollector({
+    const choiceCollector = (await interaction.fetchReply()).createMessageComponentCollector({
         componentType: ComponentType.StringSelect, 
         filter: async i => i.member?.user.id === interaction.member?.user.id && i.message.id === interactionReplyID, 
         idle: 60000, 
         max: 1
     })
-    const buttonCollector = interaction.channel?.createMessageComponentCollector({
+    const buttonCollector = (await interaction.fetchReply()).createMessageComponentCollector({
         componentType: ComponentType.Button,
         filter: async i => i.member?.user.id === interaction.member?.user.id && i.message.id === interactionReplyID,
         idle: 60000
