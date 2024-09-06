@@ -1,6 +1,8 @@
 export const languageCookie = { name: 'ln', value: '2', domain: 'game.granbluefantasy.jp' }
 export const accessCookie = {name: 'wing', value: process.env.GBF_WING!, domain: 'game.granbluefantasy.jp'}
 
+export interface relayEvent {name: string, roleID: number, channelID: number, time: number}
+
 export const rarityEmotes: {[key: string]: string} = {
     'SS Rare': '<:SSR:755671138624864266> ',
     'S Rare': '<:SR:755671130882179113> ',

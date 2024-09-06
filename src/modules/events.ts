@@ -8,6 +8,7 @@ import axios from 'axios'
 import md5 from 'md5'
 import { GuildScheduledEventCreateOptions, GuildScheduledEventStatus } from 'discord.js'
 import { decode } from 'html-entities'
+import { relayEvent } from '../data/variables.js'
 
 export interface event {
     title: string
@@ -237,10 +238,10 @@ export async function createScheduledEvents(){
         const eventsManager = client.guilds.cache.get(server.get('guildID'))?.scheduledEvents
         if (!eventsManager) return
 
-        const relayEvents: string[] = JSON.parse(server.get('events'))
-        const filteredEvents = relayEvents.includes('All')
+        const relayEvents: relayEvent[] = JSON.parse(server.get('events'))
+        const filteredEvents = /All/.test(server.get('events'))
             ? scheduledEvents
-            : scheduledEvents.filter(({name}) => relayEvents.some(eventPhrase => name.includes(eventPhrase)))
+            : scheduledEvents.filter(({name}) => relayEvents.some(relayEvent => name.includes(relayEvent.name)))
 
         filteredEvents.forEach(event => {
             const eventID = String(event.description!.match(/(?<=Event #)\d+/))
@@ -249,6 +250,8 @@ export async function createScheduledEvents(){
             })
 
             if (!existingEvent) return eventsManager.create(event)
+
+            if (existingEvent.scheduledStartAt! < new Date()) return // If the event has already started, don't change any details
 
             const eventInfoChanged = Boolean(
                 existingEvent.name !== event.name ||
@@ -261,7 +264,7 @@ export async function createScheduledEvents(){
                 existingEvent.scheduledEndTimestamp !== new Date(event.scheduledEndTime!).getTime()
             )
 
-            if (existingEvent.scheduledEndAt! > new Date() && eventInfoChanged) {
+            if (eventInfoChanged) {
                 existingEvent.edit({
                     name: event.name,
                     description: event.description,
@@ -270,7 +273,7 @@ export async function createScheduledEvents(){
                 })
             }
 
-            if (existingEvent.scheduledStartAt! > new Date() && eventTimeChanged) {
+            if (eventTimeChanged) {
                 existingEvent.edit({
                     scheduledStartTime: event.scheduledStartTime,
                     scheduledEndTime: event.scheduledEndTime,
