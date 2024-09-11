@@ -33,13 +33,14 @@ export const command = {
 				.setName('register')
 				.setDescription('Register a raid role with a raid name')
 				.addRoleOption(option => option.setName('role').setDescription('The raid role to register').setRequired(true))
-				.addStringOption(option => option.setName('raid').setDescription('The raid to register the raid role with').setAutocomplete(true).setRequired(true))
+				.addStringOption(option => option.setName('raid').setDescription('The raid to register the raid role to').setAutocomplete(true).setRequired(true))
 		)
 		.addSubcommand(subcommand =>
 			subcommand
 				.setName('unregister')
 				.setDescription('Unregister a raid role')
 				.addRoleOption(option => option.setName('role').setDescription('The raid role to unregister').setRequired(true))
+				.addStringOption(option => option.setName('raid').setDescription('The raid to unregister the raid role from').setAutocomplete(true))
 		)
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
@@ -121,11 +122,17 @@ export const command = {
 			}
 			case 'unregister': {
 				const serverRole = serverRolesConfig.find(role => role.id === raidRole.id && role.raids)
-
 				if (!serverRole) return interaction.reply('That role is not registered to a raid!')
 				
 				const newServerRole = serverRole
-				delete newServerRole.raids
+
+				if (raidName) {
+					if (!raids.find(raid => raid.value === raidName)) return interaction.reply('That is not a valid raid option!')
+					newServerRole.raids!.splice(newServerRole.raids!.indexOf(raidName), 1)
+				} else {
+					delete newServerRole.raids
+				}
+				
 				serverRolesConfig.splice(serverRolesConfig.indexOf(serverRole), 1, newServerRole)
 			}
 		}
@@ -164,7 +171,7 @@ export const command = {
 					name: 'Raid role unregistered',
 					iconURL: interaction.guild?.iconURL({extension: 'png'}) ?? undefined
 				})
-				.setDescription(`Raid role ${raidRole} has been unregistered`)
+				.setDescription(`Raid role ${raidRole} has been unregistered${raidName ? ` from ${raidName}` : ''}`)
 		}
 
 		return interaction.reply({embeds: [rolesEmbed]})
