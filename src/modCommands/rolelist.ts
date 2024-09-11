@@ -2,6 +2,7 @@ import { ChatInputCommandInteraction, EmbedBuilder, GuildMember, Role, SlashComm
 import { servers } from '../bot.js'
 import { findBestCIMatch } from '../modules/string.js'
 import { categoryRole } from '../data/variables.js'
+import { raids } from '../data/raids.js'
 
 export const command = {
 	data: new SlashCommandBuilder()
@@ -107,6 +108,8 @@ export const command = {
 				break
 			case 'register': {
 				const serverRole = serverRolesConfig.find(role => role.id === raidRole.id)
+
+				if (!raids.find(raid => raid.value === raidName)) return interaction.reply('That is not a valid raid option!')
 
 				if (serverRole) {
 					const newRole = {...serverRole, raids: (serverRole.raids ?? []).concat(raidName)}
