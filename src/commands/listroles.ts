@@ -10,7 +10,7 @@ export const command = {
 	async execute(interaction: ChatInputCommandInteraction) {
 		const server = servers.find(server => server.get('guildID') === interaction.guildId)
 		const serverRoles: categoryRole[] = JSON.parse(server?.get('roles') ?? '[]')
-		if (!serverRoles.length) return interaction.reply('No roles are set for your server.')
+		if (!/category/.test(server?.get('roles'))) return interaction.reply('No roles are set for your server.')
 		const roleCategories = [...new Set(serverRoles.map(role => role.category))].filter((c): c is string => !!c)
 
 		if (roleCategories.some(category => serverRoles.filter(role => role.category === category).length > 45)){
