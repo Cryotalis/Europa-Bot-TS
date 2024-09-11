@@ -8,7 +8,7 @@ export interface relayEvent {name: string, roleID: number, channelID: number, ti
  * - If raid is defined, the role is tied to a raid for use with /raidcode.
  * - At least one of category or raid should always be defined.
  */
-export interface categoryRole {id: string, category?: string, raid?: string}
+export interface categoryRole {id: string, category?: string, raids?: string[]}
 
 export const rarityEmotes: {[key: string]: string} = {
     'SS Rare': '<:SSR:755671138624864266> ',

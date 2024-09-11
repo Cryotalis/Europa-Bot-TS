@@ -109,26 +109,25 @@ export const command = {
 				const serverRole = serverRolesConfig.find(role => role.id === raidRole.id)
 
 				if (serverRole) {
-					serverRolesConfig.splice(serverRolesConfig.indexOf(serverRole), 1, {...serverRole, raid: raidName})
+					const newRole = {...serverRole, raids: (serverRole.raids ?? []).concat(raidName)}
+					serverRolesConfig.splice(serverRolesConfig.indexOf(serverRole), 1, newRole)
 				} else {
-					serverRolesConfig.push({id: raidRole.id, raid: raidName})
+					serverRolesConfig.push({id: raidRole.id, raids: [raidName]})
 				}
 				break
 			}
 			case 'unregister': {
-				const serverRole = serverRolesConfig.find(role => role.id === raidRole.id && role.raid)
+				const serverRole = serverRolesConfig.find(role => role.id === raidRole.id && role.raids)
 
-				if (serverRole) {
-					const newServerRole = serverRole
-					delete newServerRole.raid
-					serverRolesConfig.splice(serverRolesConfig.indexOf(serverRole), 1, newServerRole)
-				} else {
-					return interaction.reply('That role is not registered to a raid!')
-				}
+				if (!serverRole) return interaction.reply('That role is not registered to a raid!')
+				
+				const newServerRole = serverRole
+				delete newServerRole.raids
+				serverRolesConfig.splice(serverRolesConfig.indexOf(serverRole), 1, newServerRole)
 			}
 		}
 
-		const validRoles = serverRolesConfig.filter(role => role.raid || role.category)
+		const validRoles = serverRolesConfig.filter(role => role.raids || role.category)
 		server.set('roles', JSON.stringify(validRoles))
 		await server.save()
 

@@ -32,7 +32,7 @@ export const command = {
 
 		const server = servers.find(server => server.get('guildID') === interaction.guildId)
 		const roles: categoryRole[] = JSON.parse(server?.get('roles') ?? "[]")
-		const autoRaidRole = roles.find(role => role.raid === raidName)
+		const autoRaidRole = roles.find(role => role.raids?.includes(raidName ?? ""))
 		if (!raidRole && autoRaidRole) raidRole = await interaction.guild?.roles.fetch(autoRaidRole.id) ?? null
 
 		const raidEmbed = new EmbedBuilder()
