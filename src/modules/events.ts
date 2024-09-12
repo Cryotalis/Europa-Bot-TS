@@ -117,13 +117,13 @@ export async function processEvents(events: rawEvent[]): Promise<event[]>{
         }
 
         return {
-            title: event.name,
+            title: decode(event.name),
             id: String(event._ID),
             type: event['utc start'] < currentEnd ? 'Current' : 'Upcoming',
             start: start,
             end: end,
             duration: event['time known'] === 'yes' ? `${getSimpleDate(start)} - ${getSimpleDate(end)}` : `In ${month}`,
-            wikiURL: event['wiki page'] && `https://gbf.wiki/${event['wiki page'].replace(/ /g, '_')}`,
+            wikiURL: event['wiki page'] && `https://gbf.wiki/${decode(event['wiki page'].replace(/ /g, '_'))}`,
             image: imgURL ? await loadImage(imgURL) : null,
             imageURL: imgURL,
             elementAdvantage: getElementAdvantage(event.element).advantage,
