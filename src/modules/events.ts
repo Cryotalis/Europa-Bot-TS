@@ -41,7 +41,7 @@ export let eventsTemplate: Canvas | undefined
  * Loads event information and event template. The template includes upcoming events and leaves a blank space for current events.
  */
 export async function loadEvents(){
-    const {data: rawEvents} = await axios.get(
+    const {data: rawEvents} = await axios.get<rawEvent[]>(
         'https://gbf.wiki/index.php?title=Special:CargoExport',
         {
             headers: {'User-Agent': 'Europa Bot'},
@@ -57,7 +57,24 @@ export async function loadEvents(){
     ).catch(() => ({data: null}))
     if (!rawEvents) return setTimeout(() => loadEvents(), 60000)
 
-    const events = (await processEvents(rawEvents)).reverse()
+    const {data: maintData} = await axios.get('https://gbf.wiki/Template:MainPage/Notice', {headers: {'User-Agent': 'Europa Bot'}})
+    const [ _, maintStart, maintEnd ] = maintData.match(/data-start="(\d+)" data-end="(\d+)" data-text-start="The game will undergo maintenance/)
+    let maintEvent = {} as rawEvent
+
+    if (maintStart && maintEnd && (maintStart * 1000) > new Date().getTime()) {
+        maintEvent = {
+            name: 'Maintenance',
+            _ID: 0,
+            'time known': 'yes',
+            'utc start': maintStart * 1000,
+            'utc end': maintEnd * 1000,
+            'wiki page': null,
+            image: 'https://raw.githubusercontent.com/Cryotalis/Europa-Bot-TS/main/assets/Maintenance%20Event.png',
+            element: null
+        }
+    }
+
+    const events = (await processEvents(rawEvents.concat(maintEvent))).reverse()
     currentEvents = events.filter(event => event.type === 'Current')
     upcomingEvents = events.filter(event => event.type === 'Upcoming')
 
