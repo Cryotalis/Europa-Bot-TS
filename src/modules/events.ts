@@ -122,9 +122,9 @@ export async function processEvents(events: rawEvent[]): Promise<event[]>{
     })
 
     const processedEvents = filteredEvents.slice(0, 10).map(async event => {
-        const start = event['utc start'] ? new Date(event['utc start'] * 1000) : null
-        const end = event['utc end'] ? new Date(event['utc end'] * 1000) : null
-        const month = new Date((event['utc start'] + (now.getTimezoneOffset() + parseOffset('UTC +9')) * 60) * 1000).toLocaleDateString('en-US', {month: 'long'})
+        const eventStart = event['utc start'] ? new Date(event['utc start'] * 1000) : null
+        const eventEnd = event['utc end'] ? new Date(event['utc end'] * 1000) : null
+        const eventMonth = new Date((event['utc start'] + (now.getTimezoneOffset() + parseOffset('UTC +9')) * 60) * 1000).toLocaleDateString('en-US', {month: 'long'})
         let imgName, imgHash, imgURL = null
 
         if (event.image){
@@ -137,9 +137,9 @@ export async function processEvents(events: rawEvent[]): Promise<event[]>{
             title: decode(event.name),
             id: String(event._ID),
             type: event['utc start'] < currentEnd ? 'Current' : 'Upcoming',
-            start: start,
-            end: end,
-            duration: event['time known'] === 'yes' ? `${getSimpleDate(start)} - ${getSimpleDate(end)}` : `In ${month}`,
+            start: eventStart,
+            end: eventEnd,
+            duration: event['time known'] === 'yes' ? `${getSimpleDate(eventStart)} - ${getSimpleDate(eventEnd)}` : `In ${eventMonth}`,
             wikiURL: event['wiki page'] && `https://gbf.wiki/${decode(event['wiki page'].replace(/ /g, '_'))}`,
             image: imgURL ? await loadImage(imgURL) : null,
             imageURL: imgURL,
