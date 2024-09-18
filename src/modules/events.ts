@@ -156,7 +156,7 @@ export function getElementAdvantage(element: string | null) {
     switch (element) {
         case 'fire': return {advantage: `<:WaterAdvantage:1225922220157833277> Water Advantage`, image: waterAdvantage}
         case 'water': return {advantage: `<:EarthAdvantage:1225922224154742957> Earth Advantage`, image: earthAdvantage}
-        case 'farth': return {advantage: `<:WindAdvantage:1225922221617319976> Wind Advantage`, image: windAdvantage}
+        case 'earth': return {advantage: `<:WindAdvantage:1225922221617319976> Wind Advantage`, image: windAdvantage}
         case 'wind': return {advantage: `<:FireAdvantage:1225922225492856852> Fire Advantage`, image: fireAdvantage}
         case 'light': return {advantage: `<:DarkAdvantage:1225922222871412887> Dark Advantage`, image: darkAdvantage}
         case 'dark': return {advantage: `<:LightAdvantage:1225922226503811153> Light Advantage`, image: lightAdvantage}
