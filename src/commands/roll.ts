@@ -31,6 +31,16 @@ export const command = {
 		)
 		.addSubcommand(subcommand =>
 			subcommand
+				.setName('gachapin')
+				.setDescription('Draw using 10-part tickets until you get an SSR item')
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('super-mukku')
+				.setDescription('Draw using 10-part tickets with boosted SSR rates until you get 5 SSR items')
+		)
+		.addSubcommand(subcommand =>
+			subcommand
 				.setName('until')
 				.setDescription('Draw using 10-Part Draws until you get a specific character, weapon, or summon')
 				.addStringOption(option => option.setName('target').setDescription("The character, weapon, or summon you're drawing for").setRequired(true))
@@ -46,6 +56,7 @@ export const command = {
 		const user = users.find(user => user.get('userID') === interaction.user.id || user.get('username') === interaction.user.username)
 		let crystals = 0, singles = 0, tenparts = 0
 		let	target: item | string | undefined = undefined
+		let modifier: "gachapin" | "mukku" | "super mukku" | undefined
 		
 		switch (command) {
 			case 'singles':
@@ -64,13 +75,29 @@ export const command = {
 				tenparts = parseInt(user.get('tenParts'))
 				if (!crystals && !singles && !tenparts) return interaction.editReply('You do not have any funds to roll with!')
 				break
+			case 'gachapin':
+				const items1 = gacha(0, 0, 30, undefined, "gachapin")
+				const gachaEmbeds = [createGachaEmbed(items1, undefined, "gachapin")]
+
+				const rand = Math.floor(Math.random() * items1.length)
+				if ((items1.length <= 20 && rand < 10) || rand < 3) { // Reduced mukku rate after 20 pulls
+					const items2 = gacha(0, 0, 30 - items1.length / 10, undefined, "mukku")
+					gachaEmbeds.push(createGachaEmbed(items2, undefined, "mukku"))
+				}
+
+				return interaction.editReply({embeds: gachaEmbeds})
+			case 'super-mukku':
+				tenparts = 20
+				modifier = "super mukku"
+				break
 			case 'until':
+				tenparts = Infinity
 				target = findTarget(targetInput)
 				if (typeof target === 'string') return interaction.editReply(`**${target}** is not available on the current banner.`)
 				break
 		}
 
-		const items = gacha(crystals, singles, tenparts, target)
-		return interaction.editReply({embeds: [createGachaEmbed(items, target)]})
+		const items = gacha(crystals, singles, tenparts, target, modifier)
+		interaction.editReply({embeds: [createGachaEmbed(items, target, modifier)]})
 	}
 }
