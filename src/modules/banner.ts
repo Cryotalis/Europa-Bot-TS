@@ -63,7 +63,7 @@ export interface character {
 }  
 export const bannerData: {bannerInfo: bannerInfo, items: item[]} = {bannerInfo: {} as bannerInfo, items: []}
 export async function getBannerData(){
-	const gameVersion = (await axios.get('http://game.granbluefantasy.jp/')).data.match(/Game.version = "(\d+)"/i)?.[1]
+	const gameVersion = (await axios.get('http://game.granbluefantasy.jp/')).data.match(/(?<="version": ")\d+(?=")/i)?.[0]
 	if (!gameVersion) return
 	
 	const headers = {
