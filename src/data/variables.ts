@@ -1,8 +1,6 @@
 export const languageCookie = { name: 'ln', value: '2', domain: 'game.granbluefantasy.jp' }
 export const accessCookie = {name: 'wing', value: process.env.GBF_WING!, domain: 'game.granbluefantasy.jp'}
 
-export interface relayEvent {name: string, roleID: number, channelID: number, time: number}
-
 /**
  * - If category is defined, the role can be assigned by members.
  * - If raid is defined, the role is tied to a raid for use with /raidcode.
