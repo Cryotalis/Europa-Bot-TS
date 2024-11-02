@@ -221,6 +221,8 @@ export async function createScheduledEvents(){
     const events = currentEvents.concat(upcomingEvents)
     const threeMinsLater = new Date(new Date().valueOf() + 3 * 60000)
 
+    if (!events.length) return setTimeout(() => createScheduledEvents(), 60000)
+
     const scheduledEvents: GuildScheduledEventCreateOptions[] = events.map(event => {
         if (!event.start || !event.end || event.duration.startsWith('In')) return {} as GuildScheduledEventCreateOptions
         
