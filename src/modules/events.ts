@@ -1,14 +1,14 @@
 import { waterAdvantage, earthAdvantage, windAdvantage, fireAdvantage, darkAdvantage, lightAdvantage, eventsBackgroundTop, eventsBackgroundMiddle, eventsBackgroundBottom, upcomingEventsText } from '../data/assets.js'
 import { Canvas, CanvasRenderingContext2D, Image, createCanvas, loadImage } from 'canvas'
 import { dateDiff, getSimpleDate, parseOffset } from './time.js'
-import { client, fontFallBacks, servers } from '../bot.js'
+import { botID, client, fontFallBacks, servers } from '../bot.js'
 import { capFirstLetter} from './string.js'
 import { wrapText } from './image.js'
 import axios from 'axios'
 import md5 from 'md5'
-import { GuildScheduledEventCreateOptions, GuildScheduledEventStatus } from 'discord.js'
+import { GuildScheduledEvent, GuildScheduledEventCreateOptions, GuildScheduledEventEditOptions, GuildScheduledEventStatus } from 'discord.js'
 import { decode } from 'html-entities'
-import { relayEvent } from '../data/variables.js'
+import { recurringEvents, relayEvent } from '../data/events.js'
 
 export interface event {
     title: string
@@ -240,9 +240,9 @@ export async function createScheduledEvents(){
                          `\n\` Ends: \` <t:${event.end.getTime() / 1000}:f>` + 
                          '\n\n' +
                          [
-                             `Event #${event.id}`,
-                             event.wikiURL && `[Event Page](${event.wikiURL})`,
-                             event.imageURL && `[Banner Image Link](${event.imageURL})`
+                            `Event #${event.id}`,
+                            event.wikiURL && `[Event Page](${event.wikiURL})`,
+                            event.imageURL && `[Event Image](${event.imageURL})`
                          ].filter(e => e).join(' | '),
             image: canvas?.toBuffer(),
             scheduledStartTime: event.start < new Date() ? threeMinsLater : event.start, // If the in-game event already started, set the discord event to start in 3 minutes
@@ -262,42 +262,50 @@ export async function createScheduledEvents(){
             ? scheduledEvents
             : scheduledEvents.filter(({name}) => relayEvents.some(relayEvent => name.includes(relayEvent.name)))
 
+        const filteredEventNames = filteredEvents.map(e => e.name)
+        const existingEvents: GuildScheduledEvent<GuildScheduledEventStatus>[] = []
+        const obsoleteEvents: GuildScheduledEvent<GuildScheduledEventStatus>[] = []
+
+        eventsManager.cache.filter(({creatorId}) => creatorId === botID).forEach(event => {
+            filteredEventNames.includes(event.name)
+                ? existingEvents.push(event)
+                : obsoleteEvents.push(event)
+        })
+
         filteredEvents.forEach(event => {
-            const eventID = String(event.description!.match(/(?<=Event #)\d+/))
-            const existingEvent = eventsManager.cache.find(({name, description}) => {
-                return name === event.name || description!.includes(eventID)
-            })
+            let existingEvent = existingEvents.find(({name}) => name === event.name)
 
-            if (!existingEvent) return eventsManager.create(event)
+            // Prefer editing an obsolete event over creating a new one
+            if (existingEvent){
+                // Remove event from array for future loops, prevents editing the same event twice (mostly for recurring events)
+                existingEvents.splice(existingEvents.findIndex(({name}) => name == existingEvent!.name), 1)
+            } else {
+                // Recurring event names are pretty much always known beforehand
+                if (obsoleteEvents.length && !recurringEvents.includes(event.name)) {
+                    existingEvent = obsoleteEvents.shift()!
+                } else {
+                    return eventsManager.create(event)
+                }
+            }
 
-            if (existingEvent.scheduledStartAt! < new Date()) return // If the event has already started, don't change any details
-
-            const eventInfoChanged = Boolean(
-                existingEvent.name !== event.name ||
-                existingEvent.description !== event.description ||
-                existingEvent.entityMetadata !== event.entityMetadata
-            )
-
+            const editOptions: GuildScheduledEventEditOptions<any, any> = {}
             const eventTimeChanged = Boolean(
                 existingEvent.scheduledStartTimestamp !== new Date(event.scheduledStartTime).getTime() ||
                 existingEvent.scheduledEndTimestamp !== new Date(event.scheduledEndTime!).getTime()
             )
 
-            if (eventInfoChanged) {
-                existingEvent.edit({
-                    name: event.name,
-                    description: event.description,
-                    image: event.image,
-                    entityMetadata: event.entityMetadata
-                })
+            if (existingEvent.name !== event.name) editOptions.name = event.name
+            if (existingEvent.description !== event.description) editOptions.description = event.description
+            if (existingEvent.entityMetadata !== event.entityMetadata) editOptions.entityMetadata = event.entityMetadata
+            if (eventTimeChanged && existingEvent.scheduledStartAt! > new Date()) {
+                editOptions.scheduledStartTime = event.scheduledStartTime
+                editOptions.scheduledEndTime = event.scheduledEndTime
             }
 
-            if (eventTimeChanged) {
-                existingEvent.edit({
-                    scheduledStartTime: event.scheduledStartTime,
-                    scheduledEndTime: event.scheduledEndTime,
-                })
-            }
+            if (Object.keys(editOptions).length) existingEvent.edit(editOptions)
         })
+
+        // Delete any remaining obsolete events
+        obsoleteEvents.forEach(event => event.delete())
     })
 }
