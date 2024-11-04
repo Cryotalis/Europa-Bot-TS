@@ -3,6 +3,8 @@ export const raids = [
     {"name": "Faa Zero",                 "value": "Lvl 325 Lucilius"},
     {"name": "Hexachromatic Hierarch",   "value": "Lvl 325 Hexachromatic Hierarch"},
     {"name": "Super Ultimate Bahamut",   "value": "Lvl 300 Super Ultimate Bahamut"},
+
+    {"name": "Venerable Paragon",        "value": "Lvl 275 Venerable Paragon"},
     
     {"name": "Agastia",                  "value": "Lvl 275 Agastia"},
     {"name": "Cosmos",                   "value": "Lvl 275 Cosmos"},
