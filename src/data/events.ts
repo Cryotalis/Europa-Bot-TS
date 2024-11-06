@@ -1,4 +1,9 @@
-export interface relayEvent {name: string, roleID: number, channelID: number, time: number}
+export interface relayEvent {
+    name: string,
+    roleID?: number,
+    channelID?: number,
+    time?: number
+}
 
 export const recurringEvents = [
     "Unite and Fight",
@@ -6,7 +11,7 @@ export const recurringEvents = [
     "Rise of the Beasts",
     "Tower of Babyl",
     "Proving Grounds",
-    
+
     "Tales of Arcarum",
     "Tales of Arcarum: Justice",
     "Tales of Arcarum: The Hanged Man",
