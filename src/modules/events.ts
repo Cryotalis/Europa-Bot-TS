@@ -266,11 +266,14 @@ export async function createScheduledEvents(){
         const existingEvents: GuildScheduledEvent<GuildScheduledEventStatus>[] = []
         const obsoleteEvents: GuildScheduledEvent<GuildScheduledEventStatus>[] = []
 
-        eventsManager.cache.filter(({creatorId}) => creatorId === botID).forEach(event => {
-            filteredEventNames.includes(event.name)
-                ? existingEvents.push(event)
-                : obsoleteEvents.push(event)
-        })
+        eventsManager.cache
+            .filter(({creatorId, scheduledEndAt}) => {
+                return (creatorId === botID) && (new Date() < (scheduledEndAt ?? new Date(0)))
+            }).forEach(event => {
+                filteredEventNames.includes(event.name)
+                    ? existingEvents.push(event)
+                    : obsoleteEvents.push(event)
+            })
 
         filteredEvents.forEach(event => {
             let existingEvent = existingEvents.find(({name}) => name === event.name)
