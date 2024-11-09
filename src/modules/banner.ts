@@ -1,6 +1,6 @@
 import axios from "axios"
 import { dateStringToUnix } from "./time.js"
-import { accessCookie, languageCookie } from "../data/variables.js"
+import { accessCookie, languageCookie } from "../data/granblue.js"
 import { homeServerShardID, currentShardID } from "../bot.js"
 import { App } from "octokit"
 

@@ -4,7 +4,7 @@ import { browser, fontFallBacks, startPuppeteer } from "../bot.js"
 import { playerTemplate, openSummon, perpetuityRingIcon } from "../data/assets.js"
 import { getAllSummonInfo, drawStars } from "./granblue.js"
 import { wrapText } from "./image.js"
-import { languageCookie, accessCookie } from "../data/variables.js"
+import { languageCookie, accessCookie } from "../data/granblue.js"
 import { decode } from "html-entities"
 
 export async function loadProfile(interaction: ChatInputCommandInteraction, playerID: string) {

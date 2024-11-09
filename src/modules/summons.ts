@@ -3,7 +3,7 @@ import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'di
 import { browser, fontFallBacks, startPuppeteer } from '../bot.js'
 import { summonsTemplate } from '../data/assets.js'
 import { getAllSummonInfo, drawStars } from './granblue.js'
-import { languageCookie, accessCookie } from '../data/variables.js'
+import { languageCookie, accessCookie } from "../data/granblue.js"
 
 export async function loadSummons(interaction: ChatInputCommandInteraction, playerID: string){
     const playerEmbed = new EmbedBuilder()
