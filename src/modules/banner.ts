@@ -58,7 +58,7 @@ export interface character {
 	series: string[]
 	races: string[]
 	voice_actor: string
-	add_date: string
+	weapon_name: string
 	weapon_id: string
 }  
 export const bannerData: {bannerInfo: bannerInfo, items: item[]} = {bannerInfo: {} as bannerInfo, items: []}
@@ -133,12 +133,16 @@ export async function getBannerData(){
 				['', 'Human','Erune','Draph','Harvin','Unknown','Primal'][master.tribe_2]
 			].filter(e => e),
 			voice_actor: chara.voice_acter,
-			add_date: chara.story.add_date,
+			weapon_name: chara.open_reward.name,
 			weapon_id: chara.story.open_reward_id
 		})
 	}
 
-	const allSeries: string[] = characters.filter(char => char.weapon_id !== '1040605900' && bannerData.items.some(item => item.id === char.weapon_id)).flatMap(char => char.series)
+	// 3040092000 is Summer/Grand Zooey. She is the only Summer series character who can appear on non-summer banners, 
+	// so she needs to be filtered out.
+	const allSeries: string[] = characters
+		.filter(char => char.id !== '3040092000' && bannerData.items.some(item => item.id === char.weapon_id))
+		.flatMap(char => char.series)
 	const series = [...new Set(allSeries)]
 	const seasons = series.filter(series => ['Summer', 'Halloween', 'Valentine', 'Yukata', 'Holiday'].includes(series))
 
