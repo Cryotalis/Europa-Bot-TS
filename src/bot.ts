@@ -10,7 +10,7 @@ import { registerFont } from 'canvas'
 import { handleNewGuild, handleNewMember, handleRemovedMember } from './events/guild.js'
 import { handleDeletedRole } from './events/role.js'
 import { handleAutocomplete, handleCommand } from './events/interaction.js'
-import { connectDatabase } from './data/database.js'
+import { connectDatabase, getCharacterData, getSummonData } from './data/database.js'
 
 export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration], rest: {timeout: 60000}})
 export const botID = '585514230967566338'
@@ -104,7 +104,6 @@ client.on('ready', async () => {
 
 	schedule('0 * * * *', async () => {
 		getBannerData()
-		updateCounter()
 		await connectDatabase()
 		await loadEvents()
 		createScheduledEvents()
@@ -112,6 +111,13 @@ client.on('ready', async () => {
 	
 	if (currentShardID === homeServerShardID) {
 		(client.channels.cache.get(logChannelID) as TextChannel).send(`:white_check_mark:  **Europa is now online**`)
+
+		// Runs at 23:55 every day. The 5 minutes is to allow time to fetch the data before the database connection is refreshed
+		schedule('55 23 * * *', () => {
+			getCharacterData()
+			getSummonData()
+			updateCounter()
+		})
 	}
 })
 
