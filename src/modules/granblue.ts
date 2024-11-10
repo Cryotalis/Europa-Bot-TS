@@ -52,7 +52,7 @@ export async function getAllSummonInfo(rawHtml: string){
             image: privateSummon,
             level: level,
             uncaps: uncaps,
-            maxUncaps: summon?.get('maxUncaps') ?? 3
+            maxUncaps: parseInt(summon?.get('maxUncaps')) ?? 3
         })
     })
 
@@ -84,13 +84,20 @@ export function drawStars(ctx: CanvasRenderingContext2D, spacing: number, size: 
     x += (5 - maxStars) * spacing
 
     for (let i = 1; i <= maxStars; i++) {
-        if (maxUncaps === 6 && i <= uncaps)  {ctx.drawImage(transcendenceStars[5], x + spacing * i, y, size, size); continue}
-        if (maxUncaps === 6 && i > uncaps) {ctx.drawImage(transcendenceStars[6], x + spacing * i, y, size, size); continue}
+        const xPos = x + spacing * (i - 1), yPos = y
+        let star: Image
 
-        if (i < 3 && i <= uncaps)   ctx.drawImage(regularStar, x + spacing * i, y, size, size)
-        if (i < 3 && i > uncaps)  ctx.drawImage(blankRegularStar, x + spacing * i, y, size, size)
-        if (i >= 3 && i <= uncaps)  ctx.drawImage(blueStar, x + spacing * i, y, size, size)
-        if (i >= 3 && i > uncaps) ctx.drawImage(blankBlueStar, x + spacing * i, y, size, size)
+        if (maxUncaps === 6) {
+            star = i <= uncaps ? transcendenceStars[5] : transcendenceStars[6]
+        } else {
+            if (i <= 3) {
+                star = i <= uncaps ? regularStar : blankRegularStar
+            } else {
+                star = i <= uncaps ? blueStar : blankBlueStar
+            }
+        }
+
+        ctx.drawImage(star, xPos, yPos, size, size)
     }
     ctx.restore()
 }
