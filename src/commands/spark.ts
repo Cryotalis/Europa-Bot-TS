@@ -1,8 +1,8 @@
 import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js'
-import { privateDB, userData, users } from '../bot.js'
 import { getImageLink } from '../modules/image.js'
 import { calcDraws, getEmbedProfile, getProfile, manageSpark } from '../modules/spark.js'
 import { round } from '../modules/number.js'
+import { database, userData } from '../data/database.js'
 
 export const command = {
 	data: new SlashCommandBuilder()
@@ -64,9 +64,11 @@ export const command = {
 		)
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
-		let user = users.find(user => user.get('userID') === interaction.user.id || user.get('username') === interaction.user.username)
+		let user = database.users.find(user => 
+			user.get('userID') === interaction.user.id || user.get('username') === interaction.user.username
+		)
 		if (!user){
-			user = await privateDB.sheetsByTitle['Users'].addRow({
+			user = await database.usersTable.addRow({
 				username: interaction.user.tag,
 				userID: `'${interaction.user.id}`,
 				crystals: 0,
@@ -75,7 +77,7 @@ export const command = {
 				tenParts: 0,
 				rolls: 0,
 			})
-			users.push(user)
+			database.users.push(user)
 		}
 		user.set('username', interaction.user.username)
 
@@ -91,7 +93,11 @@ export const command = {
 		const command = interaction.options.getSubcommand()
 
 		if (command === 'profile'){
-			const targetUser = userInput ? users.find(user => user.get('userID') === userInput.id || user.get('username') === userInput.username) : user
+			const targetUser = userInput
+				? database.users.find(user => 
+					user.get('userID') === userInput.id || user.get('username') === userInput.username
+				) 
+				: user
 			if (!targetUser) return interaction.reply('I could not find a spark profile for the user you specified.')
 			if (interaction.options.getBoolean('embed')) interaction.reply(getEmbedProfile(targetUser, interaction.member as GuildMember))
 			else {

@@ -1,8 +1,8 @@
 import { EmbedBuilder } from "discord.js"
-import { data } from "../bot.js"
 import { findBestCIMatch, titleize } from "./string.js"
 import { weaponEmotes, rarityEmotes } from "../data/variables.js"
 import { item, bannerData } from "./banner.js"
+import { database } from "../data/database.js"
 
 export function gacha(crystals: number, singles: number, tenparts: number, target?: item, modifier?: "gachapin" | "mukku" | "super mukku"){
     /**
@@ -95,16 +95,16 @@ export function createGachaEmbed(items: item[], target?: item, modifier?: "gacha
 
 export function findTarget(target: string){
     const bannerWeaponNames = bannerData.items.map(item => item.name)
-    const characterNames = data.map(item => item.get('characterName')).filter(i => i)
-    const weaponNames = data.map(item => item.get('weaponName')).filter(i => i)
-    const summonNames = data.map(item => item.get('summonName')).filter(i => i)
+    const characterNames = database.characters.map(char => char.get('name')).filter(c => c)
+    const weaponNames = database.characters.map(item => item.get('weaponName')).filter(w => w)
+    const summonNames = database.summons.map(summon => summon.get('name')).filter(s => s)
     const allItemNames = [characterNames, summonNames, weaponNames, bannerWeaponNames].flat()
 
     const targetName = /summon/i.test(target)
         ? findBestCIMatch(target.replace(/summon/i, ''), summonNames).bestMatch.target
         : findBestCIMatch(target, allItemNames).bestMatch.target
-    const targetWeaponID = data.find(item => item.get('characterName') === targetName || item.get('weaponName') === targetName)?.get('weaponID')
-    const targetSummonID = data.find(item => item.get('summonName') === targetName)?.get('summonID')
+    const targetWeaponID = database.characters.find(char => char.get('name') === targetName || char.get('weaponName') === targetName)?.get('weaponID')
+    const targetSummonID = database.summons.find(summon => summon.get('name') === targetName)?.get('id')
     const targetItem = bannerData.items.find(item => item.id === (targetWeaponID ?? targetSummonID) || item.character === targetName || item.name === targetName)
     return targetItem ?? targetName
 }

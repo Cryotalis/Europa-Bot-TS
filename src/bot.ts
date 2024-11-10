@@ -1,10 +1,8 @@
 import { ChannelType, Client, Collection, GatewayIntentBits, Guild, REST, Routes, ShardClientUtil, TextChannel } from 'discord.js'
-import { GoogleSpreadsheet, GoogleSpreadsheetRow } from 'google-spreadsheet'
 import { schedule } from 'node-cron'
 import { inspect } from 'util'
 import { readdirSync } from 'node:fs'
 import { Browser, launch } from 'puppeteer'
-import { JWT } from 'google-auth-library'
 import { loadAssets } from './data/assets.js'
 import { createScheduledEvents, loadEvents } from './modules/events.js'
 import { getBannerData } from './modules/banner.js'
@@ -12,6 +10,7 @@ import { registerFont } from 'canvas'
 import { handleNewGuild, handleNewMember, handleRemovedMember } from './events/guild.js'
 import { handleDeletedRole } from './events/role.js'
 import { handleAutocomplete, handleCommand } from './events/interaction.js'
+import { connectDatabase } from './data/database.js'
 
 export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration], rest: {timeout: 60000}})
 export const botID = '585514230967566338'
@@ -61,43 +60,6 @@ export async function registerCommands() {
 		.catch(console.error)
 }
 
-export interface serverData {guildName: string, guildID: string, greeting: string, roles: string, events: string}
-export interface userData {
-	username: string,	userID: string,
-	crystals: string,	mobaCoin: string,
-	tickets: string,    tenParts: string,
-	rolls: string, 		background: string,
-	sparkTitle: string
-}
-export let publicDB: GoogleSpreadsheet
-export let privateDB: GoogleSpreadsheet
-export let servers: Array<GoogleSpreadsheetRow<serverData>>
-export let users: Array<GoogleSpreadsheetRow<userData>>
-export let announcements: Array<GoogleSpreadsheetRow>
-export let data: Array<GoogleSpreadsheetRow>
-
-const serviceAccountAuth = new JWT({
-	email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-	key: process.env.GOOGLE_PRIVATE_KEY,
-	scopes: ['https://www.googleapis.com/auth/spreadsheets']
-})
-export async function connectToDB(){
-    publicDB = new GoogleSpreadsheet('1H5oCUOvKSN5AAo_tQvr7ElhDIJxhuYVpaJCbbyFeA0E', serviceAccountAuth)
-    await publicDB.loadInfo()
-	
-    privateDB = new GoogleSpreadsheet(process.env.PRIVATE_DB_ID!, serviceAccountAuth)
-    await privateDB.loadInfo()
-
-	;[servers, users, announcements, data] = await Promise.all([
-		privateDB.sheetsByTitle['Servers'].getRows(),
-		privateDB.sheetsByTitle['Users'].getRows(),
-		privateDB.sheetsByTitle['Announcements'].getRows(),
-		publicDB.sheetsByTitle['Data'].getRows(),
-	])
-
-	console.log(`Database connection successful for Shard #${currentShardID}`)
-}
-
 export let browser: Browser
 export let jsessionID: string // Required for player name search
 async function getJSessionID(){
@@ -135,7 +97,7 @@ client.on('ready', async () => {
 	// Run startup functions
 	startPuppeteer()
 	getBannerData()
-	await connectToDB()
+	await connectDatabase()
 	registerCommands()
 	await loadAssets()
 	loadEvents()
@@ -143,7 +105,7 @@ client.on('ready', async () => {
 	schedule('0 * * * *', async () => {
 		getBannerData()
 		updateCounter()
-		await connectToDB()
+		await connectDatabase()
 		await loadEvents()
 		createScheduledEvents()
 	})

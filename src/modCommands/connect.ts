@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
-import { connectToDB, registerCommands } from '../bot.js'
+import { registerCommands } from '../bot.js'
+import { connectDatabase } from '../data/database.js'
 
 export const command = {
 	data: new SlashCommandBuilder()
@@ -12,7 +13,7 @@ export const command = {
 		}
 		
 		await interaction.reply('Connecting to Database <a:loading:763160594974244874>')
-		await connectToDB()
+		await connectDatabase()
 		await registerCommands()
 		interaction.editReply('Database Connection Successful.')
 	}

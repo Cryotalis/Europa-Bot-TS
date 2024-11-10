@@ -1,16 +1,17 @@
 import { Client, TextChannel, GuildMember, Guild, PartialGuildMember } from "discord.js"
-import { client, servers, privateDB, homeServerShardID, logChannelID } from "../bot.js"
+import { client, homeServerShardID, logChannelID } from "../bot.js"
 import { greetingConfig, makeGreetingImage } from "../modules/greeting.js"
+import { database } from "../data/database.js"
 
 /**
  * Adds new servers to the database and logs the server in the log channel
  */
 export async function handleNewGuild(guild: Guild) {
-	if (!servers) return
-	const server = servers.find(server => server.get('guildID') === guild.id)
+	if (!database) return
+	const server = database.servers.find(server => server.get('guildID') === guild.id)
 	if (!server){
-		const newServer = await privateDB.sheetsByTitle['Servers'].addRow({guildName: guild.name, guildID: `'${guild.id}`})
-		servers.push(newServer)
+		const newServer = await database.serversTable.addRow({guildName: guild.name, guildID: `'${guild.id}`})
+		database.servers.push(newServer)
 	}
 
 	const joinMessage = `:man_raising_hand:  Joined server **${guild.name}**`
@@ -23,7 +24,7 @@ export async function handleNewGuild(guild: Guild) {
  * Handles auto-roles and sends a join message (if enabled) when a member joins the server
  */
 export async function handleNewMember(member: GuildMember) {
-	const server = servers.find(server => server.get('guildID') === member.guild.id)
+	const server = database.servers.find(server => server.get('guildID') === member.guild.id)
 	if (!server?.get('greeting')) return
 
 	const clientUser = member.guild.members.me! as GuildMember
@@ -51,7 +52,7 @@ export async function handleNewMember(member: GuildMember) {
  * Sends a leave or ban message when a member leaves the server
  */
 export async function handleRemovedMember(member: GuildMember | PartialGuildMember) {
-	const server = servers.find(server => server.get('guildID') === member.guild.id)
+	const server = database.servers.find(server => server.get('guildID') === member.guild.id)
 	if (!server?.get('greeting')) return
 
 	const greetingSettings: greetingConfig = JSON.parse(server.get('greeting'))

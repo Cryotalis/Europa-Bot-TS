@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder, GuildMember, Role, SlashCommandBuilder } from 'discord.js'
-import { servers } from '../bot.js'
 import { findBestCIMatch } from '../modules/string.js'
 import { categoryRole } from '../data/variables.js'
+import { database } from '../data/database.js'
 
 export const command = {
 	data: new SlashCommandBuilder()
@@ -13,7 +13,7 @@ export const command = {
 		const clientUser = interaction.guild?.members.me! as GuildMember
 		if (!clientUser.permissions.has('ManageRoles')) return interaction.reply('I do not have permission to assign roles in this server.')
 
-		const server = servers.find(server => server.get('guildID') === interaction.guildId)
+		const server = database.servers.find(server => server.get('guildID') === interaction.guildId)
 		if (!server?.get('roles')) return interaction.reply('No roles are set for your server.')
 		
 		const rolesInput = interaction.options.getString('roles')!.replace(/(<@&\d+>)/g, '$1, ').match(/(?! )[^,]+(?<! )/g)

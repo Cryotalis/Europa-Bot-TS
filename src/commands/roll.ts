@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
-import { data, users } from '../bot.js'
 import { createGachaEmbed, findTarget, gacha } from '../modules/roll.js'
 import { item } from '../modules/banner.js'
+import { database } from '../data/database.js'
 
 export const command = {
 	data: new SlashCommandBuilder()
@@ -47,13 +47,15 @@ export const command = {
 		)
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
-		if (!data) return interaction.reply('Database connection failed. Please try again later.')
+		if (!database) return interaction.reply('Database connection failed. Please try again later.')
 
 		await interaction.deferReply()
 		const command = interaction.options.getSubcommand()
 		const amount = interaction.options.getNumber('amount') ?? 1
 		const targetInput = interaction.options.getString('target')!
-		const user = users.find(user => user.get('userID') === interaction.user.id || user.get('username') === interaction.user.username)
+		const user = database.users.find(user => 
+			user.get('userID') === interaction.user.id || user.get('username') === interaction.user.username
+		)
 		let crystals = 0, singles = 0, tenparts = 0
 		let	target: item | string | undefined = undefined
 		let modifier: "gachapin" | "mukku" | "super mukku" | undefined

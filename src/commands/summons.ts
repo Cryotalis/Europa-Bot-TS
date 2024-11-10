@@ -2,9 +2,10 @@ import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from '
 import { compareTwoStrings } from 'string-similarity'
 import urlencode from 'urlencode'
 import axios from 'axios'
-import { data, jsessionID } from '../bot.js'
+import { jsessionID } from '../bot.js'
 import { showMenu } from '../modules/menu.js'
 import { loadSummons } from '../modules/summons.js'
+import { database } from '../data/database.js'
 
 export const command = {
 	data: new SlashCommandBuilder()
@@ -29,7 +30,7 @@ export const command = {
 
 		await interaction.deferReply()
 
-		if (!data) return interaction.editReply('Unable to connect to database. Please try again in a few seconds.')
+		if (!database) return interaction.editReply('Unable to connect to database. Please try again in a few seconds.')
 
 		if (playerID) return loadSummons(interaction, playerID)
 		

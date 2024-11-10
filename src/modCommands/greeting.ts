@@ -1,8 +1,8 @@
 import { ChatInputCommandInteraction, EmbedBuilder, GuildBasedChannel, GuildMember, Role, SlashCommandBuilder } from 'discord.js'
-import { servers } from '../bot.js'
 import { getImageLink } from '../modules/image.js'
 import { findBestCIMatch, titleize } from '../modules/string.js'
 import { greetingConfig, makeGreetingImage, toggleableGreetingSetting } from '../modules/greeting.js'
+import { database } from '../data/database.js'
 
 export const command = {
 	data: new SlashCommandBuilder()
@@ -70,7 +70,7 @@ export const command = {
 		)
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
-		const server = servers.find(server => server.get('guildID') === interaction.guildId)
+		const server = database.servers.find(server => server.get('guildID') === interaction.guildId)
 		if (!server) return interaction.reply('Unable to access settings for your server.')
 		const channels: GuildBasedChannel[] = interaction.guild?.channels.cache.map((channel: GuildBasedChannel) => channel)!
 		const generalChannel = channels[findBestCIMatch('general', channels?.map(channel => channel.name)).bestMatchIndex].id

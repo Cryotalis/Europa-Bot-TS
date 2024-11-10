@@ -1,6 +1,6 @@
 import { CanvasRenderingContext2D, Image, loadImage } from 'canvas'
-import { data } from '../bot.js'
 import { blankBlueStar, blankRegularStar, blueStar, privateSummon, regularStar, transcendenceStars } from '../data/assets.js'
+import { database } from '../data/database.js'
 
 /**
  * Parses raw HTML and returns an array containing information for each support summon the player has set.
@@ -29,7 +29,7 @@ export async function getAllSummonInfo(rawHtml: string){
         const levelRegex = new RegExp(`summon${ID}-name".+?\\d+`)
         const summonURLRegex = new RegExp(`${ID.replace(/(\d)(\d)/, '$1/$2')}".+?img-fix-summon.+?src="(.+?)"`, 's')
 
-        const summonInfo = data.find(info => info.get('summonName') === String(rawHtml.match(nameRegex)))
+        const summon = database.summons.find(summon => summon.get('name') === String(rawHtml.match(nameRegex)))
         const level = parseInt(String(String(rawHtml.match(levelRegex)).match(/(?<=Lvl\s)\d+/i)))
         const uncapRank = parseInt(String(rawHtml.match(uncapRegex)))
         let uncaps = uncapRank

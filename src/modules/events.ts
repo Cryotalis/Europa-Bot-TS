@@ -1,7 +1,7 @@
 import { waterAdvantage, earthAdvantage, windAdvantage, fireAdvantage, darkAdvantage, lightAdvantage, eventsBackgroundTop, eventsBackgroundMiddle, eventsBackgroundBottom, upcomingEventsText } from '../data/assets.js'
 import { Canvas, CanvasRenderingContext2D, Image, createCanvas, loadImage } from 'canvas'
 import { dateDiff, getSimpleDate, parseOffset } from './time.js'
-import { botID, client, fontFallBacks, servers } from '../bot.js'
+import { botID, client, fontFallBacks } from '../bot.js'
 import { capFirstLetter} from './string.js'
 import { wrapText } from './image.js'
 import axios from 'axios'
@@ -9,6 +9,7 @@ import md5 from 'md5'
 import { GuildScheduledEvent, GuildScheduledEventCreateOptions, GuildScheduledEventEditOptions, GuildScheduledEventStatus } from 'discord.js'
 import { decode } from 'html-entities'
 import { recurringEvents, relayEvent } from '../data/events.js'
+import { database } from '../data/database.js'
 
 export interface event {
     title: string
@@ -217,7 +218,7 @@ export function getEventDuration(event: event){
  * Creates scheduled events according to the in-game events for each subscribed server
  */
 export async function createScheduledEvents(){
-    const subscribedServers = servers.filter(server => server.get('events') && !/None/.test(server.get('events')))
+    const subscribedServers = database.servers.filter(server => server.get('events') && !/None/.test(server.get('events')))
     const events = currentEvents.concat(upcomingEvents)
     const threeMinsLater = new Date(new Date().valueOf() + 3 * 60000)
 

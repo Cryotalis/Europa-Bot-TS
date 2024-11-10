@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { servers } from '../bot.js'
 import { categoryRole } from '../data/variables.js'
+import { database } from '../data/database.js'
 
 export const command = {
 	data: new SlashCommandBuilder()
@@ -9,7 +9,7 @@ export const command = {
 		.addBooleanOption(option => option.setName('raidroles').setDescription('Whether or not to instead show the raid roles list'))
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
-		const server = servers.find(server => server.get('guildID') === interaction.guildId)
+		const server = database.servers.find(server => server.get('guildID') === interaction.guildId)
 		const serverRoles: categoryRole[] = JSON.parse(server?.get('roles') ?? '[]')
 		const assignableRoles = serverRoles.filter(role => role.category)
 		const raidRoles = serverRoles.filter(role => role.raids)

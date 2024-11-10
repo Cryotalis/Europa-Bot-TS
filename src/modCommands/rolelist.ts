@@ -1,8 +1,8 @@
 import { ChatInputCommandInteraction, EmbedBuilder, GuildMember, Role, SlashCommandBuilder } from 'discord.js'
-import { servers } from '../bot.js'
 import { findBestCIMatch } from '../modules/string.js'
 import { categoryRole } from '../data/variables.js'
 import { raids } from '../data/raids.js'
+import { database } from '../data/database.js'
 
 export const command = {
 	data: new SlashCommandBuilder()
@@ -52,7 +52,7 @@ export const command = {
 		const raidName = interaction.options.getString('raid')!
 
 		const clientUser = interaction.guild?.members.me! as GuildMember
-		const server = servers.find(server => server.get('guildID') === interaction.guildId)
+		const server = database.servers.find(server => server.get('guildID') === interaction.guildId)
 		if (!server) return interaction.reply('Unable to access settings for your server.')
 
 		const serverRolesConfig: categoryRole[] = server.get('roles') ? JSON.parse(server.get('roles')) : []

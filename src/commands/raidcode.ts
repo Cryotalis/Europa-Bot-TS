@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { servers } from '../bot.js'
 import { categoryRole } from '../data/variables.js'
+import { database } from '../data/database.js'
 
 export const command = {
 	data: new SlashCommandBuilder()
@@ -30,7 +30,7 @@ export const command = {
 		if (raidName === 'Lvl 200 Uriel') raidName = 'Lvl 200 Four Primarchs'
 		if (raidName === 'Lvl 120 Huanglong') raidName = 'Lvl 120 Huanglong & Qilin'
 
-		const server = servers.find(server => server.get('guildID') === interaction.guildId)
+		const server = database.servers.find(server => server.get('guildID') === interaction.guildId)
 		const roles: categoryRole[] = JSON.parse(server?.get('roles') ?? "[]")
 		const autoRaidRole = roles.find(role => role.raids?.includes(raidName ?? ""))
 		if (!raidRole && autoRaidRole) raidRole = await interaction.guild?.roles.fetch(autoRaidRole.id) ?? null
