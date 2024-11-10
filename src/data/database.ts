@@ -23,7 +23,7 @@ export interface itemData {
 }
 export interface characterData extends itemData { weaponName: string, weaponID: string }
 
-export let database: {
+export let database = {} as {
     serversTable: GoogleSpreadsheetWorksheet
     usersTable: GoogleSpreadsheetWorksheet
     charactersTable: GoogleSpreadsheetWorksheet
@@ -62,7 +62,6 @@ export async function connectDatabase(){
 	])
 
 	console.log(`Database connection successful for Shard #${currentShardID}`)
-    console.log(`Summons length: ${database.summons.length}`)
 }
 
 /**
