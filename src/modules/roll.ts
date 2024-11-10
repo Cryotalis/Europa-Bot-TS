@@ -41,15 +41,40 @@ export function gacha(crystals: number, singles: number, tenparts: number, targe
         if (target && items.includes(target)) break
     }
 
-    // const specialSummons = data.map(row => row.nonTixableSummons)
-    const specialCharacters = data.map(row => row.get('limitedCharacters'))
-    items.sort((a, b) => a?.character && a?.rarity === 'Rare' ? -1 : b?.character && b.rarity === 'Rare' ? 1 : 0)
-    items.sort((a, b) => (a?.rarity === 'S Rare' ? -1 : b?.rarity === 'S Rare' ? 1 : 0))
-    items.sort((a, b) => a?.character && a?.rarity === 'S Rare' ? -1 : b?.character && b.rarity === 'S Rare' ? 1 : 0)
-    items.sort((a, b) => (a?.rarity === 'SS Rare' ? -1 : b?.rarity === 'SS Rare' ? 1 : 0))
-    items.sort((a, b) => a?.character && a?.rarity === 'SS Rare' ? -1 : b?.character && b.rarity === 'SS Rare' ? 1 : 0)
-    // items.sort((a, b) => specialSummons.includes(a?.name) ? -1 : specialSummons.includes(b?.name) ? 1 : 0)
-    items.sort((a, b) => specialCharacters.includes(a?.character) ? -1 : specialCharacters.includes(b?.character) ? 1 : 0)
+    const specialSummonIDs = database.summons
+        .filter(summon => {
+            const isPremium = /premium/i.test(summon.get('obtain'))
+            const isSeasonal = /summer|yukata|holiday/i.test(summon.get('obtain'))
+            const isSpecialSeries = /optimus|six dragons/i.test(summon.get('series'))
+            const isNonTicketable = /non-ticketable/i.test(summon.get('obtain'))
+
+            return isPremium && (isSeasonal || isSpecialSeries || isNonTicketable)
+        })
+        .map(summon => summon.get('id'))
+
+    const specialWeaponIDs = database.characters
+        .filter(char => char.get('series'))
+        .map(char => char.get('id'))
+
+    /**
+     * Hierarchy:
+     * Target Character (If applicable)
+     * Special Characters (Any character that is part of a series (e.g. Grand, Zodiac, Summer, Yukata, etc.))
+     * Special Summons (Limited and Optimus/6D)
+     * SSR Characters
+     * SSR Summons
+     * SR Characters
+     * SR Non-Char Weapons and Summons
+     * R Characters
+     * R Non-Char Weapons and Summons
+     */
+    items.sort((a, b) => a.character && a.rarity === 'Rare' ? -1 : b.character && b.rarity === 'Rare' ? 1 : 0)
+    items.sort((a, b) => a.rarity === 'S Rare' ? -1 : b.rarity === 'S Rare' ? 1 : 0)
+    items.sort((a, b) => a.character && a.rarity === 'S Rare' ? -1 : b.character && b.rarity === 'S Rare' ? 1 : 0)
+    items.sort((a, b) => a.rarity === 'SS Rare' ? -1 : b.rarity === 'SS Rare' ? 1 : 0)
+    items.sort((a, b) => a.character && a.rarity === 'SS Rare' ? -1 : b.character && b.rarity === 'SS Rare' ? 1 : 0)
+    items.sort((a, b) => specialSummonIDs.includes(a.id) ? -1 : specialSummonIDs.includes(b.id) ? 1 : 0)
+    items.sort((a, b) => specialWeaponIDs.includes(a.id) ? -1 : specialWeaponIDs.includes(b.id) ? 1 : 0)
     if (target) items.sort((a, b) => a === target ? -1 : b === target ? 1 : 0)
 
     return items
