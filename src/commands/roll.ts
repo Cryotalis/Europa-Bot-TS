@@ -47,7 +47,9 @@ export const command = {
 		)
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
-		if (!database) return interaction.reply('Database connection failed. Please try again later.')
+		if (!database?.characters || !database?.summons) {
+			return interaction.reply('Database connection failed. Please try again later.')
+		}
 
 		await interaction.deferReply()
 		const command = interaction.options.getSubcommand()

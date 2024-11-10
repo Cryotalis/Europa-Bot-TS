@@ -7,7 +7,7 @@ import { database } from "../data/database.js"
  * Adds new servers to the database and logs the server in the log channel
  */
 export async function handleNewGuild(guild: Guild) {
-	if (!database) return
+	if (!database?.servers) return
 	const server = database.servers.find(server => server.get('guildID') === guild.id)
 	if (!server){
 		const newServer = await database.serversTable.addRow({guildName: guild.name, guildID: `'${guild.id}`})
@@ -24,7 +24,7 @@ export async function handleNewGuild(guild: Guild) {
  * Handles auto-roles and sends a join message (if enabled) when a member joins the server
  */
 export async function handleNewMember(member: GuildMember) {
-	const server = database.servers.find(server => server.get('guildID') === member.guild.id)
+	const server = database?.servers.find(server => server.get('guildID') === member.guild.id)
 	if (!server?.get('greeting')) return
 
 	const clientUser = member.guild.members.me! as GuildMember
@@ -52,7 +52,7 @@ export async function handleNewMember(member: GuildMember) {
  * Sends a leave or ban message when a member leaves the server
  */
 export async function handleRemovedMember(member: GuildMember | PartialGuildMember) {
-	const server = database.servers.find(server => server.get('guildID') === member.guild.id)
+	const server = database?.servers.find(server => server.get('guildID') === member.guild.id)
 	if (!server?.get('greeting')) return
 
 	const greetingSettings: greetingConfig = JSON.parse(server.get('greeting'))

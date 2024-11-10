@@ -30,7 +30,9 @@ export const command = {
 
 		await interaction.deferReply()
 
-		if (!database) return interaction.editReply('Unable to connect to database. Please try again in a few seconds.')
+		if (!database?.summons) {
+			return interaction.editReply('Unable to connect to database. Please try again in a few seconds.')
+		}
 
 		if (playerID) return loadSummons(interaction, playerID)
 		
