@@ -42,11 +42,8 @@ export async function getAllSummonInfo(rawHtml: string){
             if (81  <= level && level <= 100) uncaps = 3
             if (101 <= level && level <= 150) uncaps = 4
             if (151 <= level && level <= 200) uncaps = 5
-            if (201 <= level && level <= 210) uncaps = 6
-            if (211 <= level && level <= 220) uncaps = 7
-            if (221 <= level && level <= 230) uncaps = 8
-            if (231 <= level && level <= 240) uncaps = 9
-            if (241 <= level && level <= 250) uncaps = 10
+
+            if (level > 200) uncaps = Math.ceil((level - 200) / 10)
         } else {
             uncaps += 2
         }
@@ -55,7 +52,7 @@ export async function getAllSummonInfo(rawHtml: string){
             image: privateSummon,
             level: level,
             uncaps: uncaps,
-            maxUncaps: summonInfo?.get('ulbDate') ? 5 : summonInfo?.get('flbDate') ? 4 : 3
+            maxUncaps: summon?.get('maxUncaps') ?? 3
         })
     })
 
@@ -82,14 +79,18 @@ export function drawStars(ctx: CanvasRenderingContext2D, spacing: number, size: 
     ctx.shadowOffsetX = 2
     ctx.shadowOffsetY = 2
 
-    x += (5 - maxUncaps) * spacing // This ensures that the placement of the stars is consistent no matter the number of stars that need to be drawn
-    for (let i = 0; i < maxUncaps; i++) {
-        if (uncaps > 5 && i < uncaps - 5)  {ctx.drawImage(transcendenceStars[5], x + spacing * i, y, size, size); continue}
-        if (uncaps > 5 && i >= uncaps - 5) {ctx.drawImage(transcendenceStars[6], x + spacing * i, y, size, size); continue}
-        if (i < 3 && i < uncaps)   ctx.drawImage(regularStar, x + spacing * i, y, size, size)
-        if (i < 3 && i >= uncaps)  ctx.drawImage(blankRegularStar, x + spacing * i, y, size, size)
-        if (i >= 3 && i < uncaps)  ctx.drawImage(blueStar, x + spacing * i, y, size, size)
-        if (i >= 3 && i >= uncaps) ctx.drawImage(blankBlueStar, x + spacing * i, y, size, size)
+    // Move the cursor to the right (increase the x value) if fewer stars need to be drawn
+    const maxStars = Math.min(maxUncaps, 5)
+    x += (5 - maxStars) * spacing
+
+    for (let i = 1; i <= maxStars; i++) {
+        if (maxUncaps === 6 && i <= uncaps)  {ctx.drawImage(transcendenceStars[5], x + spacing * i, y, size, size); continue}
+        if (maxUncaps === 6 && i > uncaps) {ctx.drawImage(transcendenceStars[6], x + spacing * i, y, size, size); continue}
+
+        if (i < 3 && i <= uncaps)   ctx.drawImage(regularStar, x + spacing * i, y, size, size)
+        if (i < 3 && i > uncaps)  ctx.drawImage(blankRegularStar, x + spacing * i, y, size, size)
+        if (i >= 3 && i <= uncaps)  ctx.drawImage(blueStar, x + spacing * i, y, size, size)
+        if (i >= 3 && i > uncaps) ctx.drawImage(blankBlueStar, x + spacing * i, y, size, size)
     }
     ctx.restore()
 }
