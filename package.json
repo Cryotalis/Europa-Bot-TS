@@ -6,8 +6,9 @@
   "main": "./prod/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "tsc && node --env-file=.env ./prod/index.js",
-    "postinstall": "npm run build"
+    "start": "node -r dotenv/config ./prod/index.js",
+    "postinstall": "npm run build",
+    "startup": "tsc && node -r dotenv/config ./prod/index.js"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,7 @@
     "axios": "^1.7.7",
     "canvas": "^3.0.0-rc2",
     "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5",
     "google-auth-library": "^9.14.2",
     "google-spreadsheet": "^4.1.4",
     "html-entities": "^2.5.2",
