@@ -33,6 +33,7 @@ export async function getAllSummonInfo(rawHtml: string){
         const level = parseInt(String(String(rawHtml.match(levelRegex)).match(/(?<=Lvl\s)\d+/i)))
         const uncapRank = parseInt(String(rawHtml.match(uncapRegex)))
         let uncaps = uncapRank
+        let maxUncaps = Math.min(parseInt(summon?.get('maxUncaps') ?? 3), 5)
         summonImageLinks.push(rawHtml.match(summonURLRegex)![1])
 
         if (uncapRank === 0 || level > 200 || isNaN(uncapRank)) { // Guess the summon uncap level based on level if the summon isn't at least mlb
@@ -43,7 +44,10 @@ export async function getAllSummonInfo(rawHtml: string){
             if (101 <= level && level <= 150) uncaps = 4
             if (151 <= level && level <= 200) uncaps = 5
 
-            if (level > 200) uncaps = Math.ceil((level - 200) / 10)
+            if (level > 200) {
+                uncaps = Math.ceil((level - 200) / 10)
+                maxUncaps = 6
+            }
         } else {
             uncaps += 2
         }
@@ -52,7 +56,7 @@ export async function getAllSummonInfo(rawHtml: string){
             image: privateSummon,
             level: level,
             uncaps: uncaps,
-            maxUncaps: parseInt(summon?.get('maxUncaps')) ?? 3
+            maxUncaps: maxUncaps
         })
     })
 
