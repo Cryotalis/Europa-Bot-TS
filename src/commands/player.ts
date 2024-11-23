@@ -62,7 +62,7 @@ export const command = {
 			interaction.editReply({embeds: [searchEmbed]})
 			players = await axios.get(`https://gbfdata.com/user/search?q=${urlencode(playerName)}&is_fulltext=1`).then(({data}) => {
 				const playerData = String(data.match(/(?<=\/thead>).+(?=<\/table)/s))
-				const playerMatches = playerData.matchAll(/href=".+?(\d+)">\n(.+?)\n<.+?"num">(\d+)/gs)
+				const playerMatches = playerData.matchAll(/href=".+?(\d+)">.+?\b(.+?)\b.+?>(\d+)/gs)
 				return [...playerMatches].map(player => ({userid: player[1], name: player[2], level: player[3]}))
 			}).catch(() => undefined)
 		}
