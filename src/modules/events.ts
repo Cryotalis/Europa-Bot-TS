@@ -132,7 +132,7 @@ export async function processEvents(events: rawEvent[]): Promise<event[]>{
         if (event.name === 'Maintenance') {
             imgURL = 'https://raw.githubusercontent.com/Cryotalis/Europa-Bot-TS/main/assets/Maintenance%20Event.png'
         } else if (event.image){
-            imgName = decode(capFirstLetter(event.image).replace(/ /g, '_'))
+            imgName = decode(capFirstLetter(event.image).replace(/ /g, '_').replace(/__/g, '_'))
             imgHash = md5(imgName)
             imgURL = `https://gbf.wiki/images/${imgHash.charAt(0)}/${imgHash.slice(0,2)}/${encodeURI(imgName)}`
         }
