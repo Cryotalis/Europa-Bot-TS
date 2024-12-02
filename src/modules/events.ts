@@ -15,8 +15,8 @@ export interface event {
     title: string
     id: string
     type: string
-    start: Date | null
-    end: Date | null
+    start: Date
+    end: Date
     duration: string
     wikiURL: string | null
     image: Image | null
@@ -64,7 +64,7 @@ export async function loadEvents(){
         .map((match: string) => parseInt(match))
 
     if (maintStart && maintEnd && (maintStart * 1000) > new Date().getTime()) {
-        rawEvents.push({
+        rawEvents.unshift({
             name: 'Maintenance',
             _ID: 0,
             'time known': 'yes',
@@ -76,7 +76,7 @@ export async function loadEvents(){
         })
     }
 
-    const events = (await processEvents(rawEvents)).reverse()
+    const events = (await processEvents(rawEvents)).sort((a, b) => a.start.getTime() - b.start.getTime())
     currentEvents = events.filter(event => event.type === 'Current')
     upcomingEvents = events.filter(event => event.type === 'Upcoming')
 
@@ -124,8 +124,8 @@ export async function processEvents(events: rawEvent[]): Promise<event[]>{
     })
 
     const processedEvents = filteredEvents.slice(0, 10).map(async event => {
-        const eventStart = event['utc start'] ? new Date(event['utc start'] * 1000) : null
-        const eventEnd = event['utc end'] ? new Date(event['utc end'] * 1000) : null
+        const eventStart = new Date(event['utc start'] * 1000)
+        const eventEnd = new Date(event['utc end'] * 1000)
         const eventMonth = new Date((event['utc start'] + (now.getTimezoneOffset() + parseOffset('UTC +9')) * 60) * 1000).toLocaleDateString('en-US', {month: 'long'})
         let imgName, imgHash, imgURL = null
 
