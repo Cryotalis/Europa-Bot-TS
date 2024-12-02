@@ -59,23 +59,24 @@ export async function loadEvents(){
     if (!rawEvents) return setTimeout(() => loadEvents(), 60000)
 
     const {data: maintData} = await axios.get('https://gbf.wiki/Template:MainPage/Notice', {headers: {'User-Agent': 'Europa Bot'}})
-    const [ _, maintStart, maintEnd ] = maintData.match(/data-start="(\d+)" data-end="(\d+)" data-text-start="The game will undergo maintenance/)
-    let maintEvent = {} as rawEvent
+    const [ _, maintStart, maintEnd ] = maintData
+        .match(/data-start="(\d+)" data-end="(\d+)" data-text-start="The game will undergo maintenance/)
+        .map((match: string) => parseInt(match))
 
     if (maintStart && maintEnd && (maintStart * 1000) > new Date().getTime()) {
-        maintEvent = {
+        rawEvents.push({
             name: 'Maintenance',
             _ID: 0,
             'time known': 'yes',
             'utc start': maintStart * 1000,
             'utc end': maintEnd * 1000,
             'wiki page': null,
-            image: 'https://raw.githubusercontent.com/Cryotalis/Europa-Bot-TS/main/assets/Maintenance%20Event.png',
+            image: null,
             element: null
-        }
+        })
     }
 
-    const events = (await processEvents(rawEvents.concat(maintEvent))).reverse()
+    const events = (await processEvents(rawEvents)).reverse()
     currentEvents = events.filter(event => event.type === 'Current')
     upcomingEvents = events.filter(event => event.type === 'Upcoming')
 
@@ -128,7 +129,9 @@ export async function processEvents(events: rawEvent[]): Promise<event[]>{
         const eventMonth = new Date((event['utc start'] + (now.getTimezoneOffset() + parseOffset('UTC +9')) * 60) * 1000).toLocaleDateString('en-US', {month: 'long'})
         let imgName, imgHash, imgURL = null
 
-        if (event.image){
+        if (event.name === 'Maintenance') {
+            imgURL = 'https://raw.githubusercontent.com/Cryotalis/Europa-Bot-TS/main/assets/Maintenance%20Event.png'
+        } else if (event.image){
             imgName = decode(capFirstLetter(event.image).replace(/ /g, '_'))
             imgHash = md5(imgName)
             imgURL = `https://gbf.wiki/images/${imgHash.charAt(0)}/${imgHash.slice(0,2)}/${encodeURI(imgName)}`
@@ -149,7 +152,7 @@ export async function processEvents(events: rawEvent[]): Promise<event[]>{
         }
     })
 
-    return await Promise.all(processedEvents)
+    return Promise.all(processedEvents)
 }
 
 /** Determines the element advantage and the element advantage image from the event data. */
