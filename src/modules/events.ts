@@ -58,6 +58,8 @@ export async function loadEvents(){
     ).catch(() => ({data: null}))
     if (!rawEvents) return setTimeout(() => loadEvents(), 60000)
 
+    rawEvents.sort((a, b) => a['utc start'] - b['utc start'])
+
     const {data: maintData} = await axios.get('https://gbf.wiki/Template:MainPage/Notice', {headers: {'User-Agent': 'Europa Bot'}})
     const [ _, maintStart, maintEnd ] = maintData
         .match(/data-start="(\d+)" data-end="(\d+)" data-text-start="The game will undergo maintenance/)
@@ -76,7 +78,7 @@ export async function loadEvents(){
         })
     }
 
-    const events = (await processEvents(rawEvents)).sort((a, b) => a.start.getTime() - b.start.getTime())
+    const events = await processEvents(rawEvents)
     currentEvents = events.filter(event => event.type === 'Current')
     upcomingEvents = events.filter(event => event.type === 'Upcoming')
 
