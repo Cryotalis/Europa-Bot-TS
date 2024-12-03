@@ -68,8 +68,8 @@ export async function loadEvents(){
             name: 'Maintenance',
             _ID: 0,
             'time known': 'yes',
-            'utc start': maintStart * 1000,
-            'utc end': maintEnd * 1000,
+            'utc start': maintStart,
+            'utc end': maintEnd,
             'wiki page': null,
             image: null,
             element: null
