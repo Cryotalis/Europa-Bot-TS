@@ -22,27 +22,27 @@
   "homepage": "https://github.com/Cryotalis/Europa-Bot-TS#readme",
   "dependencies": {
     "@google-cloud/translate": "^8.5.0",
-    "axios": "^1.7.7",
+    "axios": "^1.7.8",
     "canvas": "^3.0.0-rc2",
     "discord.js": "^14.16.3",
-    "dotenv": "^16.4.5",
-    "google-auth-library": "^9.14.2",
+    "dotenv": "^16.4.6",
+    "google-auth-library": "^9.15.0",
     "google-spreadsheet": "^4.1.4",
     "html-entities": "^2.5.2",
     "md5": "^2.3.0",
     "node-cron": "^3.0.3",
     "octokit": "^4.0.2",
-    "puppeteer": "^23.7.0",
+    "puppeteer": "^23.9.0",
     "string-similarity": "^4.0.4",
     "urlencode": "^2.0.0",
-    "uuid": "^11.0.2"
+    "uuid": "^11.0.3"
   },
   "devDependencies": {
     "@types/md5": "^2.3.5",
-    "@types/node": "^22.8.7",
+    "@types/node": "^22.10.1",
     "@types/node-cron": "^3.0.11",
     "@types/string-similarity": "^4.0.2",
     "@types/urlencode": "^1.1.4",
-    "typescript": "^5.6.3"
+    "typescript": "^5.7.2"
   }
 }
