@@ -315,6 +315,6 @@ export async function createScheduledEvents(){
         })
 
         // Delete any remaining obsolete events
-        obsoleteEvents.forEach(event => event.delete())
+        obsoleteEvents.filter(event => event.name !== 'Maintenance').forEach(event => event.delete())
     })
 }
