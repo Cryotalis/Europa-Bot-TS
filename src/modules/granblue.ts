@@ -31,14 +31,14 @@ export async function getAllSummonInfo(rawHtml: string){
     summonIDs.forEach(ID => {
         const nameRegex = new RegExp(`(?<=summon${ID}-name" class="prt-fix-name" name=").+?(?=">)`)
         const uncapRegex = new RegExp(`(?<=summon${ID}-info" class="prt-fix-info bless-rank)\\d`)
-        const levelRegex = new RegExp(`summon${ID}-name".+?\\d+`)
+        const levelRegex = new RegExp(`summon${ID}-name".+?(\\d+)`)
         const summonURLRegex = new RegExp(`${ID.replace(/(\d)(\d)/, '$1/$2')}".+?img-fix-summon.+?src="(.+?)"`, 's')
 
         const summon = database.summons.find(summon => summon.get('name') === String(rawHtml.match(nameRegex)))
-        const level = parseInt(String(String(rawHtml.match(levelRegex)).match(/(?<=Lvl\s)\d+/i)))
+        const level = parseInt(String(rawHtml.match(levelRegex)?.[1]))
         const uncapRank = parseInt(String(rawHtml.match(uncapRegex)))
         let uncaps = uncapRank
-        let maxUncaps = Math.min(parseInt(summon?.get('maxUncaps') ?? 3), 5)
+        let maxUncaps = isNaN(uncapRank) ? NaN : Math.min(parseInt(summon?.get('maxUncaps') ?? 3), 5)
         summonImageLinks.push(rawHtml.match(summonURLRegex)![1])
 
         if (uncapRank === 0 || level > 200 || isNaN(uncapRank)) { // Guess the summon uncap status based on level
