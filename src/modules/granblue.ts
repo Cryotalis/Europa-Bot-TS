@@ -1,6 +1,11 @@
+import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
 import { CanvasRenderingContext2D, Image, loadImage } from 'canvas'
-import { blankBlueStar, blankRegularStar, blueStar, privateSummon, regularStar, transcendenceStars } from '../data/assets.js'
+import { compareTwoStrings } from 'string-similarity'
+import axios from 'axios'
+import urlencode from 'urlencode'
 import { database } from '../data/database.js'
+import { blankBlueStar, blankRegularStar, blueStar, privateSummon, regularStar, transcendenceStars } from '../data/assets.js'
+import { showMenu } from './menu.js'
 
 /**
  * Parses raw HTML and returns an array containing information for each support summon the player has set.
@@ -36,7 +41,7 @@ export async function getAllSummonInfo(rawHtml: string){
         let maxUncaps = Math.min(parseInt(summon?.get('maxUncaps') ?? 3), 5)
         summonImageLinks.push(rawHtml.match(summonURLRegex)![1])
 
-        if (uncapRank === 0 || level > 200 || isNaN(uncapRank)) { // Guess the summon uncap level based on level if the summon isn't at least mlb
+        if (uncapRank === 0 || level > 200 || isNaN(uncapRank)) { // Guess the summon uncap status based on level
             if (1   <= level && level <= 40)  uncaps = 0
             if (41  <= level && level <= 60)  uncaps = 1
             if (61  <= level && level <= 80)  uncaps = 2
@@ -104,4 +109,49 @@ export function drawStars(ctx: CanvasRenderingContext2D, spacing: number, size: 
         ctx.drawImage(star, xPos, yPos, size, size)
     }
     ctx.restore()
+}
+
+/**
+ * Searches for a player by name via https://gbfdata.com and returns their player ID. 
+ * 
+ * - Displays a menu allowing the user to pick from multiple options if necessary.
+ * - Replies to the original interaction with an error message if no players were found or if gbfdata is unavailable.
+ */
+export async function findPlayer(interaction: ChatInputCommandInteraction, playerName: string) {
+    const searchEmbed = new EmbedBuilder()
+        .setTitle(`Searching for "${playerName}" <a:loading:763160594974244874>`)
+        .setColor('Blue')
+        .setAuthor({
+            name: 'Player Search',
+            iconURL: 'https://upload.wikimedia.org/wikipedia/en/e/e5/Granblue_Fantasy_logo.png'
+        })
+        .setFooter({text: 'https://gbfdata.com/', iconURL: 'https://gbf.wiki/images/8/81/Bait_Chunk_square.jpg'})
+
+    await interaction.editReply({embeds: [searchEmbed]})
+    
+    // Search https://gbfdata.com for players
+    let players = await axios.get(`https://gbfdata.com/user/search?q=${urlencode(playerName)}&is_fulltext=1`).then(({data}) => {
+        const playerData = String(data.match(/(?<=\/thead>).+(?=<\/table)/s))
+        const playerMatches = playerData.matchAll(/href=".+?(\d+)">\n\s+(.+?)\n.+?"num">(\d+)/gs)
+        return [...playerMatches].map(player => ({userid: player[1], name: player[2], level: player[3]}))
+    }).catch(() => undefined)
+
+    if (!players || players.length === 0) {
+        interaction.editReply({
+            content: players
+                ? `I could not find any players named "${playerName}". Please adjust your spelling or capitalization and try again.`
+                : 'Player search is currently unavailable. Please try again later.',
+            embeds: []
+        })
+        return
+    }
+    
+    if (players.length === 1) return players[0].userid
+
+    players.sort((a, b) => parseInt(b.level) - parseInt(a.level))
+    players.sort((a, b) => compareTwoStrings(b.name, playerName) - compareTwoStrings(a.name, playerName))
+    const formattedPlayers = players.map(player => `${player.name} Rank ${player.level} (${player.userid})`)
+
+    const userChoice = await showMenu(interaction, playerName, formattedPlayers)
+    return userChoice ? players[userChoice].userid : undefined
 }
