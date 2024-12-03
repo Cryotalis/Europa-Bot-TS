@@ -28,6 +28,8 @@ export async function loadSummons(interaction: ChatInputCommandInteraction, play
         return await page.close()
     }
 
+	page.close()
+
 	playerEmbed.setTitle('Drawing Support Summons <a:loading:763160594974244874>')
     interaction.editReply({embeds: [playerEmbed]})
 
