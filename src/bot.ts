@@ -61,22 +61,9 @@ export async function registerCommands() {
 }
 
 export let browser: Browser
-export let jsessionID: string // Required for player name search
-async function getJSessionID(){
-	const page = await browser.newPage()
-	const res = await page.goto('http://info.gbfteamraid.fun/web/about', { timeout: 30000 }).catch(() => null)
-	if (!res) return
-	await page.click('#login')
-	await page.waitForNetworkIdle()
-	jsessionID = (await page.cookies())[0].value
-	await page.close()
-}
-
 export async function startPuppeteer(){
 	browser = await launch({args: ['--single-process', '--no-zygote', '--no-sandbox']})
 	console.log(`Puppeteer browser launched for Shard #${currentShardID}`)
-	getJSessionID()
-	schedule('0 * * * *', () => getJSessionID())
 }
 
 async function updateCounter() {
