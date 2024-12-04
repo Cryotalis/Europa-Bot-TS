@@ -304,8 +304,11 @@ export async function createScheduledEvents(){
             )
 
             if (existingEvent.name !== event.name) editOptions.name = event.name
-            if (existingEvent.description !== event.description) editOptions.description = event.description
             if (existingEvent.entityMetadata !== event.entityMetadata) editOptions.entityMetadata = event.entityMetadata
+            if (existingEvent.description !== event.description) {
+                editOptions.description = event.description
+                editOptions.image = event.image
+            }
             if (eventTimeChanged && existingEvent.scheduledStartAt! > new Date()) {
                 editOptions.scheduledStartTime = event.scheduledStartTime
                 editOptions.scheduledEndTime = event.scheduledEndTime
