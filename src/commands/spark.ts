@@ -119,10 +119,17 @@ export const command = {
 			await interaction.reply(errorMsg || summary)
 		}
 		else if (command === 'background'){
-			const {errorMsg, imageLink} = await getImageLink(linkInput, imageInput)
-			if (errorMsg) return interaction.reply(errorMsg)
-			user.set('background', imageLink)
-			await interaction.reply('Spark background set.')
+			if (imageInput || linkInput) {
+				let imageLink = await getImageLink((imageInput ?? linkInput)!).catch(errorMsg => { 
+					interaction.reply(errorMsg)
+				})
+				if (!imageLink) return
+
+				user.set('background', imageLink)
+				await interaction.reply('Spark background set.')
+			} else {
+				return interaction.reply('You must provide an image link or an image upload!')
+			}
 		}
 		else if (command === 'reset'){
 			user.assign({...user.toObject() as userData, crystals: '0', mobaCoin: '0', tickets: '0', tenParts: '0', rolls: '0'})

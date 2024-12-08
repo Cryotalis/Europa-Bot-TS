@@ -3,36 +3,36 @@ import { CanvasGradient, CanvasPattern, CanvasRenderingContext2D, CanvasTextAlig
 import { Attachment } from 'discord.js'
 
 /**
- * Takes a link or image, fetches the direct link to the image, then validates and returns the image link.
+ * Fetches an image link from an Attachment image. If given an image URL, fetches an image link from that URL.
+ * - Indirect Imgur links will return a direct image link.
  * - Imgur Albums, Galleries, and Topics links will return the link to the first image in the group.
  */
-export async function getImageLink(url?: string | null, image?: Attachment | null){
-    if (!url && !image) return {errorMsg: 'You must provide either an image link or upload!', imageLink: ''}
-    if (url && image) url = undefined
-
+export async function getImageLink(image: string | Attachment){
     let imageLink = ''
-    if (url){
-        if (url.includes('i.imgur.com') || !url.includes('imgur.com')) imageLink = url
-        else if (/(imgur\.com\/)(gallery|a|t)/i.test(url)) {
-            const albumHash = url.match(/com\/(?:gallery|a|t\/.+?)\/(.+)/)![1]
-            const {data: {data}} = await axios.get(`https://api.imgur.com/3/album/${albumHash}/images`, {headers: {Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`}})
+    if (typeof image === 'string'){  
+        const config = { headers: { Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}` } }
+        if (/(imgur\.com\/)(gallery|a|t)/i.test(image)) { // Handle imgur albums/galleries
+            const albumHash = image.match(/\w+$/)
+            const { data: { data } } = await axios.get(`https://api.imgur.com/3/album/${albumHash}/images`, config)
             imageLink = data[0].link
-        } else {
-            const imageHash = url.match(/(?<=com\/).+/)
-            const {data: {data}} = await axios.get(`https://api.imgur.com/3/image/${imageHash}`, {headers: {Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`}})
+        } else if (/(?<=\/)imgur\.com/i.test(image)) { // Handle indirect imgur links
+            const imageHash = image.match(/\w+$/)
+            const { data: { data } } = await axios.get(`https://api.imgur.com/3/image/${imageHash}`, config)
             imageLink = data.link
+        } else {
+            imageLink = image
         }
-    } 
-    
-    if (image) {
-        if (!/image\/(jpeg|png|gif)/.test(image.contentType!)) return {errorMsg: 'The image must either be a JPG, PNG, or GIF.', imageLink: ''}
+    } else {
+        if (!/image\/(jpeg|png|gif)/.test(image.contentType!)) {
+            throw new Error('The image must either be a JPG, PNG, or GIF.')
+        }
         imageLink = image.url
     }
 
-    const validImage = await loadImage(imageLink).catch(() => undefined)
-    if (!validImage) return {errorMsg: 'I could not access the image you provided.', imageLink: ''}
+    const validImage = await loadImage(imageLink).catch(() => {})
+    if (!validImage) throw new Error('I could not access the image you provided.')
 
-    return {errorMsg: '', imageLink: imageLink}
+    return imageLink
 }
 
 interface CanvasTextInfo {
