@@ -92,63 +92,71 @@ export const command = {
 		const imageInput = interaction.options.getAttachment('image')
 		const command = interaction.options.getSubcommand()
 
-		if (command === 'profile'){
-			const targetUser = userInput
-				? database.users.find(user => 
-					user.get('userID') === userInput.id || user.get('username') === userInput.username
-				) 
-				: user
-			if (!targetUser) return interaction.reply('I could not find a spark profile for the user you specified.')
-			if (interaction.options.getBoolean('embed')) interaction.reply(getEmbedProfile(targetUser, interaction.member as GuildMember))
-			else {
-				await interaction.deferReply()
-				if (!user) return interaction.editReply('I could not find your spark profile.')
-				interaction.editReply(await getProfile(targetUser, userInput ?? interaction.user))
-			}
-		}
-		else if (/\bset\b|add|subtract/.test(command)){
-			if (shorthandInput) {
-				const shorthandMatch = shorthandInput.replace(',', '').match(/\d+/g)!
-				crystals = shorthandMatch[0] ? parseInt(shorthandMatch[0]) : null
-				tickets = shorthandMatch[1] ? parseInt(shorthandMatch[1]) : null
-				tenparts = shorthandMatch[2] ? parseInt(shorthandMatch[2]) : null
-				mobaCoin = shorthandMatch[3] ? parseInt(shorthandMatch[3]) : null
-			}
-
-			const {errorMsg, summary} = manageSpark(user, command, crystals, mobaCoin, tickets, tenparts)
-			await interaction.reply(errorMsg || summary)
-		}
-		else if (command === 'background'){
-			if (!imageInput && !linkInput) {
-				return interaction.reply('You must provide an image link or an image upload!')
-			}
-
-			let imageLink = await getImageLink((imageInput ?? linkInput)!).catch(errorMsg => { 
-				interaction.reply(errorMsg)
-			})
-			if (!imageLink) return
-
-			user.set('background', imageLink)
-			await interaction.reply('Spark background set.')
-		}
-		else if (command === 'reset'){
-			user.assign({...user.toObject() as userData, crystals: '0', mobaCoin: '0', tickets: '0', tenParts: '0', rolls: '0'})
-			await interaction.reply('Spark profile reset.')
-		}
-		else if (command === 'delete'){
-			user.assign({
-				userID: 'deleted',
-				username: 'deleted',
-				crystals: 'deleted',
-				mobaCoin: 'deleted',
-				tickets: 'deleted',
-				tenParts: 'deleted',
-				rolls: 'deleted',
-				background: 'deleted',
-				sparkTitle: 'deleted'
-			})
-			// await user.delete()
-			await interaction.reply('Spark profile deleted.')
+		switch (command) {
+			case 'profile':
+				const targetUser = userInput
+					? database.users.find(user => 
+						user.get('userID') === userInput.id || user.get('username') === userInput.username
+					) 
+					: user
+				if (!targetUser) {
+					return interaction.reply('I could not find a spark profile for the user you specified.')
+				}
+				
+				if (interaction.options.getBoolean('embed')) {
+					interaction.reply(getEmbedProfile(targetUser, interaction.member as GuildMember))
+				} else {
+					await interaction.deferReply()
+					if (!user) return interaction.editReply('I could not find your spark profile.')
+					interaction.editReply(await getProfile(targetUser, userInput ?? interaction.user))
+				}
+				break
+			case 'set':
+			case 'add':
+			case 'subtract':
+				if (shorthandInput) {
+					const shorthandMatch = shorthandInput.replace(',', '').match(/\d+/g)!
+					crystals = shorthandMatch[0] ? parseInt(shorthandMatch[0]) : null
+					tickets	 = shorthandMatch[1] ? parseInt(shorthandMatch[1]) : null
+					tenparts = shorthandMatch[2] ? parseInt(shorthandMatch[2]) : null
+					mobaCoin = shorthandMatch[3] ? parseInt(shorthandMatch[3]) : null
+				}
+	
+				const { errorMsg, summary } = manageSpark(user, command, crystals, mobaCoin, tickets, tenparts)
+				await interaction.reply(errorMsg || summary)
+				break
+			case 'background':
+				if (!imageInput && !linkInput) {
+					return interaction.reply('You must provide an image link or an image upload!')
+				}
+	
+				let imageLink = await getImageLink((imageInput ?? linkInput)!).catch(errorMsg => { 
+					interaction.reply(errorMsg)
+				})
+				if (!imageLink) return
+	
+				user.set('background', imageLink)
+				await interaction.reply('Spark background set.')
+				break
+			case 'reset':
+				user.assign({...user.toObject() as userData, crystals: '0', mobaCoin: '0', tickets: '0', tenParts: '0', rolls: '0'})
+				await interaction.reply('Spark profile reset.')
+				break
+			case 'delete':
+				user.assign({
+					userID: 'deleted',
+					username: 'deleted',
+					crystals: 'deleted',
+					mobaCoin: 'deleted',
+					tickets: 'deleted',
+					tenParts: 'deleted',
+					rolls: 'deleted',
+					background: 'deleted',
+					sparkTitle: 'deleted'
+				})
+				// await user.delete()
+				await interaction.reply('Spark profile deleted.')
+				break
 		}
 
 		if (command !== 'profile') await user.save()
