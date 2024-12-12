@@ -64,9 +64,11 @@ export const command = {
 		)
 	,
 	async execute(interaction: ChatInputCommandInteraction) {
-		let user = database.users.find(user => 
-			user.get('userID') === interaction.user.id || user.get('username') === interaction.user.username
-		)
+		function findUser(id: string, username: string) {
+			return database.users.find(user => user.get('userID') === id || user.get('username') === username)
+		}
+
+		let user = findUser(interaction.user.id, interaction.user.username)
 		if (!user){
 			user = await database.usersTable.addRow({
 				username: interaction.user.username,
@@ -94,11 +96,7 @@ export const command = {
 
 		switch (command) {
 			case 'profile':
-				const targetUser = userInput
-					? database.users.find(user => 
-						user.get('userID') === userInput.id || user.get('username') === userInput.username
-					) 
-					: user
+				const targetUser = userInput ? findUser(userInput.id, userInput.username) : user
 				if (!targetUser) {
 					return interaction.reply('I could not find a spark profile for the user you specified.')
 				}
