@@ -128,6 +128,8 @@ export const command = {
 					return interaction.reply('You must provide an image link or an image upload!')
 				}
 	
+				await interaction.deferReply()
+	
 				let imageLink = await getImageLink((imageInput ?? linkInput)!).catch(errorMsg => { 
 					interaction.reply(errorMsg)
 				})
@@ -138,7 +140,7 @@ export const command = {
 					const imageInfo = {
 						type: 'url',
 						image: imageLink,
-						title: `${interaction.user.username}'s Spark Background`,
+						title: `Spark Background for ${interaction.user.username}`,
 						description: `User ID: ${interaction.user.id}`
 					}
 					
@@ -149,7 +151,7 @@ export const command = {
 				}
 	
 				user.set('background', imageLink)
-				await interaction.reply('Spark background set.')
+				await interaction.editReply('Spark background set.')
 				break
 			case 'reset':
 				user.assign({...user.toObject() as userData, crystals: '0', mobaCoin: '0', tickets: '0', tenParts: '0', rolls: '0'})
