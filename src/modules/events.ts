@@ -61,21 +61,23 @@ export async function loadEvents(){
     rawEvents.sort((a, b) => a['utc start'] - b['utc start'])
 
     const {data: maintData} = await axios.get('https://gbf.wiki/Template:MainPage/Notice', {headers: {'User-Agent': 'Europa Bot'}})
-    const [ _, maintStart, maintEnd ] = maintData
-        .match(/data-start="(\d+)" data-end="(\d+)" data-text-start="The game will undergo maintenance/)
-        .map((match: string) => parseInt(match))
-
-    if (maintStart && maintEnd && (maintStart * 1000) > new Date().getTime()) {
-        rawEvents.unshift({
-            name: 'Maintenance',
-            _ID: 0,
-            'time known': 'yes',
-            'utc start': maintStart,
-            'utc end': maintEnd,
-            'wiki page': null,
-            image: null,
-            element: null
-        })
+    if (/maintenance/i.test(maintData)) {
+        const [ _, maintStart, maintEnd ] = maintData
+            .match(/data-start="(\d+)" data-end="(\d+)" data-text-start="The game will undergo maintenance/)
+            .map((match: string) => parseInt(match))
+    
+        if (maintStart && maintEnd && (maintStart * 1000) > new Date().getTime()) {
+            rawEvents.unshift({
+                name: 'Maintenance',
+                _ID: 0,
+                'time known': 'yes',
+                'utc start': maintStart,
+                'utc end': maintEnd,
+                'wiki page': null,
+                image: null,
+                element: null
+            })
+        }
     }
 
     const events = await processEvents(rawEvents)
