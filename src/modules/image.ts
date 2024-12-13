@@ -81,3 +81,42 @@ export function wrapText(textInfo: CanvasTextInfo, text: string, textX: number, 
     ctx.fillText(line, textX, textY)
     ctx.restore()
 }
+
+/**
+ * @param image - Binary file, base64 data, or url for an image/video (up to 10mb)
+ * @param album - ID of the album you want to add the image/video to. Deletehash for anonymous albums
+ * @param type - file, url, base64, or raw
+ */
+interface imgurImgInfo {
+    image: string
+    album?: string
+    type?: string
+    name?: string
+    title?: string
+    description?: string
+}
+
+interface imgurUploadResponse {
+    id: string
+    deletehash: string
+    account_id: string
+    account_url: string
+    type: string
+    link: string
+}
+
+/**
+ * Upload an image to an Imgur account
+ */
+export async function uploadImage(imgInfo: imgurImgInfo, accessToken: string) {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${accessToken}`
+        }
+    }
+
+    const { data: { data }} = await axios.post<{data: imgurUploadResponse}>('https://api.imgur.com/3/image', imgInfo, config)
+        .catch(() => { throw new Error('Failed to upload image. Please try again later.') })
+
+    return data
+}
