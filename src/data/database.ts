@@ -23,15 +23,18 @@ export interface itemData {
 }
 export interface characterData extends itemData { weaponName: string, weaponID: string }
 
-export let database = {} as {
+export const database = {} as {
     serversTable: GoogleSpreadsheetWorksheet
     usersTable: GoogleSpreadsheetWorksheet
     charactersTable: GoogleSpreadsheetWorksheet
     summonsTable: GoogleSpreadsheetWorksheet
+    variablesTable: GoogleSpreadsheetWorksheet
+    
     servers: Array<GoogleSpreadsheetRow<serverData>>
     users: Array<GoogleSpreadsheetRow<userData>>
     characters: Array<GoogleSpreadsheetRow<characterData>>
     summons: Array<GoogleSpreadsheetRow<itemData>>
+    variables: Array<GoogleSpreadsheetRow<{key: string, value: string}>>
 }
 
 const serviceAccountAuth = new JWT({
@@ -44,21 +47,24 @@ export async function connectDatabase(){
     const gsheetsDB = new GoogleSpreadsheet(process.env.PRIVATE_DB_ID!, serviceAccountAuth)
     await gsheetsDB.loadInfo()
 
-    database.serversTable = gsheetsDB.sheetsByTitle['Servers']
-    database.usersTable = gsheetsDB.sheetsByTitle['Users']
+    database.serversTable    = gsheetsDB.sheetsByTitle['Servers']
+    database.usersTable      = gsheetsDB.sheetsByTitle['Users']
     database.charactersTable = gsheetsDB.sheetsByTitle['Characters']
-    database.summonsTable = gsheetsDB.sheetsByTitle['Summons']
+    database.summonsTable    = gsheetsDB.sheetsByTitle['Summons']
+    database.variablesTable  = gsheetsDB.sheetsByTitle['Variables']
 
 	;[
         database.servers,
         database.users,
         database.characters,
-        database.summons
+        database.summons,
+        database.variables
     ] = await Promise.all([
 		database.serversTable.getRows(),
 		database.usersTable.getRows(),
         database.charactersTable.getRows(),
-        database.summonsTable.getRows()
+        database.summonsTable.getRows(),
+        database.variablesTable.getRows()
 	])
 
 	console.log(`Database connection successful for Shard #${currentShardID}`)
