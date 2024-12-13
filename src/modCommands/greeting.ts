@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder, GuildBasedChannel, GuildMember, Role, SlashCommandBuilder } from 'discord.js'
-import { getImageLink } from '../modules/image.js'
+import { getImageLink, uploadImage } from '../modules/image.js'
 import { findBestCIMatch, titleize } from '../modules/string.js'
 import { greetingConfig, makeGreetingImage, toggleableGreetingSetting } from '../modules/greeting.js'
 import { database } from '../data/database.js'
@@ -111,8 +111,32 @@ export const command = {
 			greetingSettings.channelID = channel.id
 			interaction.reply(`Greeting channel set to <#${channel.id}>`)
 		} else if (command === 'background'){
-			const {errorMsg, imageLink} = await getImageLink(linkInput, imageInput)
-			if (errorMsg) return interaction.reply(errorMsg)
+			if (!imageInput && !linkInput) {
+				return interaction.reply('You must provide an image link or an image upload!')
+			}
+
+			await interaction.deferReply()
+
+			let imageLink = await getImageLink((imageInput ?? linkInput)!).catch(errorMsg => {
+				interaction.reply(errorMsg)
+			})
+			if (!imageLink) return
+
+			// Upload to imgur and fetch a permalink instead, since discord links expire
+			if (/discordapp/i.test(imageLink)) {
+				const imageInfo = {
+					type: 'url',
+					image: imageLink,
+					title: `Greeting Background for ${interaction.guild?.name} (uploaded by ${interaction.user.username})`,
+					description: `Server ID: ${interaction.guild?.id}\nUser ID: ${interaction.user.id}`
+				}
+				
+				const imgurImage = await uploadImage(imageInfo).catch(errorMsg => { interaction.reply(errorMsg) })
+				if (!imgurImage) return
+					
+				imageLink = imgurImage.link
+			}
+			
 			greetingSettings.background = imageLink
 			interaction.reply('Join image background set.')
 		} else if (command === 'autorole'){
