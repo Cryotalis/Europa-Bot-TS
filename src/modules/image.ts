@@ -30,7 +30,7 @@ export async function getImageLink(image: string | Attachment){
         imageLink = image.url
     }
 
-    const validImage = await loadImage(imageLink).catch(() => {})
+    const validImage = await loadImage(imageLink).catch(() => undefined)
     if (!validImage) throw 'I could not access the image you provided.'
 
     return imageLink
