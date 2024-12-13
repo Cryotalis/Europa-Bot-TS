@@ -110,7 +110,7 @@ interface imgurUploadResponse {
  * Upload an image to an Imgur account
  */
 export async function uploadImage(imgInfo: imgurImgInfo) {
-    const accessToken = database.variables.find(v => v.get('key') === 'IMGUR_ACCESS_TOKEN')
+    const accessToken = database.variables.find(v => v.get('key') === 'IMGUR_ACCESS_TOKEN')?.get('value')
     const config = {
         headers: {
             Authorization: `Bearer ${accessToken}`
