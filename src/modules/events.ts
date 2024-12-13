@@ -61,7 +61,7 @@ export async function loadEvents(){
     rawEvents.sort((a, b) => a['utc start'] - b['utc start'])
 
     const {data: maintData} = await axios.get('https://gbf.wiki/Template:MainPage/Notice', {headers: {'User-Agent': 'Europa Bot'}})
-    if (/maintenance/i.test(maintData)) {
+    if (/The game will undergo maintenance/i.test(maintData)) {
         const [ _, maintStart, maintEnd ] = maintData
             .match(/data-start="(\d+)" data-end="(\d+)" data-text-start="The game will undergo maintenance/)
             .map((match: string) => parseInt(match))
