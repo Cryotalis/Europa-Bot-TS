@@ -21,7 +21,7 @@ export async function getAllSummonInfo(rawHtml: string){
         '40', '41', // Wind summon IDs
         '50', '51', // Light summon IDs
         '60', '61', // Dark summon IDs
-        '00', '01', // Misc summon IDs
+        '00', '01', '02', '03' // Misc summon IDs
     ]
 
     const summonPrivate = /Support Summons<\/div>\n\n.+<div class="txt-private">Private/.test(rawHtml)
