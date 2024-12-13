@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js'
-import { getImageLink } from '../modules/image.js'
+import { getImageLink, uploadImage } from '../modules/image.js'
 import { calcDraws, getEmbedProfile, getProfile, manageSpark } from '../modules/spark.js'
 import { round } from '../modules/number.js'
 import { database, userData } from '../data/database.js'
@@ -132,6 +132,21 @@ export const command = {
 					interaction.reply(errorMsg)
 				})
 				if (!imageLink) return
+
+				// Upload to imgur and fetch a permalink instead, since discord links expire
+				if (/discordapp/i.test(imageLink)) {
+					const imageInfo = {
+						type: 'url',
+						image: imageLink,
+						title: `${interaction.user.username}'s Spark Background`,
+						description: `User ID: ${interaction.user.id}`
+					}
+					
+					const imgurImage = await uploadImage(imageInfo).catch(errorMsg => { interaction.reply(errorMsg) })
+					if (!imgurImage) return
+						
+					imageLink = imgurImage.link
+				}
 	
 				user.set('background', imageLink)
 				await interaction.reply('Spark background set.')
