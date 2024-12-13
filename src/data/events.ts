@@ -31,4 +31,6 @@ export const recurringEvents = [
     "Exo Ifrit Crucible",
     "Exo Corow Crucible",
     "Exo Diablo Crucible",
+
+    "Records of the Ten"
 ]
