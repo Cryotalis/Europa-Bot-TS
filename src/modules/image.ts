@@ -123,3 +123,21 @@ export async function uploadImage(imgInfo: imgurImgInfo) {
 
     return data
 }
+
+/**
+ * Generates a new Imgur access token
+ */
+export async function getAccessToken() {
+    const params = {
+        refresh_token: process.env.IMGUR_REFRESH_TOKEN, 
+        client_id: process.env.IMGUR_CLIENT_ID,
+        client_secret: process.env.IMGUR_CLIENT_SECRET,
+        grant_type: 'refresh_token'
+    }
+
+    const { data: { access_token } } = await axios.post<{access_token: string }>('https://api.imgur.com/oauth2/token', params)
+        .catch(() => ({ data: { access_token: undefined } }))
+    if (!access_token) throw 'Failed to retrieve Access Token'
+    
+    return access_token
+}
