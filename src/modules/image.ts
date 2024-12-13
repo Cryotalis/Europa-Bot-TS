@@ -25,13 +25,13 @@ export async function getImageLink(image: string | Attachment){
         }
     } else {
         if (!/image\/(jpeg|png|gif)/.test(image.contentType!)) {
-            throw new Error('The image must either be a JPG, PNG, or GIF.')
+            throw 'The image must either be a JPG, PNG, or GIF.'
         }
         imageLink = image.url
     }
 
     const validImage = await loadImage(imageLink).catch(() => {})
-    if (!validImage) throw new Error('I could not access the image you provided.')
+    if (!validImage) throw 'I could not access the image you provided.'
 
     return imageLink
 }
@@ -118,7 +118,8 @@ export async function uploadImage(imgInfo: imgurImgInfo) {
     }
 
     const { data: { data }} = await axios.post<{data: imgurUploadResponse}>('https://api.imgur.com/3/image', imgInfo, config)
-        .catch(() => { throw new Error('Failed to upload image. Please try again later.') })
+        .catch(() => ({ data: { data: undefined } }))
+    if (!data) throw 'Failed to upload image. Please try again later.'
 
     return data
 }
