@@ -69,12 +69,12 @@ export async function loadProfile(interaction: ChatInputCommandInteraction, play
 
     const summons = await getAllSummonInfo(bodyHTML)
     summons.forEach((summon, i) => {
-        const summonXCoords = [370, 475, 585, 690, 370, 475, 585, 690, 370, 475, 585, 690, 470, 600]
-        const summonYCoords = [ 50,  50,  50,  50, 115, 115, 115, 115, 180, 180, 180, 180, 275, 275]
+        const summonXCoords = [370, 475, 585, 690, 370, 475, 585, 690, 370, 475, 585, 690, 371, 477, 583, 689]
+        const summonYCoords = [ 50,  50,  50,  50, 115, 115, 115, 115, 180, 180, 180, 180, 275, 275, 275, 275]
         ctx.drawImage(summon.image, summonXCoords[i], summonYCoords[i], 105, 60)
 
-        const starXCoords = [398, 503, 613, 718, 398, 503, 613, 718, 398, 503, 613, 718, 498, 628]
-        const starYCoords = [ 91,  91,  91,  91, 156, 156, 156, 156, 221, 221, 221, 221, 316, 316]
+        const starXCoords = summonXCoords.map(x => x + 28)
+        const starYCoords = summonYCoords.map(y => y + 41)
         drawStars(ctx, 15, 17, summon.uncaps, summon.maxUncaps, starXCoords[i], starYCoords[i])
     })
 

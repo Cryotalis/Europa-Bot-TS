@@ -37,7 +37,7 @@ export async function loadSummons(interaction: ChatInputCommandInteraction, play
     const rank = bodyHTML.match(/(?<=\sRank\s)\d+/)
 
 	// Draw player name, ID, and template
-	const canvas = createCanvas(1375, 475)
+	const canvas = createCanvas(1540, 475)
 	const ctx = canvas.getContext('2d')
 
 	ctx.drawImage(summonsTemplate, 0, 0)
@@ -47,22 +47,22 @@ export async function loadSummons(interaction: ChatInputCommandInteraction, play
 	ctx.strokeStyle = 'black'
 	ctx.fillStyle = 'white'
 	ctx.lineWidth = 2
-	ctx.strokeText(`${name} Rank ${rank}`, 467, 420)
-	ctx.strokeText(`ID: ${playerID}`, 908, 420)
-	ctx.fillText(`${name} Rank ${rank}`, 467, 420)
-	ctx.fillText(`ID: ${playerID}`, 908, 420)
+	ctx.strokeText(`${name} Rank ${rank}`, 549, 425)
+	ctx.fillText(`${name} Rank ${rank}`, 549, 425)
+	ctx.strokeText(`ID: ${playerID}`, 990, 425)
+	ctx.fillText(`ID: ${playerID}`, 990, 425)
 
 	ctx.shadowColor = '#000000'
     ctx.shadowOffsetX = ctx.shadowOffsetY = 4
 
 	const summons = await getAllSummonInfo(bodyHTML)
 	summons.forEach((summon, i) => {
-		const summonXCoords = [ 50,  50, 234, 234, 419, 419, 604, 604, 788, 788, 973, 973, 1158, 1158]
-		const summonYCoords = [155, 265, 155, 265, 155, 265, 155, 265, 155, 265, 155, 265,  155,  265]
+		const summonXCoords = [ 36,  36, 221, 221, 406, 406, 591, 591, 776, 776, 961, 961, 1146, 1146, 1331, 1331]
+		const summonYCoords = [155, 265, 155, 265, 155, 265, 155, 265, 155, 265, 155, 265,  155,  265,  155,  265]
 		ctx.drawImage(summon.image, summonXCoords[i], summonYCoords[i], 168, 96)
 
-		const xCoordinates = [ 88,  88, 272, 272, 457, 457, 642, 642, 826, 826, 1011, 1011, 1196, 1196]
-		const yCoordinates = [220, 330, 220, 330, 220, 330, 220, 330, 220, 330,  220,  330,  220,  330]
+		const xCoordinates = summonXCoords.map(x => x + 38)
+		const yCoordinates = summonYCoords.map(y => y + 65)
 		drawStars(ctx, 25, 29, summon.uncaps, summon.maxUncaps, xCoordinates[i], yCoordinates[i])
 	})
 
