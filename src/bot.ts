@@ -10,7 +10,8 @@ import { registerFont } from 'canvas'
 import { handleNewGuild, handleNewMember, handleRemovedMember } from './events/guild.js'
 import { handleDeletedRole } from './events/role.js'
 import { handleAutocomplete, handleCommand } from './events/interaction.js'
-import { connectDatabase, getCharacterData, getSummonData } from './data/database.js'
+import { connectDatabase, database, getCharacterData, getSummonData } from './data/database.js'
+import { getAccessToken } from './modules/image.js'
 
 export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration], rest: {timeout: 60000}})
 export const botID = '585514230967566338'
@@ -104,6 +105,16 @@ client.on('ready', async () => {
 			getCharacterData()
 			getSummonData()
 			updateCounter()
+		})
+
+		// Regenerate a new Imgur access token every week
+		schedule('0 0 * * 0', async () => {
+			const newAccessToken = await getAccessToken().catch(() => undefined)
+			if (newAccessToken) {
+				const imgurAccessToken = database.variables.find(v => v.get('key') === 'IMGUR_ACCESS_TOKEN')!
+				imgurAccessToken.set('value', newAccessToken)
+				imgurAccessToken.save()
+			}
 		})
 	}
 })
