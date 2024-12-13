@@ -8,7 +8,7 @@ import axios from 'axios'
 import md5 from 'md5'
 import { GuildScheduledEvent, GuildScheduledEventCreateOptions, GuildScheduledEventEditOptions, GuildScheduledEventStatus } from 'discord.js'
 import { decode } from 'html-entities'
-import { recurringEvents, relayEvent } from '../data/events.js'
+import { recurringEvents } from '../data/events.js'
 import { database } from '../data/database.js'
 
 export interface event {
@@ -225,7 +225,7 @@ export function getEventDuration(event: event){
  * Creates scheduled events according to the in-game events for each subscribed server
  */
 export async function createScheduledEvents(){
-    const subscribedServers = database.servers.filter(server => server.get('events') && !/None/.test(server.get('events')))
+    const subscribedServers = database.servers.filter(server => server.get('events') && server.get('events') !== '[]')
     const events = currentEvents.concat(upcomingEvents)
     const threeMinsLater = new Date(new Date().valueOf() + 3 * 60000)
 
@@ -265,10 +265,28 @@ export async function createScheduledEvents(){
         const eventsManager = client.guilds.cache.get(server.get('guildID'))?.scheduledEvents
         if (!eventsManager) return
 
-        const relayEvents: relayEvent[] = JSON.parse(server.get('events'))
-        const filteredEvents = /All/.test(server.get('events'))
-            ? scheduledEvents
-            : scheduledEvents.filter(({name}) => relayEvents.some(relayEvent => name.includes(relayEvent.name)))
+        const relayEvents: string[] = JSON.parse(server.get('events') || '[]')
+        
+        let filteredEvents: GuildScheduledEventCreateOptions[]
+        switch (relayEvents[0]) {
+            case 'All': filteredEvents = scheduledEvents; break;
+            case 'All Recurring': 
+            case 'All Non-Recurring': 
+                const recurring: GuildScheduledEventCreateOptions[] = []
+                const nonRecurring: GuildScheduledEventCreateOptions[] = []
+                for (const event of scheduledEvents) {
+                    recurringEvents.some(name => event.name.includes(name))
+                        ? recurring.push(event)
+                        : nonRecurring.push(event)
+                }
+
+                filteredEvents = /Non/.test(relayEvents[0]) ? nonRecurring : recurring
+                break
+            default:
+                filteredEvents = scheduledEvents.filter(({name}) => {
+                    return relayEvents.some(eventName => name.includes(eventName))
+                })
+        }
 
         const filteredEventNames = filteredEvents.map(e => e.name)
         const existingEvents: GuildScheduledEvent<GuildScheduledEventStatus>[] = []
