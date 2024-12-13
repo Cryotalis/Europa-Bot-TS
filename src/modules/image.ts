@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { CanvasGradient, CanvasPattern, CanvasRenderingContext2D, CanvasTextAlign, loadImage } from 'canvas'
 import { Attachment } from 'discord.js'
+import { database } from '../data/database.js'
 
 /**
  * Fetches an image link from an Attachment image. If given an image URL, fetches an image link from that URL.
@@ -108,7 +109,8 @@ interface imgurUploadResponse {
 /**
  * Upload an image to an Imgur account
  */
-export async function uploadImage(imgInfo: imgurImgInfo, accessToken: string) {
+export async function uploadImage(imgInfo: imgurImgInfo) {
+    const accessToken = database.variables.find(v => v.get('key') === 'IMGUR_ACCESS_TOKEN')
     const config = {
         headers: {
             Authorization: `Bearer ${accessToken}`
