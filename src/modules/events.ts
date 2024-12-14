@@ -271,16 +271,9 @@ export async function createScheduledEvents(){
         switch (relayEvents[0]) {
             case 'All': filteredEvents = scheduledEvents; break;
             case 'All Recurring': 
-            case 'All Non-Recurring': 
-                const recurring: GuildScheduledEventCreateOptions[] = []
-                const nonRecurring: GuildScheduledEventCreateOptions[] = []
-                for (const event of scheduledEvents) {
-                    recurringEvents.some(name => event.name.includes(name))
-                        ? recurring.push(event)
-                        : nonRecurring.push(event)
-                }
-
-                filteredEvents = /Non/.test(relayEvents[0]) ? nonRecurring : recurring
+                filteredEvents = scheduledEvents.filter(({name}) => {
+                    return recurringEvents.some(eventName => name.includes(eventName))
+                })
                 break
             default:
                 filteredEvents = scheduledEvents.filter(({name}) => {
