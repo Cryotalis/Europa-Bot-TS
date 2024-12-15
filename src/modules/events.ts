@@ -222,14 +222,13 @@ export function getEventDuration(event: event){
 }
 
 /**
- * Creates scheduled events according to the in-game events for each subscribed server
+ * Creates a list of Discord scheduled events according to the in-game events
  */
-export async function createScheduledEvents(){
-    const subscribedServers = database.servers.filter(server => server.get('events') && server.get('events') !== '[]')
+async function makeScheduledEvents(){
     const events = currentEvents.concat(upcomingEvents)
     const threeMinsLater = new Date(new Date().valueOf() + 3 * 60000)
-
-    if (!events.length) return setTimeout(() => createScheduledEvents(), 60000)
+    
+    if (!events.length) return
 
     const scheduledEvents: GuildScheduledEventCreateOptions[] = events.map(event => {
         if (!event.start || !event.end || event.duration.startsWith('In')) return {} as GuildScheduledEventCreateOptions
@@ -260,16 +259,27 @@ export async function createScheduledEvents(){
             entityMetadata: {location: event.elementAdvantage ?? 'No Element Advantage'}
         }
     }).filter(event => event.name)
- 
-    subscribedServers.forEach(server => {
-        const eventsManager = client.guilds.cache.get(server.get('guildID'))?.scheduledEvents
-        if (!eventsManager) return
+
+    return scheduledEvents
+}
+
+/**
+ * Relays scheduled GBF events to each subscribed server
+ */
+export async function relayEvents() {
+    const scheduledEvents = await makeScheduledEvents()
+    if (!scheduledEvents) return setTimeout(() => relayEvents(), 60000)
+
+    const subscribedServers = database.servers.filter(server => server.get('events') && server.get('events') !== '[]')
+    subscribedServers.forEach(async server => {
+        const eventsManager = (await client.guilds.fetch(server.get('guildID'))).scheduledEvents
+        const serverEvents = await eventsManager.fetch()
 
         const relayEvents: string[] = JSON.parse(server.get('events') || '[]')
         
         let filteredEvents: GuildScheduledEventCreateOptions[]
         switch (relayEvents[0]) {
-            case 'All': filteredEvents = scheduledEvents; break;
+            case 'All': filteredEvents = scheduledEvents; break
             case 'All Recurring': 
                 filteredEvents = scheduledEvents.filter(({name}) => {
                     return recurringEvents.some(eventName => name.includes(eventName))
@@ -285,8 +295,7 @@ export async function createScheduledEvents(){
         const existingEvents: GuildScheduledEvent<GuildScheduledEventStatus>[] = []
         const obsoleteEvents: GuildScheduledEvent<GuildScheduledEventStatus>[] = []
 
-        eventsManager.cache
-            .filter(({creatorId, scheduledEndAt}) => {
+        serverEvents.filter(({creatorId, scheduledEndAt}) => {
                 return (creatorId === botID) && (new Date() < (scheduledEndAt ?? new Date(0)))
             }).forEach(event => {
                 filteredEventNames.includes(event.name)

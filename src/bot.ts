@@ -4,7 +4,7 @@ import { inspect } from 'util'
 import { readdirSync } from 'node:fs'
 import { Browser, launch } from 'puppeteer'
 import { loadAssets } from './data/assets.js'
-import { createScheduledEvents, loadEvents } from './modules/events.js'
+import { loadEvents, relayEvents } from './modules/events.js'
 import { getBannerData } from './modules/banner.js'
 import { registerFont } from 'canvas'
 import { handleNewGuild, handleNewMember, handleRemovedMember } from './events/guild.js'
@@ -94,7 +94,7 @@ client.on('ready', async () => {
 		getBannerData()
 		await connectDatabase()
 		await loadEvents()
-		createScheduledEvents()
+		relayEvents()
 	})
 	
 	if (currentShardID === homeServerShardID) {
