@@ -231,7 +231,7 @@ async function makeScheduledEvents(){
     if (!events.length) return
 
     const scheduledEvents: GuildScheduledEventCreateOptions[] = events.map(event => {
-        if (!event.start || !event.end || event.duration.startsWith('In')) return {} as GuildScheduledEventCreateOptions
+        if (!event.start || !event.end || new Date() >= event.end || event.duration.startsWith('In')) return {} as GuildScheduledEventCreateOptions
         
         // Resize the image to better fit Discord's event image frame
         let canvas
@@ -299,12 +299,12 @@ export async function relayEvents() {
         const obsoleteEvents: GuildScheduledEvent<GuildScheduledEventStatus>[] = []
 
         serverEvents.filter(({creatorId, scheduledEndAt}) => {
-                return (creatorId === botID) && (new Date() < (scheduledEndAt ?? new Date(0)))
-            }).forEach(event => {
-                filteredEventNames.includes(event.name)
-                    ? existingEvents.push(event)
-                    : obsoleteEvents.push(event)
-            })
+            return (creatorId === botID) && (new Date() < (scheduledEndAt ?? new Date(0)))
+        }).forEach(event => {
+            filteredEventNames.includes(event.name)
+                ? existingEvents.push(event)
+                : obsoleteEvents.push(event)
+        })
 
         filteredEvents.forEach(event => {
             let existingEvent = existingEvents.find(({name}) => name === event.name)
