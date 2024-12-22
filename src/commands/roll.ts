@@ -42,7 +42,7 @@ export const command = {
 		.addSubcommand(subcommand =>
 			subcommand
 				.setName('until')
-				.setDescription('Draw using 10-Part Draws until you get a specific character, weapon, or summon')
+				.setDescription('Draw until you get a specific character, weapon, or summon')
 				.addStringOption(option => option.setName('target').setDescription("The character, weapon, or summon you're drawing for").setRequired(true))
 		)
 	,
@@ -95,7 +95,7 @@ export const command = {
 				modifier = "super mukku"
 				break
 			case 'until':
-				tenparts = Infinity
+				singles = Infinity
 				target = findTarget(targetInput)
 				if (typeof target === 'string') return interaction.editReply(`**${target}** is not available on the current banner.`)
 				break
