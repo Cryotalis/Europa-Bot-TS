@@ -159,15 +159,9 @@ export const command = {
 				break
 			case 'delete':
 				user.assign({
-					userID: 'deleted',
-					username: 'deleted',
-					crystals: 'deleted',
-					mobaCoin: 'deleted',
-					tickets: 'deleted',
-					tenParts: 'deleted',
-					rolls: 'deleted',
-					background: 'deleted',
-					sparkTitle: 'deleted'
+					userID: 'deleted', 		username: 'deleted', 	crystals: 'deleted', 	mobaCoin: 'deleted',
+					tickets: 'deleted',		tenParts: 'deleted',	rolls: 'deleted',		background: 'deleted',
+					sparkTitle: 'deleted',	reminders: 'deleted'
 				})
 				// await user.delete()
 				await interaction.reply('Spark profile deleted.')
