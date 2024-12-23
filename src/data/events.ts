@@ -1,8 +1,14 @@
-export interface relayEvent {
-    name: string,
-    roleID?: number,
-    channelID?: number,
-    time?: number
+/**
+ * - `eventName` - Name of the event
+ * - `roleID` - the ID of the role to ping in the reminder
+ * - `channelID` - the ID of the channel to ping in the reminder
+ * - `time` - time in milliseconds before the event ends to send the reminder
+ */
+export interface eventReminder {
+    eventName: string
+    time: number
+    channelID?: string
+    roleID?: string
 }
 
 export const recurringEvents = [
