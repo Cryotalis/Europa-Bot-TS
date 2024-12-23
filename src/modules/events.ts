@@ -6,9 +6,9 @@ import { capFirstLetter} from './string.js'
 import { wrapText } from './image.js'
 import axios from 'axios'
 import md5 from 'md5'
-import { GuildScheduledEvent, GuildScheduledEventCreateOptions, GuildScheduledEventEditOptions, GuildScheduledEventStatus } from 'discord.js'
+import { EmbedBuilder, GuildScheduledEvent, GuildScheduledEventCreateOptions, GuildScheduledEventEditOptions, GuildScheduledEventStatus, TextChannel } from 'discord.js'
 import { decode } from 'html-entities'
-import { recurringEvents } from '../data/events.js'
+import { eventReminder, recurringEvents } from '../data/events.js'
 import { database } from '../data/database.js'
 
 export interface event {
@@ -344,4 +344,62 @@ export async function relayEvents() {
         // Delete any remaining obsolete events
         obsoleteEvents.filter(event => event.name !== 'Maintenance').forEach(event => event.delete())
     })
+}
+
+/**
+ * Sends reminders to subscribed servers and users when GBF events are ending soon
+ */
+export async function sendEventReminders() {
+    const servers = database.servers.filter(server => server.get('reminders') && server.get('reminders') !== '[]')
+    const users = database.users.filter(user => user.get('reminders') && user.get('reminders') !== '[]')
+
+    function findReminder(reminders: eventReminder[], event: event) {
+        const isRecurringEvent = recurringEvents.some(eventName => event.title.includes(eventName))
+        switch (reminders[0].eventName) {
+            case 'All':             return reminders[0]
+            case 'All Recurring':   return isRecurringEvent ? reminders[0] : undefined
+            default:                return reminders.find(({eventName}) => event.title.includes(eventName))
+        }
+    }
+
+    function makeReminderEmbed(event: event) {
+        const reminderEmbed = new EmbedBuilder()
+            .setAuthor({name: 'Event Reminder'})
+            .setTitle(`${event.title} is Ending Soon!`)
+            .setDescription(`\`Time Remaining:\` ${dateDiff(new Date(), event.end)}\n[Event Wiki Page](${event.wikiURL})`)
+            .setImage(event.imageURL)
+            .setURL(event.wikiURL)
+            .setColor('Blue')
+
+        return reminderEmbed
+    }
+
+    for (const server of servers) {
+        const reminders: eventReminder[] = JSON.parse(server.get('reminders'))
+
+        for (const event of granblueEvents) {
+            const reminder = findReminder(reminders, event)
+            if (reminder && (new Date()).getTime() + reminder.time >= event.end.getTime()) {
+                const reminderGuild = client.guilds.cache.get(server.get('guildID'))!
+                const reminderChannel = await reminderGuild.channels.fetch(reminder.channelID!) as TextChannel
+                reminderChannel.send({
+                    content: reminder.roleID && `## <@&${reminder.roleID}>`, 
+                    allowedMentions: reminder.roleID ? {roles: [reminder.roleID]} : undefined,
+                    embeds: [makeReminderEmbed(event)]
+                })
+            }
+        }
+    }
+
+    for (const user of users) {
+        const reminders: eventReminder[] = JSON.parse(user.get('reminders'))
+
+        for (const event of granblueEvents) {
+            const reminder = findReminder(reminders, event)
+            if (reminder && (new Date()).getTime() + reminder.time >= event.end.getTime()) {
+                const targetUser = await client.users.fetch(user.get('userID'))
+                targetUser.send({embeds: [makeReminderEmbed(event)]})
+            }
+        }
+    }
 }
