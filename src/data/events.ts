@@ -11,6 +11,20 @@ export interface eventReminder {
     roleID?: string
 }
 
+export const eventChoices = [
+    {name: 'All Events (Overrides other options)', value: 'All'},
+    {name: 'All Recurring Events (Overrides other options)', value: 'All Recurring'},
+    {name: 'Unite and Fight', value: 'Unite and Fight'},
+    {name: 'Dread Barrage', value: 'Dread Barrage'},
+    {name: 'Rise of the Beasts', value: 'Rise of the Beasts'},
+    {name: 'Tower of Babyl', value: 'Tower of Babyl'},
+    {name: 'Proving Grounds', value: 'Proving Grounds'},
+    {name: 'Tales of Arcarum', value: 'Tales of Arcarum'},
+    {name: 'Exo Crucibles', value: 'Crucible'},
+    {name: 'Records of the Ten', value: 'Records of the Ten'},
+]
+
+
 export const recurringEvents = [
     "Unite and Fight",
     "Dread Barrage",
