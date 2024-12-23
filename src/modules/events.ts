@@ -350,6 +350,8 @@ export async function relayEvents() {
  * Sends reminders to subscribed servers and users when GBF events are ending soon
  */
 export async function sendEventReminders() {
+    if (!granblueEvents.length) return
+    
     const servers = database.servers.filter(server => server.get('reminders') && server.get('reminders') !== '[]')
     const users = database.users.filter(user => user.get('reminders') && user.get('reminders') !== '[]')
 
