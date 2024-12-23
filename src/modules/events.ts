@@ -36,6 +36,7 @@ export interface rawEvent {
 }
 export let currentEvents: event[] = []
 export let upcomingEvents: event[] = []
+export let granblueEvents: event[] = []
 export let eventsTemplate: Canvas | undefined
 
 /**
@@ -80,9 +81,9 @@ export async function loadEvents(){
         }
     }
 
-    const events = await processEvents(rawEvents)
-    currentEvents = events.filter(event => event.type === 'Current')
-    upcomingEvents = events.filter(event => event.type === 'Upcoming')
+    granblueEvents = await processEvents(rawEvents)
+    currentEvents = granblueEvents.filter(event => event.type === 'Current')
+    upcomingEvents = granblueEvents.filter(event => event.type === 'Upcoming')
 
     // Create the events image
     const canvasHeight = Math.ceil(currentEvents.length / 2) * 110 + Math.ceil(upcomingEvents.length / 2) * 110 + 50
@@ -225,12 +226,10 @@ export function getEventDuration(event: event){
  * Creates a list of Discord scheduled events according to the in-game events
  */
 async function makeScheduledEvents(){
-    const events = currentEvents.concat(upcomingEvents)
-    const threeMinsLater = new Date(new Date().valueOf() + 3 * 60000)
-    
-    if (!events.length) return
+    if (!granblueEvents.length) return
 
-    const scheduledEvents: GuildScheduledEventCreateOptions[] = events.map(event => {
+    const threeMinsLater = new Date(new Date().valueOf() + 3 * 60000)
+    const scheduledEvents: GuildScheduledEventCreateOptions[] = granblueEvents.map(event => {
         if (!event.start || !event.end || new Date() >= event.end || event.duration.startsWith('In')) return {} as GuildScheduledEventCreateOptions
         
         // Resize the image to better fit Discord's event image frame
