@@ -131,7 +131,7 @@ export const command = {
 				await interaction.deferReply()
 	
 				let imageLink = await getImageLink((imageInput ?? linkInput)!).catch(errorMsg => { 
-					interaction.reply(errorMsg)
+					interaction.editReply(errorMsg)
 				})
 				if (!imageLink) return
 
@@ -144,7 +144,7 @@ export const command = {
 						description: `User ID: ${interaction.user.id}`
 					}
 					
-					const imgurImage = await uploadImage(imageInfo).catch(errorMsg => { interaction.reply(errorMsg) })
+					const imgurImage = await uploadImage(imageInfo).catch(errorMsg => { interaction.editReply(errorMsg) })
 					if (!imgurImage) return
 						
 					imageLink = imgurImage.link
@@ -161,7 +161,7 @@ export const command = {
 				user.assign({
 					userID: 'deleted', 		username: 'deleted', 	crystals: 'deleted', 	mobaCoin: 'deleted',
 					tickets: 'deleted',		tenParts: 'deleted',	rolls: 'deleted',		background: 'deleted',
-					sparkTitle: 'deleted',	reminders: 'deleted'
+					sparkTitle: 'deleted',	reminders: '[]'
 				})
 				// await user.delete()
 				await interaction.reply('Spark profile deleted.')
