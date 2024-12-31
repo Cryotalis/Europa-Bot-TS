@@ -120,7 +120,7 @@ export function createGachaEmbed(items: item[], target?: item, modifier?: "gacha
 
 export function findTarget(target: string){
     const bannerItemNames = bannerData.items.map(item => item.name)
-    const bannerCharacterNames = bannerData.items.map(item => item.character)
+    const bannerCharacterNames = bannerData.items.map(item => item.character).filter(c => c)
     const characterNames = database.characters.map(char => char.get('name')).filter(c => c)
     const weaponNames = database.characters.map(item => item.get('weaponName')).filter(w => w)
     const summonNames = database.summons.map(summon => summon.get('name')).filter(s => s)
