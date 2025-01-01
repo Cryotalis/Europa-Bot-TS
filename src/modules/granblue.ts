@@ -32,7 +32,7 @@ export async function getAllSummonInfo(rawHtml: string){
         const nameRegex = new RegExp(`(?<=summon${ID}-name" class="prt-fix-name" name=").+?(?=">)`)
         const uncapRegex = new RegExp(`(?<=summon${ID}-info" class="prt-fix-info bless-rank)\\d`)
         const levelRegex = new RegExp(`summon${ID}-name".+?(\\d+)`)
-        const summonURLRegex = new RegExp(`${ID.replace(/(\d)(\d)/, '/$1/$2')}".+?img-fix-summon.+?src="(.+?)"`, 's')
+        const summonURLRegex = new RegExp(`summon/\\d+/${ID.replace(/(\d)(\d)/, '$1/$2')}".+?img-fix-summon.+?src="(.+?)"`, 's')
 
         const summon = database.summons.find(summon => summon.get('name') === String(rawHtml.match(nameRegex)))
         const level = parseInt(String(rawHtml.match(levelRegex)?.[1]))
