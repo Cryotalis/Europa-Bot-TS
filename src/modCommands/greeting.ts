@@ -118,7 +118,7 @@ export const command = {
 			await interaction.deferReply()
 
 			let imageLink = await getImageLink((imageInput ?? linkInput)!).catch(errorMsg => {
-				interaction.reply(errorMsg)
+				interaction.editReply(errorMsg)
 			})
 			if (!imageLink) return
 
@@ -131,14 +131,14 @@ export const command = {
 					description: `Server ID: ${interaction.guild?.id}\nUser ID: ${interaction.user.id}`
 				}
 				
-				const imgurImage = await uploadImage(imageInfo).catch(errorMsg => { interaction.reply(errorMsg) })
+				const imgurImage = await uploadImage(imageInfo).catch(errorMsg => { interaction.editReply(errorMsg) })
 				if (!imgurImage) return
 					
 				imageLink = imgurImage.link
 			}
 			
 			greetingSettings.background = imageLink
-			interaction.reply('Join image background set.')
+			interaction.editReply('Join image background set.')
 		} else if (command === 'autorole'){
 			if (!roleIDs) return interaction.reply('The roles you provided were invalid.')
 			const clientUser = interaction.guild?.members.me! as GuildMember
