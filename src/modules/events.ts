@@ -278,7 +278,7 @@ export async function relayEvents() {
         
         let filteredEvents: GuildScheduledEventCreateOptions[]
         switch (relayEvents[0]) {
-            case 'All': filteredEvents = scheduledEvents; break
+            case 'All': filteredEvents = [...scheduledEvents]; break
             case 'All Recurring': 
                 filteredEvents = scheduledEvents.filter(({name}) => {
                     return recurringEvents.some(eventName => name.includes(eventName))
