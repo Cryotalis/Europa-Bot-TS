@@ -291,7 +291,7 @@ export async function relayEvents() {
         }
 
         const maintEvent = scheduledEvents.find(({name}) => name === 'Maintenance')
-        if (maintEvent) filteredEvents.unshift(maintEvent)
+        if (maintEvent && !filteredEvents.includes(maintEvent)) filteredEvents.unshift(maintEvent)
 
         const filteredEventNames = filteredEvents.map(e => e.name)
         const existingEvents: GuildScheduledEvent<GuildScheduledEventStatus>[] = []
