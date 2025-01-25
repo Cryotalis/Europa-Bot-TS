@@ -7,12 +7,13 @@ import { capFirstLetter } from "../modules/string.js"
 import { rarityFullNames } from "./granblue.js"
 
 export interface serverData { 
-    guildName: string,  guildID: string, greeting: string,   roles: string, events: string, reminders: string 
+    guildName: string,  guildID: string,    greeting: string,   roles: string,  events: string,
+    reminders: string,  receivedReminders: string
 }
 export interface userData {
 	username: string,	userID: string,
-	crystals: string,	mobaCoin: string,   tickets: string,    tenParts: string,    rolls: string,
-    background: string, sparkTitle: string, reminders: string
+	crystals: string,	mobaCoin: string,   tickets: string,    tenParts: string,   rolls: string,
+    background: string, sparkTitle: string, reminders: string,  receivedReminders: string
 }
 export interface itemData {
     name: string
