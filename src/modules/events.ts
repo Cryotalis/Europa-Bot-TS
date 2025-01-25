@@ -350,8 +350,7 @@ export async function relayEvents() {
  * Sends reminders to subscribed servers and users when GBF events are ending soon
  */
 export async function sendEventReminders() {
-    if (!granblueEvents.length) return
-    
+    if (!granblueEvents.length) return setTimeout(() => sendEventReminders(), 60000)
     const servers = database.servers.filter(server => server.get('reminders') && server.get('reminders') !== '[]')
     const users = database.users.filter(user => user.get('reminders') && user.get('reminders') !== '[]')
 
@@ -377,31 +376,57 @@ export async function sendEventReminders() {
     }
 
     for (const server of servers) {
-        const reminders: eventReminder[] = JSON.parse(server.get('reminders'))
+        const reminders: eventReminder[] = JSON.parse(server.get('reminders') || '[]')
+        const receivedReminders: {title: string, end: string}[] = JSON.parse(server.get('receivedReminders') || '[]')
+        const filteredEvents = granblueEvents.filter(event =>
+            receivedReminders.every(e => e.title !== event.title) && event.end > new Date()
+        )
 
-        for (const event of granblueEvents) {
+        for (const event of filteredEvents) {
             const reminder = findReminder(reminders, event)
-            if (reminder && (new Date()).getTime() + reminder.time >= event.end.getTime()) {
+            
+            if (reminder && (new Date()).getTime() >= event.end.getTime() - reminder.time) {
                 const reminderGuild = client.guilds.cache.get(server.get('guildID'))!
                 const reminderChannel = await reminderGuild.channels.fetch(reminder.channelID!) as TextChannel
-                reminderChannel.send({
+                await reminderChannel.send({
                     content: reminder.roleID && `## <@&${reminder.roleID}>`, 
                     allowedMentions: reminder.roleID ? {roles: [reminder.roleID]} : undefined,
                     embeds: [makeReminderEmbed(event)]
                 })
+
+                receivedReminders.push({title: event.title, end: event.end.getTime().toString()})
             }
         }
+        
+        server.set(
+            'receivedReminders',
+            JSON.stringify(receivedReminders.filter(({end}) => new Date().getTime() < parseInt(end)))
+        )
+        server.save()
     }
 
     for (const user of users) {
-        const reminders: eventReminder[] = JSON.parse(user.get('reminders'))
+        const reminders: eventReminder[] = JSON.parse(user.get('reminders') || '[]')
+        const receivedReminders: {title: string, end: string}[] = JSON.parse(user.get('receivedReminders') || '[]')
+        const filteredEvents = granblueEvents.filter(event => 
+            receivedReminders.every(e => e.title !== event.title) && event.end > new Date()
+        )
 
-        for (const event of granblueEvents) {
+        for (const event of filteredEvents) {
             const reminder = findReminder(reminders, event)
-            if (reminder && (new Date()).getTime() + reminder.time >= event.end.getTime()) {
+
+            if (reminder && (new Date()).getTime() >= event.end.getTime() - reminder.time) {
                 const targetUser = await client.users.fetch(user.get('userID'))
-                targetUser.send({embeds: [makeReminderEmbed(event)]})
+                await targetUser.send({embeds: [makeReminderEmbed(event)]})
+
+                receivedReminders.push({title: event.title, end: event.end.getTime().toString()})
             }
         }
+        
+        user.set(
+            'receivedReminders',
+            JSON.stringify(receivedReminders.filter(({end}) => new Date().getTime() < parseInt(end)))
+        )
+        user.save()
     }
 }
