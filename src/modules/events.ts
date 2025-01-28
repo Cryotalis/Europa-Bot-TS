@@ -367,7 +367,7 @@ export async function sendEventReminders() {
         const reminderEmbed = new EmbedBuilder()
             .setAuthor({name: 'Event Reminder'})
             .setTitle(`${event.title} is Ending Soon!`)
-            .setDescription(`\`Time Remaining:\` ${dateDiff(new Date(), event.end)}\n[Event Wiki Page](${event.wikiURL})`)
+            .setDescription(`Event Ends <t:${event.end.getTime() / 1000}:R>`)
             .setImage(event.imageURL)
             .setURL(event.wikiURL)
             .setColor('Blue')
@@ -376,6 +376,7 @@ export async function sendEventReminders() {
     }
 
     for (const server of servers) {
+        const reminderGuild = await client.guilds.fetch(server.get('guildID'))
         const reminders: eventReminder[] = JSON.parse(server.get('reminders') || '[]')
         const receivedReminders: {title: string, end: string}[] = JSON.parse(server.get('receivedReminders') || '[]')
         const filteredEvents = granblueEvents.filter(event =>
@@ -386,7 +387,6 @@ export async function sendEventReminders() {
             const reminder = findReminder(reminders, event)
             
             if (reminder && (new Date()).getTime() >= event.end.getTime() - reminder.time) {
-                const reminderGuild = client.guilds.cache.get(server.get('guildID'))!
                 const reminderChannel = await reminderGuild.channels.fetch(reminder.channelID!) as TextChannel
                 await reminderChannel.send({
                     content: reminder.roleID && `## <@&${reminder.roleID}>`, 
