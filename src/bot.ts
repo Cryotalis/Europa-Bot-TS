@@ -94,12 +94,15 @@ client.on('ready', async () => {
 		getBannerData()
 		await connectDatabase()
 		await loadEvents()
-		relayEvents()
-		sendEventReminders()
 	})
 	
 	if (currentShardID === homeServerShardID) {
 		(client.channels.cache.get(logChannelID) as TextChannel).send(`:white_check_mark:  **Europa is now online**`)
+
+		schedule('0 * * * *', async () => {
+			relayEvents()
+			sendEventReminders()
+		})
 
 		// Runs at 23:55 every day. The 5 minutes is to allow time to fetch the data before the database connection is refreshed
 		schedule('55 23 * * *', () => {
