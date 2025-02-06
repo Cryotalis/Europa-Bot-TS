@@ -23,26 +23,26 @@
   "dependencies": {
     "@google-cloud/translate": "^8.5.0",
     "axios": "^1.7.9",
-    "canvas": "^3.0.1",
-    "discord.js": "^14.16.3",
+    "canvas": "^3.1.0",
+    "discord.js": "^14.17.3",
     "dotenv": "^16.4.7",
-    "google-auth-library": "^9.15.0",
+    "google-auth-library": "^9.15.1",
     "google-spreadsheet": "^4.1.4",
     "html-entities": "^2.5.2",
     "md5": "^2.3.0",
     "node-cron": "^3.0.3",
-    "octokit": "^4.0.3",
-    "puppeteer": "^23.11.1",
+    "octokit": "^4.1.0",
+    "puppeteer": "^24.2.0",
     "string-similarity": "^4.0.4",
     "urlencode": "^2.0.0",
-    "uuid": "^11.0.3"
+    "uuid": "^11.0.5"
   },
   "devDependencies": {
     "@types/md5": "^2.3.5",
-    "@types/node": "^22.10.3",
+    "@types/node": "^22.13.1",
     "@types/node-cron": "^3.0.11",
     "@types/string-similarity": "^4.0.2",
     "@types/urlencode": "^1.1.4",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.3"
   }
 }
