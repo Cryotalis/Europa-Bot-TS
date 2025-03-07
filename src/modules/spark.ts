@@ -1,5 +1,5 @@
 import { createCanvas, loadImage, Image } from "canvas"
-import { AttachmentBuilder, EmbedBuilder, GuildMember, InteractionReplyOptions, User } from "discord.js"
+import { AttachmentBuilder, EmbedBuilder, GuildMember, User } from "discord.js"
 import { GoogleSpreadsheetRow } from "google-spreadsheet"
 import { fontFallBacks } from "../bot.js"
 import { sparkBGMask, clearSparkBG, defaultSparkBG, progressBars, developerTitle, VIPTitle, clearMBSparkBG, defaultMBSparkBG } from "../data/assets.js"
@@ -7,7 +7,7 @@ import { formatList } from "./string.js"
 import { round } from "./number.js"
 import { userData } from "../data/database.js"
 
-export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUser: User): Promise<InteractionReplyOptions>{
+export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUser: User) {
     const canvas = createCanvas(500, 300)
     const ctx = canvas.getContext('2d')
     
@@ -94,7 +94,7 @@ export async function getProfile(user: GoogleSpreadsheetRow<userData>, discordUs
     return {files: [attachment]}
 }
 
-export function getEmbedProfile(user: GoogleSpreadsheetRow<userData>, discordUser: GuildMember): InteractionReplyOptions{
+export function getEmbedProfile(user: GoogleSpreadsheetRow<userData>, discordUser: GuildMember) {
     const {crystals, tickets, tenParts, rolls} = user.toObject() as userData
     const sparkPercent = calcDraws(user, false) / 300
     const blank = '⠀'
