@@ -5,6 +5,7 @@ export const raids = [
     {"name": "Super Ultimate Bahamut",   "value": "Lvl 300 Super Ultimate Bahamut"},
 
     {"name": "Venerable Paragon",        "value": "Lvl 275 Venerable Paragon"},
+    {"name": "Omni-Magia Witch",         "value": "Lvl 275 Omni-Magia Witch"},
     
     {"name": "Agastia",                  "value": "Lvl 275 Agastia"},
     {"name": "Cosmos",                   "value": "Lvl 275 Cosmos"},
