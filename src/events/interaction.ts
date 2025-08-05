@@ -1,4 +1,4 @@
-import { AutocompleteInteraction, CacheType, ChatInputCommandInteraction, Client, MessageContextMenuCommandInteraction, TextChannel, UserContextMenuCommandInteraction } from "discord.js"
+import { AutocompleteInteraction, CacheType, ChatInputCommandInteraction, Client, MessageContextMenuCommandInteraction, PrimaryEntryPointCommandInteraction, TextChannel, UserContextMenuCommandInteraction } from "discord.js"
 import { inspect } from "util"
 import { raids } from "../data/raids.js"
 import { findBestCIMatch } from "../modules/string.js"
@@ -27,7 +27,12 @@ export function handleAutocomplete(interaction: AutocompleteInteraction<CacheTyp
 /**
  * Handles slash commands and context menu commands
  */
-export function handleCommand(interaction: ChatInputCommandInteraction<CacheType> | MessageContextMenuCommandInteraction<CacheType> | UserContextMenuCommandInteraction<CacheType>){
+type allowedInteractions =
+	ChatInputCommandInteraction<CacheType> |
+	MessageContextMenuCommandInteraction<CacheType> |
+	UserContextMenuCommandInteraction<CacheType> |
+	PrimaryEntryPointCommandInteraction<CacheType>
+export function handleCommand(interaction: allowedInteractions){
     const isModCommand = modCommands.includes(`${interaction.commandName}.js`)
     const command: any = client.commands?.get(interaction.commandName)
 	if (!command) {interaction.reply('Failed to load command. Please try again in a few seconds.'); return}
