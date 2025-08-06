@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { capFirstLetter } from '../modules/string.js'
+import { capFirstLetter } from '../commandHelpers/string.js'
 
 export const command = {
 	data: new SlashCommandBuilder()

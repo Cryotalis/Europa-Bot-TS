@@ -1,6 +1,6 @@
 import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import { createCanvas } from 'canvas'
-import { drawEvent, currentEvents, eventsTemplate, upcomingEvents, getEventDuration } from '../modules/events.js'
+import { drawEvent, currentEvents, eventsTemplate, upcomingEvents, getEventDuration } from '../commandHelpers/events.js'
 
 export const command = {
 	data: new SlashCommandBuilder()

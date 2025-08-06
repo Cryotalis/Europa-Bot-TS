@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
-import { findLastWord } from '../modules/string.js'
-import { dateToString, findTimeZone, dateStringToUnix } from '../modules/time.js'
+import { findLastWord } from '../commandHelpers/string.js'
+import { dateToString, findTimeZone, dateStringToUnix } from '../commandHelpers/time.js'
 
 export const command = {
 	data: new SlashCommandBuilder()

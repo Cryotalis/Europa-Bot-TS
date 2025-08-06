@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder, GuildMember, Role, SlashCommandBuilder } from 'discord.js'
-import { findBestCIMatch } from '../modules/string.js'
+import { findBestCIMatch } from '../commandHelpers/string.js'
 import { categoryRole } from '../data/variables.js'
 import { raids } from '../data/raids.js'
 import { database } from '../data/database.js'

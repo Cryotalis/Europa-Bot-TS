@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder, GuildBasedChannel, GuildMember, Role, SlashCommandBuilder } from 'discord.js'
-import { getImageLink, uploadImage } from '../modules/image.js'
-import { findBestCIMatch, titleize } from '../modules/string.js'
-import { greetingConfig, makeGreetingImage, toggleableGreetingSetting } from '../modules/greeting.js'
+import { getImageLink, uploadImage } from '../commandHelpers/image.js'
+import { findBestCIMatch, titleize } from '../commandHelpers/string.js'
+import { greetingConfig, makeGreetingImage, toggleableGreetingSetting } from '../commandHelpers/greeting.js'
 import { database } from '../data/database.js'
 
 export const command = {

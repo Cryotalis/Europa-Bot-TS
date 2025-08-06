@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js'
-import { getImageLink, uploadImage } from '../modules/image.js'
-import { calcDraws, getEmbedProfile, getProfile, manageSpark } from '../modules/spark.js'
-import { round } from '../modules/number.js'
+import { getImageLink, uploadImage } from '../commandHelpers/image.js'
+import { calcDraws, getEmbedProfile, getProfile, manageSpark } from '../commandHelpers/spark.js'
+import { round } from '../commandHelpers/number.js'
 import { database, userData } from '../data/database.js'
 
 export const command = {

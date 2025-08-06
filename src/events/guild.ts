@@ -1,6 +1,6 @@
 import { Client, TextChannel, GuildMember, Guild, PartialGuildMember } from "discord.js"
 import { client, homeServerShardID, logChannelID } from "../bot.js"
-import { greetingConfig, makeGreetingImage } from "../modules/greeting.js"
+import { greetingConfig, makeGreetingImage } from "../commandHelpers/greeting.js"
 import { database } from "../data/database.js"
 
 /**

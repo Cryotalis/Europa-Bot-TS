@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
-import { createGachaEmbed, findTarget, gacha } from '../modules/roll.js'
-import { item } from '../modules/banner.js'
+import { createGachaEmbed, findTarget, gacha } from '../commandHelpers/roll.js'
+import { item } from '../commandHelpers/banner.js'
 import { database } from '../data/database.js'
 
 export const command = {

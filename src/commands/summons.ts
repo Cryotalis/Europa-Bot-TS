@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { database } from '../data/database.js'
-import { findPlayer } from '../modules/granblue.js'
-import { loadSummons } from '../modules/summons.js'
+import { findPlayer } from '../commandHelpers/granblue.js'
+import { loadSummons } from '../commandHelpers/summons.js'
 
 export const command = {
 	data: new SlashCommandBuilder()

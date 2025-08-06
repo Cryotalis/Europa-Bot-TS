@@ -1,8 +1,8 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import { compareTwoStrings } from 'string-similarity'
 import axios from 'axios'
-import { showMenu } from '../modules/menu.js'
-import { crew, loadCrew } from '../modules/crew.js'
+import { showMenu } from '../commandHelpers/menu.js'
+import { crew, loadCrew } from '../commandHelpers/crew.js'
 
 export const command = {
 	data: new SlashCommandBuilder()

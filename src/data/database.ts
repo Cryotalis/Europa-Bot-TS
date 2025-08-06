@@ -3,7 +3,7 @@ import { JWT } from "google-auth-library"
 import { decode } from "html-entities"
 import axios from "axios"
 import { currentShardID } from "../bot.js"
-import { capFirstLetter } from "../modules/string.js"
+import { capFirstLetter } from "../commandHelpers/string.js"
 import { rarityFullNames } from "./granblue.js"
 
 export interface serverData { 
