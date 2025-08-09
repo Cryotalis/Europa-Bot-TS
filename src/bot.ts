@@ -105,8 +105,8 @@ client.on('ready', async () => {
 
 		// Runs at 23:55 every day. The 5 minutes is to allow time to fetch the data before the database connection is refreshed
 		schedule('55 23 * * *', () => {
-			getCharacterData()
-			getSummonData()
+			// getCharacterData()
+			// getSummonData()
 			updateCounter()
 		})
 
