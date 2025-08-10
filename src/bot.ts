@@ -88,12 +88,12 @@ client.on('ready', async () => {
 	await connectDatabase()
 	registerCommands()
 	await loadAssets()
-	loadEvents()
+	loadEvents(2)
 
 	schedule('0 * * * *', async () => {
 		getBannerData()
 		await connectDatabase()
-		await loadEvents()
+		await loadEvents(1)
 		if (currentShardID === homeServerShardID) {
 			relayEvents()
 			sendEventReminders()

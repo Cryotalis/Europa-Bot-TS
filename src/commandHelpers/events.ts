@@ -41,8 +41,11 @@ export let eventsTemplate: Canvas | undefined
 
 /**
  * Loads event information and event template. The template includes upcoming events and leaves a blank space for current events.
+ * @param retries - How many times to retry if events cannot be loaded
  */
-export async function loadEvents(){
+export async function loadEvents(retries: number){
+    if (retries < 0) return
+
     const {data: rawEvents} = await axios.get<rawEvent[]>(
         'https://gbf.wiki/index.php?title=Special:CargoExport',
         {
@@ -57,7 +60,8 @@ export async function loadEvents(){
             }
         }
     ).catch(() => ({data: null}))
-    if (!rawEvents) return setTimeout(() => loadEvents(), 60000)
+
+    if (!rawEvents) return setTimeout(() => loadEvents(--retries), 90000)
 
     rawEvents.sort((a, b) => a['utc start'] - b['utc start'])
 
