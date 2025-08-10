@@ -125,7 +125,7 @@ export async function findPlayer(interaction: ChatInputCommandInteraction, playe
             name: 'Player Search',
             iconURL: 'https://upload.wikimedia.org/wikipedia/en/e/e5/Granblue_Fantasy_logo.png'
         })
-        .setFooter({text: 'https://gbfdata.com/', iconURL: 'https://gbf.wiki/images/8/81/Bait_Chunk_square.jpg'})
+        .setFooter({text: 'https://gbfdata.com/', iconURL: 'https://raw.githubusercontent.com/Cryotalis/Europa-Bot-TS/refs/heads/main/assets/gbfdata%20Icon.png'})
 
     await interaction.editReply({embeds: [searchEmbed]})
     
