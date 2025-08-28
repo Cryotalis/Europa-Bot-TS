@@ -12,9 +12,9 @@ import { handleDeletedRole } from './events/role.js'
 import { handleAutocomplete, handleCommand } from './events/interaction.js'
 import { connectDatabase, database, getCharacterData, getSummonData } from './data/database.js'
 import { getAccessToken } from './commandHelpers/image.js'
+import { botToken, botID } from './index.js'
 
 export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration], rest: {timeout: 60000}})
-export const botID = '585514230967566338'
 export const homeServerID = '379501550097399810'
 export const homeServerShardID = ShardClientUtil.shardIdForGuildId(homeServerID, client.shard?.count!)
 export const currentShardID = client.shard?.ids[0]
@@ -52,7 +52,7 @@ export async function registerCommands() {
 		client.commands.set(command.data.name, command)
 	}
 
-	const rest = new REST({ version: '9' }).setToken(process.env.BOT_TOKEN!)
+	const rest = new REST({ version: '9' }).setToken(botToken)
 	rest.put(Routes.applicationCommands(botID), { body: commands })
 		.then(() => console.log(`Successfully registered application commands globally for Shard #${currentShardID}`))
 		.catch(console.error)
@@ -136,7 +136,7 @@ client.on('guildMemberRemove', member => handleRemovedMember(member))
 
 client.on('roleDelete', role => handleDeletedRole(role))
 
-client.login(process.env.BOT_TOKEN)
+client.login(botToken)
 
 // Check every hour - if memory exceeds 400MB, force the shard to respawn
 schedule('0 * * * *', () => {
