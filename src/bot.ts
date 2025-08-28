@@ -83,11 +83,13 @@ client.on('ready', async () => {
 	client.user?.setActivity('Granblue Fantasy')
 
 	// Run startup functions
-	startPuppeteer()
+	await Promise.all([
+		startPuppeteer(),
+		connectDatabase(),
+		loadAssets(),
+	])
 	getBannerData()
-	await connectDatabase()
 	registerCommands()
-	await loadAssets()
 	loadEvents(2)
 
 	schedule('0 * * * *', async () => {

@@ -1,15 +1,15 @@
 import { waterAdvantage, earthAdvantage, windAdvantage, fireAdvantage, darkAdvantage, lightAdvantage, eventsBackgroundTop, eventsBackgroundMiddle, eventsBackgroundBottom, upcomingEventsText } from '../data/assets.js'
 import { Canvas, CanvasRenderingContext2D, Image, createCanvas, loadImage } from 'canvas'
 import { dateDiff, getSimpleDate, parseOffset } from './time.js'
-import { botID, client, fontFallBacks } from '../bot.js'
+import { browser, client, fontFallBacks } from '../bot.js'
 import { capFirstLetter} from './string.js'
 import { wrapText } from './image.js'
-import axios from 'axios'
 import md5 from 'md5'
 import { EmbedBuilder, GuildScheduledEvent, GuildScheduledEventCreateOptions, GuildScheduledEventEditOptions, GuildScheduledEventStatus, TextChannel } from 'discord.js'
 import { decode } from 'html-entities'
 import { eventReminder, recurringEvents } from '../data/events.js'
 import { database } from '../data/database.js'
+import { botID } from '../index.js'
 
 export interface event {
     title: string
@@ -46,31 +46,34 @@ export let eventsTemplate: Canvas | undefined
 export async function loadEvents(retries: number){
     if (retries < 0) return
 
-    const {data: rawEvents} = await axios.get<rawEvent[]>(
-        'https://gbf.wiki/index.php?title=Special:CargoExport',
-        {
-            headers: {'User-Agent': 'Europa Bot'},
-            params: {
-                tables: 'event_history',
-                fields: 'event_history.name, event_history._ID, event_history.time_known, event_history.utc_start,' + 
-                        'event_history.utc_end, event_history.wiki_page, event_history.image, event_history.element',
-                'order by': 'event_history.utc_start DESC',
-                limit: 20,
-                format: 'json'
-            }
-        }
-    ).catch(() => ({data: null}))
+    const page = await browser.newPage()
+    await page.setExtraHTTPHeaders({'User-Agent': 'Europa Bot'})
 
-    if (!rawEvents) return setTimeout(() => loadEvents(--retries), 90000)
+    const params = {
+        title: 'Special:CargoExport',
+        tables: 'event_history',
+        fields: 'event_history.name, event_history._ID, event_history.time_known, event_history.utc_start,' + 
+                'event_history.utc_end, event_history.wiki_page, event_history.image, event_history.element',
+        'order by': 'event_history.utc_start DESC',
+        limit: '20',
+        format: 'json'
+    }
+    const url = new URL('https://gbf.wiki/index.php')
+    url.search = new URLSearchParams(params).toString()
 
+    const eventsResponse = await page.goto(url.href, { waitUntil: 'networkidle0' })
+    if (!eventsResponse?.ok()) return setTimeout(() => loadEvents(--retries), 90000)
+
+    const rawEvents: rawEvent[] = await eventsResponse.json()
     rawEvents.sort((a, b) => a['utc start'] - b['utc start'])
 
-    const {data: maintData} = await axios.get('https://gbf.wiki/Template:MainPage/Notice', {headers: {'User-Agent': 'Europa Bot'}})
-    if (/The game will undergo maintenance/i.test(maintData)) {
-        const [ _, maintStart, maintEnd ] = maintData
-            .match(/data-start="(\d+)" data-end="(\d+)" data-text-start="The game will undergo maintenance/)
+    const maintResponse = await page.goto('https://gbf.wiki/Template:MainPage/Notice', { waitUntil: 'domcontentloaded' })
+    const maintHTML = await maintResponse?.text()
+    if (maintResponse?.ok() && maintHTML && /The game will undergo maintenance/i.test(maintHTML)) {
+        const [ _, maintStart, maintEnd ] = maintHTML
+            .match(/data-start="(\d+)" data-end="(\d+)" data-text-start="The game will undergo maintenance/)!
             .map((match: string) => parseInt(match))
-    
+
         if (maintStart && maintEnd && (maintStart * 1000) > new Date().getTime()) {
             rawEvents.unshift({
                 name: 'Maintenance',
@@ -84,6 +87,8 @@ export async function loadEvents(retries: number){
             })
         }
     }
+
+    await page.close()
 
     granblueEvents = await processEvents(rawEvents)
     currentEvents = granblueEvents.filter(event => event.type === 'Current')
