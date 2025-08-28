@@ -12,7 +12,7 @@ import { handleDeletedRole } from './events/role.js'
 import { handleAutocomplete, handleCommand } from './events/interaction.js'
 import { connectDatabase, database, getCharacterData, getSummonData } from './data/database.js'
 import { getAccessToken } from './commandHelpers/image.js'
-import { botToken, botID } from './index.js'
+import { botID, botToken } from './config.js'
 
 export const client: Client<boolean> & {commands?: Collection<unknown, unknown>} = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration], rest: {timeout: 60000}})
 export const homeServerID = '379501550097399810'

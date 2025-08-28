@@ -9,7 +9,7 @@ import { EmbedBuilder, GuildScheduledEvent, GuildScheduledEventCreateOptions, Gu
 import { decode } from 'html-entities'
 import { eventReminder, recurringEvents } from '../data/events.js'
 import { database } from '../data/database.js'
-import { botID } from '../index.js'
+import { botID } from '../config.js'
 
 export interface event {
     title: string
