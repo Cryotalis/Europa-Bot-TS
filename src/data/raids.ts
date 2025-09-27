@@ -6,6 +6,7 @@ export const raids = [
 
     {"name": "Venerable Paragon",        "value": "Lvl 275 Venerable Paragon"},
     {"name": "Omni-Magia Witch",         "value": "Lvl 275 Omni-Magia Witch"},
+    {"name": "Phantasmal Performer",     "value": "Lvl 275 Phantasmal Performer"},
     
     {"name": "Agastia",                  "value": "Lvl 275 Agastia"},
     {"name": "Cosmos",                   "value": "Lvl 275 Cosmos"},
