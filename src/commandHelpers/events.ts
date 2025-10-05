@@ -43,7 +43,7 @@ export let eventsTemplate: Canvas | undefined
  * Loads event information and event template. The template includes upcoming events and leaves a blank space for current events.
  * @param retries - How many times to retry if events cannot be loaded
  */
-export async function loadEvents(retries: number){
+export async function loadEvents(retries: number) {
     if (retries < 0) return
 
     const page = await browser.newPage()
@@ -109,7 +109,7 @@ export async function loadEvents(retries: number){
     Y += 45
 
     upcomingEvents.forEach((event, i) => {
-        if (i % 2 === 0){ // Draw events in the left column
+        if (i % 2 === 0) { // Draw events in the left column
             const lastEvent = Boolean(i + 1 === upcomingEvents.length)
             X = lastEvent ? 185 : 25 // Center the event if it's the last one
             Y += i ? 110 : 0 // Only add to Y after the first event
@@ -128,7 +128,7 @@ export async function loadEvents(retries: number){
  * - Events that are not ongoing, ended more than 3 hours ago, or end more than 90 days later are filtered out.
  * - Returns up to 10 events.
  */
-export async function processEvents(events: rawEvent[]): Promise<event[]>{
+export async function processEvents(events: rawEvent[]): Promise<event[]> {
     const now = new Date()
     const currentStart = (now.getTime() / 1000) - (3 * 60 * 60)
     const currentEnd = (now.getTime() / 1000) + (36 * 60 * 60)
@@ -145,7 +145,7 @@ export async function processEvents(events: rawEvent[]): Promise<event[]>{
 
         if (event.name === 'Maintenance') {
             imgURL = 'https://raw.githubusercontent.com/Cryotalis/Europa-Bot-TS/main/assets/Maintenance%20Event.png'
-        } else if (event.image){
+        } else if (event.image) {
             imgName = decode(capFirstLetter(event.image).replace(/ /g, '_').replace(/__/g, '_'))
             imgHash = md5(imgName)
             imgURL = `https://gbf.wiki/images/${imgHash.charAt(0)}/${imgHash.slice(0,2)}/${encodeURI(imgName)}`
@@ -183,7 +183,7 @@ export function getElementAdvantage(element: string | null) {
 }
 
 /** Draws event banners and their durations. */
-export function drawEvent(ctx: CanvasRenderingContext2D, event: event, textX: number, eventX: number, eventY: number){
+export function drawEvent(ctx: CanvasRenderingContext2D, event: event, textX: number, eventX: number, eventY: number) {
     /** Calculates where text should be placed on the X-axis in order to be center aligned. */
     function centerTextX(text: string, center: number) { 
         return center - ctx.measureText(text).width / text.length * text.length / 2
@@ -198,14 +198,14 @@ export function drawEvent(ctx: CanvasRenderingContext2D, event: event, textX: nu
     let eventDuration = getEventDuration(event)
     
     // Draw the event banner, or text if there is no banner image
-    if (event.image){
+    if (event.image) {
         let bannerHeight = event.image.height * 330 / event.image.width
         ctx.drawImage(event.image, eventX, eventY + (77 - bannerHeight) / 2, 330, bannerHeight)
     } else {
         wrapText({ctx: ctx, font: '25px Default'}, event.title, textX, eventY + 43, 290, 30)
     }
 
-    if (event.elementAdvantageImg){
+    if (event.elementAdvantageImg) {
         textX += 18
         ctx.drawImage(event.elementAdvantageImg, centerTextX(eventDuration, textX) - 35, eventY + 82)
     }
@@ -217,8 +217,8 @@ export function drawEvent(ctx: CanvasRenderingContext2D, event: event, textX: nu
 /**
  * Takes an event and outputs the correct duration string for the event.
  */
-export function getEventDuration(event: event){
-    if (event.type === 'Current'){
+export function getEventDuration(event: event) {
+    if (event.type === 'Current') {
         const now = new Date()
         
         if (!event.start) return 'Starts in ?'
@@ -234,7 +234,7 @@ export function getEventDuration(event: event){
 /**
  * Creates a list of Discord scheduled events according to the in-game events
  */
-async function makeScheduledEvents(){
+async function makeScheduledEvents() {
     if (!granblueEvents.length) return
 
     const threeMinsLater = new Date(new Date().valueOf() + 3 * 60000)
@@ -243,7 +243,7 @@ async function makeScheduledEvents(){
         
         // Resize the image to better fit Discord's event image frame
         let canvas
-        if (event.image){
+        if (event.image) {
             canvas = createCanvas(event.image.width, event.image.width * 320 / 800) // 800x320 is the recommended dimensions by Discord
             const ctx = canvas.getContext('2d')
             ctx.drawImage(event.image, 0, (canvas.height - event.image.height) / 2)
@@ -318,19 +318,16 @@ export async function relayEvents() {
             let existingEvent = existingEvents.find(({name}) => name === event.name)
 
             // Prefer editing an obsolete event over creating a new one
-            if (existingEvent){
+            if (existingEvent) {
                 // Remove event from array for future loops, prevents editing the same event twice (mostly for recurring events)
                 existingEvents.splice(existingEvents.findIndex(({name}) => name == existingEvent!.name), 1)
+            } else if (obsoleteEvents.length && !recurringEvents.includes(event.name)) { // Don't overwrite recurring events
+                existingEvent = obsoleteEvents.shift()!
             } else {
-                // Recurring event names are pretty much always known beforehand
-                if (obsoleteEvents.length && !recurringEvents.includes(event.name)) {
-                    existingEvent = obsoleteEvents.shift()!
-                } else {
-                    return eventsManager.create(event)
-                }
+                return eventsManager.create(event)
             }
 
-            const editOptions: GuildScheduledEventEditOptions<any, any> = {}
+            const editOptions: GuildScheduledEventEditOptions<GuildScheduledEventStatus, any> = {}
             const eventTimeChanged = Boolean(
                 existingEvent.scheduledStartTimestamp !== new Date(event.scheduledStartTime).getTime() ||
                 existingEvent.scheduledEndTimestamp !== new Date(event.scheduledEndTime!).getTime()
