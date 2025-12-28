@@ -41,7 +41,7 @@ export async function registerCommands() {
 
 	for (const file of commandFiles) {
 		const { command } = regCommands.includes(file) 
-			? await import(`./commands/${file}`) 
+			? await import(`./commands/${file}`)
 			: await import(`./modCommands/${file}`)
 
 		if (privateCommandFiles.includes(file)) 
@@ -63,7 +63,7 @@ export async function registerCommands() {
 
 export let browser: Browser
 export async function startPuppeteer(){
-	browser = await launch({args: ['--single-process', '--no-zygote', '--no-sandbox']})
+	browser = await launch({ args: ['--single-process', '--no-zygote', '--no-sandbox'] })
 	console.log(`Puppeteer browser launched for Shard #${currentShardID}`)
 }
 
@@ -78,7 +78,7 @@ async function updateCounter() {
 	serverCountChannel?.edit({name: `Server Count: ${serverCount}`})
 }
 
-client.on('ready', async () => {
+client.on('clientReady', async () => {
 	console.log(`Shard #${currentShardID} is now online`)
 	client.user?.setActivity('Granblue Fantasy')
 
@@ -90,12 +90,12 @@ client.on('ready', async () => {
 	])
 	getBannerData()
 	registerCommands()
-	loadEvents(2)
+	// loadEvents(2)
 
 	schedule('0 * * * *', async () => {
 		getBannerData()
 		await connectDatabase()
-		await loadEvents(1)
+		// await loadEvents(1)
 		if (currentShardID === homeServerShardID) {
 			relayEvents()
 			sendEventReminders()

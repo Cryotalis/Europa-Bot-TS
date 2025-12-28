@@ -1,3 +1,5 @@
+import 'dotenv/config'
+
 import { ShardingManager } from 'discord.js'
 import { botToken } from './config.js'
 
