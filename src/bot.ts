@@ -64,8 +64,7 @@ export async function registerCommands() {
 
 export let browser: Browser
 export async function startPuppeteer(){
-	// browser = await launch({ args: ['--single-process', '--no-zygote', '--no-sandbox'] })
-	browser = await launch({ args: ['--no-zygote', '--no-sandbox'] })
+	browser = await launch({ args: ['--single-process', '--no-zygote', '--no-sandbox'] })
 	console.log(`Puppeteer browser launched for Shard #${currentShardID}`)
 }
 
