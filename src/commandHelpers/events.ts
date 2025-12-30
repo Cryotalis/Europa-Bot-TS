@@ -47,7 +47,7 @@ export async function loadEvents(retries: number) {
     if (retries < 0) return
 
     const page = await browser.newPage()
-    await page.setExtraHTTPHeaders({'User-Agent': 'Europa Bot'})
+    await page.setExtraHTTPHeaders({ 'User-Agent': process.env.GBF_WIKI_AGENT! })
 
     const params = {
         title: 'Special:CargoExport',

@@ -2,11 +2,12 @@ import { ChannelType, Client, Collection, GatewayIntentBits, Guild, REST, Routes
 import { schedule } from 'node-cron'
 import { inspect } from 'util'
 import { readdirSync } from 'node:fs'
+import { registerFont } from 'canvas'
 import { Browser, launch } from 'puppeteer'
+
 import { loadAssets } from './data/assets.js'
 import { loadEvents, relayEvents, sendEventReminders } from './commandHelpers/events.js'
 import { getBannerData } from './commandHelpers/banner.js'
-import { registerFont } from 'canvas'
 import { handleNewGuild, handleNewMember, handleRemovedMember } from './events/guild.js'
 import { handleDeletedRole } from './events/role.js'
 import { handleAutocomplete, handleCommand } from './events/interaction.js'
@@ -63,7 +64,8 @@ export async function registerCommands() {
 
 export let browser: Browser
 export async function startPuppeteer(){
-	browser = await launch({ args: ['--single-process', '--no-zygote', '--no-sandbox'] })
+	// browser = await launch({ args: ['--single-process', '--no-zygote', '--no-sandbox'] })
+	browser = await launch({ args: ['--no-zygote', '--no-sandbox'] })
 	console.log(`Puppeteer browser launched for Shard #${currentShardID}`)
 }
 
@@ -90,12 +92,12 @@ client.on('clientReady', async () => {
 	])
 	getBannerData()
 	registerCommands()
-	// loadEvents(2)
+	loadEvents(1)
 
 	schedule('0 * * * *', async () => {
 		getBannerData()
 		await connectDatabase()
-		// await loadEvents(1)
+		await loadEvents(1)
 		if (currentShardID === homeServerShardID) {
 			relayEvents()
 			sendEventReminders()
@@ -140,9 +142,9 @@ client.on('roleDelete', role => handleDeletedRole(role))
 
 client.login(botToken)
 
-// Check every hour - if memory exceeds 400MB, force the shard to respawn
+// Check every hour - if memory exceeds 500MB, force the shard to respawn
 schedule('0 * * * *', () => {
-	if (process.memoryUsage().heapUsed / 1024 / 1024 > 400){
+	if (process.memoryUsage().heapUsed / 1024 / 1024 > 500){
 		client.shard?.broadcastEval(client => process.exit())
 	}
 })
